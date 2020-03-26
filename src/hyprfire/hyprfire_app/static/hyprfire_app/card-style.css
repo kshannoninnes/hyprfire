@@ -1,0 +1,26 @@
+.card {
+  border-top: 1px solid #d3d3d3;
+  border-bottom: 1px solid #d3d3d3;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: -19px;
+}
+
+/*.bg-img {*/
+/*  background-size: cover;*/
+/*  min-height: 180px;*/
+/*  background-position: center;*/
+/*  background-color: #ccc;*/
+/*}*/
+
+.content {
+  padding: 5px;
+}
+
+/*button {*/
+/*  background-color: transparent;*/
+/*  border: 1px solid #2196F3;*/
+/*  padding: .5rem 1rem;*/
+/*  cursor: pointer;*/
+/*  border-radius: .25rem;*/
+/*}*/
