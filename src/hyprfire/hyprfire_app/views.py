@@ -1,12 +1,15 @@
-from django.shortcuts import render
-from os import listdir, path
+from django.views import generic
+from os import listdir
 
 
-def index(request):
-    file_list = listdir()
-    filenames = []
-    for file in file_list:
-        if file.title().lower().endswith('.pcapng'):
-            filenames.append(file.title().lower())
-    return render(request, 'hyprfire_app/index.html', {'files': filenames})
-    # return render(request, 'hyprfire_app/index.html')
+class IndexView(generic.ListView):
+    template_name = 'hyprfire_app/index.html'
+
+    def get_queryset(self):
+        file_list = listdir()
+        filenames = []
+        for file in file_list:
+            name = file.title().lower()
+            if name.endswith('.pcapng'):
+                filenames.append(name)
+        return filenames

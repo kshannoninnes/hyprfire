@@ -2,27 +2,32 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Hyprfire</title>
-    <link rel="stylesheet" href="{% static 'hyprfire_app/style.css' %}">
-</head>
-<body>
-    <div class="split left">
-      <div class="centered-left">
-        {% for file in files %}
-            <a href="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">{{ file }}</a>
-            <br>
-        {% endfor %}
-      </div>
-    </div>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hyprfire</title>
+        <link rel="stylesheet" href="{% static 'hyprfire_app/style.css' %}">
+    </head>
 
-    <div class="split right">
-      <div class="centered-right">
-        <h1>GRAPH WINDOW</h1>
-      </div>
-    </div>
-</body>
+    <body>
+
+        # File selection window
+        <div class="split left">
+          <div class="centered-left">
+            {% for file in object_list %}
+                <a href="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">{{ file }}</a>
+                <br>
+            {% endfor %}
+          </div>
+        </div>
+
+        # Graph window
+        <div class="split right">
+          <div class="centered-right">
+            <h1>GRAPH WINDOW</h1>
+          </div>
+        </div>
+
+    </body>
 </html>
 
 
