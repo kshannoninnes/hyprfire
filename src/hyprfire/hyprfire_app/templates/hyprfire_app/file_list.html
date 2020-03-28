@@ -1,0 +1,12 @@
+{% extends "hyprfire_app/base.html" %}
+
+{% block file_list %}
+    <div class="split left">
+          <ul class="w3-ul" id="file_list">
+            <li><h3>Files</h3></li>
+            {% for file in object_list %}
+                <li class="w3-hover-amber"><a href="{% url 'details' file%}"> {{ file }} </a></li>
+            {% endfor %}
+          </ul>
+    </div>
+{% endblock %}

@@ -6,21 +6,11 @@
   margin-top: -19px;
 }
 
-/*.bg-img {*/
-/*  background-size: cover;*/
-/*  min-height: 180px;*/
-/*  background-position: center;*/
-/*  background-color: #ccc;*/
-/*}*/
-
 .content {
   padding: 5px;
 }
 
-/*button {*/
-/*  background-color: transparent;*/
-/*  border: 1px solid #2196F3;*/
-/*  padding: .5rem 1rem;*/
-/*  cursor: pointer;*/
-/*  border-radius: .25rem;*/
-/*}*/
+#leftsideMenu ul li {
+  border-bottom: 1px dashed lightgray;
+  background-color: cadetblue;
+}
