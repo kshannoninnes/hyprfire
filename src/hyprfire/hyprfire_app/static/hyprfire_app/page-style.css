@@ -12,37 +12,18 @@
 .left {
   width: 18%;
   left: 0;
-  background-color: #111;
+  background-color: #23272a;
 }
 
 /* Control the right side */
 .right {
   width: 82%;
   right: 0;
-  background-color: red;
-}
-
-/* If you want the content centered horizontally and vertically */
-.centered-left {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-
-/* If you want the content centered horizontally and vertically */
-.centered-right {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+  background-color: #2c2f33;
 }
 
 /* Style the image inside the centered container, if needed */
 .centered img {
-  width: 150px;
-  border-radius: 50%;
+  position:relative;
 }
 
