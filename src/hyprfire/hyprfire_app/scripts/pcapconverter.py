@@ -7,7 +7,8 @@ import subprocess
 def pcapConverter(filename):
     pcapFilename = filename + ".pcap"
     tcpdumpFilename = filename + ".tcpd"
-    p = subprocess.Popen(('tcpdump', '-nnr', pcapFilename), stdout=subprocess.PIPE)
+    p = subprocess.Popen(('tcpdump', '-nnr', pcapFilename), shell=True, stdout=subprocess.PIPE)
     f = open(tcpdumpFilename, 'w')
     for row in iter(p.stdout.readline, b''):
         f.write(str(row))
+    f.close()
