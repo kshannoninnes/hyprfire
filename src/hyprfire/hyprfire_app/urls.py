@@ -5,5 +5,5 @@ from . import views
 
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
-    path('details/<slug>/', views.DetailsView.as_view(), name='details')
+    path('<slug>.pcapng/', views.send_image, name='get_image')
 ]

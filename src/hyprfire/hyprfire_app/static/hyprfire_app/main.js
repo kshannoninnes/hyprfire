@@ -1,8 +1,15 @@
-function get_file_details(selected_file_name){
-    // Make http request to django server for details of selected_file_name
-    // Use said details to update HTML img_element src
-
+function load_graph(filename){
     $.get({
-        url: `${selected_file_name}/`
-    })
+        url: `${filename}/`,
+        success: function (response) {
+            let imported = document.importNode(response.documentElement, true);
+
+            // Ensure the image is centered within the container html tag
+            imported.setAttribute("width", "100%");
+            imported.setAttribute("height", "100%");
+            imported.setAttribute('style', 'position:absolute; top:(calc 50% - 24px); left:(50% - 24px);');
+
+            $('#svg_container').html(imported);
+        }
+    });
 }
