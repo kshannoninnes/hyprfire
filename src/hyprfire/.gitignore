@@ -259,3 +259,7 @@ modules.xml
 venv/
 .csv
 .pcapng
+.pcap
+.tcpd
+.n2d.prt
+.tcpd.n2d
