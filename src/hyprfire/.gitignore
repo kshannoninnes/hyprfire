@@ -257,3 +257,5 @@ modules.xml
 # hyprfire
 *.pcapng
 venv/
+.csv
+.pcapng
