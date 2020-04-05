@@ -1,8 +1,10 @@
-import sys
-import matplotlib.pyplot as plt
+from plotly.offline import plot
+import plotly.graph_objects as go
 
-def GetXY(filename, xcol, ycol):
-    retThing = []
+
+# Get the x and y locations from the supplied file
+def get_xy(filename, xcol, ycol):
+    ret_thing = []
     with open(filename) as file:
         for line in file:
             try:
@@ -10,22 +12,28 @@ def GetXY(filename, xcol, ycol):
                 x = float(lin[xcol])
                 y = float(lin[ycol])
                 a = (x,y)
-                retThing.append(a)
+                ret_thing.append(a)
             except Exception:
                 print("Oh no, a thing happened. Maybe " + lin[xcol] + " or " + lin[ycol] + " aren't numbers?")
-    return retThing
+    return ret_thing
 
-def plottify(filenm, xcol, ycol, xlab, ylab):
-    xy = GetXY(filenm,xcol,ycol)
+
+# Plot the data from the supplied file
+def plottify(filename, xcol, ycol):
+    xy = get_xy(filename, xcol, ycol)
     x = [k[0] for k in xy]
     y = [k[1] for k in xy]
-    fig = plt.figure(figsize=(8.0,5.0))
-    fig.add_subplot(111).plot(x,y)
-    fig.add_subplot(111).set_ylabel(ylab)
-    fig.add_subplot(111).set_xlabel(xlab)
-    fig.savefig(filenm + ".svg")
+    fig = go.Figure()
+    scatter = go.Scatter(x=x, y=y,
+                         mode='lines', name='test',
+                         opacity=0.8, marker_color='green')
+    fig.add_trace(scatter)
 
-if __name__ == "__main__":
-    fileToDoThingsTo = sys.argv[1]
-    #plottify(fileToDoThingsTo,0,13,"Time Value (microseconds)","U over Threshold")
-    plottify(fileToDoThingsTo,0,1,"Time Value (microseconds)", "U value")
+    return fig
+
+
+# Get a plot using the data in the supplied file
+def get_plot(filename):
+    plt = plottify(filename, 0, 1)
+    return plot(plt, output_type='div', include_plotlyjs=False)
+

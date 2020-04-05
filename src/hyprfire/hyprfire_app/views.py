@@ -1,4 +1,4 @@
-import base64
+import hyprfire_app.scripts.plotting as plotting
 
 from django.http import FileResponse, HttpResponse, JsonResponse
 from django.views import generic
@@ -19,6 +19,5 @@ class IndexView(generic.ListView):
 
 
 def send_image(request, slug):
-    name = f"{slug}-graph.svg"
-    with open(f'hyprfire_app/static/hyprfire_app/{name}', 'rb') as f:
-        return HttpResponse(f.read(), content_type="image/svg+xml")
+    temp = plotting.get_plot('C:\\Users\\Mav\\PycharmProjects\\src\\2020-23-stefan-cyber\\src\hyprfire\\hyprfire_app\\scripts\\dump121.tcpd.n2d_benf_time.csv')
+    return HttpResponse(temp, content_type='text/html')

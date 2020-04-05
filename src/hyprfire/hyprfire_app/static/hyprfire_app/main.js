@@ -1,15 +1,10 @@
 function load_graph(filename){
+    // Perform a get request to http://127.0.0.1:8000/<filename>/ which will respond with HTML/JavaScript data
+    // for loading the graph relevant to the specified file
     $.get({
         url: `${filename}/`,
         success: function (response) {
-            let imported = document.importNode(response.documentElement, true);
-
-            // Ensure the image is centered within the container html tag
-            imported.setAttribute("width", "100%");
-            imported.setAttribute("height", "100%");
-            imported.setAttribute('style', 'position:absolute; top:(calc 50% - 24px); left:(50% - 24px);');
-
-            $('#svg_container').html(imported);
+            $('#svg_container').html(response)
         }
     });
 }
