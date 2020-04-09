@@ -8,7 +8,8 @@ class IndexView(generic.ListView):
     template_name = 'hyprfire_app/index.html'
 
     def get_queryset(self):
-        file_list = os.listdir()
+        monitored_dir = 'pcaps'
+        file_list = os.listdir(monitored_dir)
         filenames = []
         for file in file_list:
             name = file.title().lower()
