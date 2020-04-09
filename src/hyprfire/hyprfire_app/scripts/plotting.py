@@ -5,15 +5,16 @@ import plotly.graph_objects as go
 # Get the x and y locations from the supplied file
 def get_xy(filename, xcol, ycol):
     ret_thing = []
-    with open(filename) as file:
+    file_path = f'csv\\{filename}.csv'
+    with open(file_path) as file:
         for line in file:
             try:
                 lin = line.split(",")
                 x = float(lin[xcol])
                 y = float(lin[ycol])
-                a = (x,y)
+                a = (x, y)
                 ret_thing.append(a)
-            except Exception:
+            except ValueError:
                 print("Oh no, a thing happened. Maybe " + lin[xcol] + " or " + lin[ycol] + " aren't numbers?")
     return ret_thing
 
@@ -24,10 +25,10 @@ def plottify(filename, xcol, ycol):
     x = [k[0] for k in xy]
     y = [k[1] for k in xy]
     fig = go.Figure()
-    scatter = go.Scatter(x=x, y=y,
-                         mode='lines', name='test',
-                         opacity=0.8, marker_color='green')
+    scatter = go.Scatter(x=x, y=y, mode='lines', opacity=0.8, marker_color='blue', )
     fig.add_trace(scatter)
+    fig.update_layout(title=f"Anomaly graph for {filename}",
+                      xaxis_title="Time Value (microseconds)", yaxis_title="U Value")
 
     return fig
 

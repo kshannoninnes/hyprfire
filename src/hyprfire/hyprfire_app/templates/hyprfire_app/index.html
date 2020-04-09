@@ -16,7 +16,9 @@
 </head>
 
 <body>
-    <div class="split left">
+    <!-- This div will take up 12% of the left side of the screen. -->
+    <!-- It is used to display a list of clickablefilenames sent by the server -->
+    <div class="split left" id="left_container">
         <ul class="w3-ul" id="file_list">
         <li><h3>Files</h3></li>
         {% for file in object_list %}
@@ -25,7 +27,9 @@
         </ul>
     </div>
 
-    <div class="split right centered" id="svg_container">
+    <!-- This div takes up the remaining 88% of the right side of the screen. -->
+    <!-- It will be used to show everything else, such as graphs, or configuration options -->
+    <div class="split right centered" id="right_container">
 
     </div>
 </body>

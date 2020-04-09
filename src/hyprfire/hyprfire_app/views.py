@@ -1,23 +1,17 @@
-import hyprfire_app.scripts.plotting as plotting
-
-from django.http import FileResponse, HttpResponse, JsonResponse
 from django.views import generic
-from os import listdir
+import os
 
 
 class IndexView(generic.ListView):
+    """ Load the initial view """
+
     template_name = 'hyprfire_app/index.html'
 
     def get_queryset(self):
-        file_list = listdir()
+        file_list = os.listdir()
         filenames = []
         for file in file_list:
             name = file.title().lower()
             if name.endswith('.pcapng'):
-                filenames.append(name)
+                filenames.append(os.path.splitext(name)[0])
         return filenames
-
-
-def send_image(request, slug):
-    temp = plotting.get_plot('C:\\Users\\Mav\\PycharmProjects\\src\\2020-23-stefan-cyber\\src\hyprfire\\hyprfire_app\\scripts\\dump121.tcpd.n2d_benf_time.csv')
-    return HttpResponse(temp, content_type='text/html')

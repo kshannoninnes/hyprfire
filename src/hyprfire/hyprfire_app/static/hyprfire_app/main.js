@@ -4,7 +4,7 @@ function load_graph(filename){
     $.get({
         url: `${filename}/`,
         success: function (response) {
-            $('#svg_container').html(response)
+            $('#right_container').html(response)
         }
     });
 }
