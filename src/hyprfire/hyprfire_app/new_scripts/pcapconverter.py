@@ -1,13 +1,14 @@
 # pcapconverter.py: takes in a filename for a pcap file, uses the scapy Python package to extract the data from it
 # and place that data into a list of objects that will be converted to a csv format later
 # Author: Dean Quaife
-# Last edited: 2020/04/19
+# Last edited: 2020/04/25
 
 from scapy.utils import RawPcapReader
 from scapy.layers.l2 import Ether
 from scapy.layers.inet import IP, TCP, UDP
+from hyprfire_app.new_scripts.packetdata import PacketData
 
-filters = ["syslog", "ntp", "domain", "snmp"] #used to filter out non TCP/UDP packets
+filters = [514, 123, 53, 161] #used to filter out non TCP/UDP packets (syslog, NTP, domain, SNMP)
 
 #main pcapconverter method; takes in a pcap filename and returns a list of Packet objects
 def pcapConverter(filename):
@@ -39,8 +40,8 @@ def pcapConverter(filename):
                         raise IndexError #stand-in for custom exception later
                 ipFrom = ip_pkt.src
                 ipTo = ip_pkt.dst
-                portTo = udp_pkt.sport
-                portFrom = udp_pkt.dport
+                portFrom = udp_pkt.sport
+                portTo = udp_pkt.dport
                 timeStamp = udp_pkt.time
                 length = ip_pkt.len - 28
                 winLength = "N/A"
@@ -75,6 +76,3 @@ def getTime(string):
     contents = string.split(".")
     seconds = int(contents[0])
     microseconds = seconds + int(contents[1])
-
-if __name__ == '__main__':
-    pcapConverter("dump121.pcap")
