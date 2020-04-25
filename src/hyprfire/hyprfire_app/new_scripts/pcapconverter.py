@@ -10,47 +10,46 @@ from hyprfire_app.new_scripts.packetdata import PacketData
 
 filters = [514, 123, 53, 161] #used to filter out non TCP/UDP packets (syslog, NTP, domain, SNMP)
 
-#main pcapconverter method; takes in a pcap filename and returns a list of Packet objects
+#main pcapconverter method; takes in a pcap filename and returns a list of PacketData objects
 def pcapConverter(filename):
     packets = []
 
     for (pkt_data, pkt_metadata,) in RawPcapReader(filename):
         ether_pkt = Ether(pkt_data)
         try:
-            print(f"Values: {ether_pkt.show()}")
             ip_pkt = ether_pkt[IP]
             tcp_pkt = ip_pkt[TCP]
+            timestamp = ether_pkt.time * 1000000 #convert to microseconds; difference between packets is VERY small
             ipFrom = ip_pkt.src
             ipTo = ip_pkt.dst
             portFrom = tcp_pkt.sport
             portTo = tcp_pkt.dport
-            timeStamp = tcp_pkt.time
             length = ip_pkt.len - 40
-            winLength = tcp_pkt.window
+            winLen = tcp_pkt.window
             tcpFlags = tcp_pkt.flags
             flags = flagFormat(tcpFlags)
-            print(f"Timestamp: {timeStamp}")
-            print(f"Source: {ipFrom}:{portFrom} Dest: {ipTo}:{portTo} Length: {length} Window: {winLength} Flags: {flags}")
+            packet = PacketData(timestamp, ipFrom, ipTo, portFrom, portTo, length, winLen, flags)
+            packets.append(packet)
         except IndexError:
-            try: #check whether packet is a UDP packet
+            try: #check whether packet is a UDP packet before ignoring it
                 ip_pkt = ether_pkt[IP]
                 udp_pkt = ip_pkt[UDP]
-                for port in filters: # filter packets via list. ARP, ICMP and VRRPv3 packets do not have either [TCP] or [UDP]
+                for port in filters: #filter packets via list. ARP, ICMP and VRRPv3 packets do not have either [TCP] or [UDP]
                     if udp_pkt.sport == port or udp_pkt.dport == port:
-                        raise IndexError #stand-in for custom exception later
+                        raise IndexError
+                timestamp = ether_pkt.time * 1000000
                 ipFrom = ip_pkt.src
                 ipTo = ip_pkt.dst
                 portFrom = udp_pkt.sport
                 portTo = udp_pkt.dport
-                timeStamp = udp_pkt.time
                 length = ip_pkt.len - 28
-                winLength = "N/A"
+                winLen = "N/A" #no windows in UDP!
                 flags = "0,0,0,0,0,0,1"
-                print(f"Timestamp: {timeStamp}")
-                print(
-                    f"Source: {ipFrom}:{portFrom} Dest: {ipTo}:{portTo} Length: {length} Window: {winLength} Flags: {flags}")
-            except IndexError:
-                print("that one bad")
+                packet = PacketData(timestamp, ipFrom, ipTo, portFrom, portTo, length, winLen, flags)
+                packets.append(packet)
+            except IndexError: #filter
+                pass
+    return packets
 
 #converts TCP flags returned by Scapy into a number format which is how they will be represented in the csv
 #code from method FlagProc in PcapToN2DConverter by Stefan
@@ -71,8 +70,3 @@ def flagFormat(string):
         if letter == '.': ACK = 1
     flags = str(SYN) + ',' + str(ACK) + ',' + str(FIN) + ',' + str(RST) + ',' + str(PSH) + ',' + str(URG) + ',0'
     return flags
-
-def getTime(string):
-    contents = string.split(".")
-    seconds = int(contents[0])
-    microseconds = seconds + int(contents[1])
