@@ -22,8 +22,22 @@
             <li class="w3-hover-amber" onclick="set_selected('{{ file }}')">{{ file }}</li>
         {% endfor %}
         </ul>
-
         <div class="button-panel">
+            <h4 class="underlinexyz">Configuration</h4>
+            <label>Window Size: </label>
+            <select class="windowSizes" id="windowSizes">
+                <option>1000</option>
+                <option>2000</option>
+            </select>
+
+            <label class="algorithm">Algorithm: </label>
+            <div class="onoffswitch">
+                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+                <label class="onoffswitch-label" for="myonoffswitch">
+                    <span class="onoffswitch-inner"></span>
+                    <span class="onoffswitch-switch"></span>
+                </label>
+            </div>
             <button class="w3-btn w3-block hf_btn w3-blue" onclick="analyse()">Analyse</button>
         </div>
     </div>
