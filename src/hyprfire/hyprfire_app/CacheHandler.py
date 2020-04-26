@@ -3,7 +3,6 @@
 
 from django.http import HttpResponse
 import os
-# import ajax_handlers as aj
 import scripts.plotting as plot
 
 # The variables below, are testing variables to see if this function actually works
@@ -16,7 +15,7 @@ windowsize = '1000'
 Function Name: ScriptProcessor
 Description: Compiles all of Stefan's old script to turn a single pcap file into a csv of either benford or zipf
 Input: filepath with the name/extension and configuration item (assumed to be strings)
-Output: Returns a HTTPresponse that will contain the graph from plotting.py to be displayed to the front end.
+Output: Returns a HTTPResponse that will contain the graph from plotting.py to be displayed to the front end.
 '''
 
 
@@ -64,6 +63,14 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
         print("Error Processing")
 
 
+'''
+Function Name: arguments_valid
+Description: This function checks if the configuration items sent from the front end are valid
+Input: filename, configuration item +b/+z and window size (1000/2000)
+Output: returns a boolean
+'''
+
+
 def arguments_valid(name, config, size):
 
     if check_filename(name) and check_config(config) and check_size(size):
@@ -108,6 +115,14 @@ def check_config(config):
         results = True
 
     return results
+
+
+'''
+Function Name: check_size
+Description: Checks if the windows size entered in the configuration is valid
+Input: A string that is able to be type casted to be an integer
+Output: A boolean
+'''
 
 
 def check_size(size):
