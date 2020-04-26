@@ -10,9 +10,6 @@
     <link rel="stylesheet" href="{% static 'hyprfire_app/page-style.css' %}">
     <link rel="stylesheet" href="{% static 'hyprfire_app/card-style.css' %}">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="{% static 'hyprfire_app/main.js' %}"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body>
@@ -22,12 +19,12 @@
         <ul class="w3-ul" id="file_list">
         <li><h3>Files</h3></li>
         {% for file in object_list %}
-            <li class="w3-hover-amber" onclick="load_graph('{{ file }}')"> {{ file }} </li>
+            <li class="w3-hover-amber" onclick="set_selected('{{ file }}')">{{ file }}</li>
         {% endfor %}
         </ul>
 
         <div class="button-panel">
-            <button class="w3-btn w3-block hf_btn w3-blue">Analyse</button>
+            <button class="w3-btn w3-block hf_btn w3-blue" onclick="analyse()">Analyse</button>
         </div>
     </div>
 
@@ -36,6 +33,11 @@
     <div class="split right centered" id="right_container">
 
     </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="{% static 'hyprfire_app/main.js' %}"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 
 </html>
