@@ -10,28 +10,48 @@
     <link rel="stylesheet" href="{% static 'hyprfire_app/page-style.css' %}">
     <link rel="stylesheet" href="{% static 'hyprfire_app/card-style.css' %}">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="{% static 'hyprfire_app/main.js' %}"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body>
     <!-- This div will take up 12% of the left side of the screen. -->
-    <!-- It is used to display a list of clickablefilenames sent by the server -->
+    <!-- It is used to display a list of clickable filenames sent by the server -->
     <div class="split left" id="left_container">
         <ul class="w3-ul" id="file_list">
         <li><h3>Files</h3></li>
         {% for file in object_list %}
-            <li class="w3-hover-amber" onclick="load_graph('{{ file }}')"> {{ file }} </li>
+            <li class="w3-hover-amber" onclick="set_selected('{{ file }}')">{{ file }}</li>
         {% endfor %}
         </ul>
+        <div class="button-panel">
+            <h4 class="underlinexyz">Configuration</h4>
+            <label>Window Size: </label>
+            <select class="windowSizes" id="windowSizes">
+                <option>1000</option>
+                <option>2000</option>
+            </select>
+
+            <label class="algorithm">Algorithm: </label>
+            <div class="onoffswitch">
+                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked>
+                <label class="onoffswitch-label" for="myonoffswitch">
+                    <span class="onoffswitch-inner"></span>
+                    <span class="onoffswitch-switch"></span>
+                </label>
+            </div>
+            <button class="w3-btn w3-block hf_btn w3-blue" onclick="analyse()">Analyse</button>
+        </div>
     </div>
 
     <!-- This div takes up the remaining 88% of the right side of the screen. -->
-    <!-- It will be used to show everything else, such as graphs, or configuration options -->
+    <!-- It will be used to show a graph and the raw data under the graph -->
     <div class="split right centered" id="right_container">
 
     </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="{% static 'hyprfire_app/main.js' %}"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 
 </html>
