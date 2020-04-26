@@ -22,10 +22,16 @@
 
 .button-panel {
   height: 25%;
-  width: 100%;
-  position: fixed;
+  width: inherit;
+  position: absolute;
   bottom: 0;
-  background-color: aqua;
+  background-color: black;
+}
+
+.hf_btn {
+  color: beige;
+  position: absolute;
+  bottom: 0;
 }
 
 /* Style the image inside the centered container, if needed */
