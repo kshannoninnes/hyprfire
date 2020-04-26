@@ -27,25 +27,25 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
 
         os_command = 'bash -c "tcpdump -nnr ' + path + ' >> ' + path + '.tcpd"'
         print(os_command)
-        #os.system(os_command)
+        os.system(os_command)
 
         pcapconvertcommand = 'bash -c "python3 old_scripts/PcapToN2DConverter.py ' + path + '.tcpd"'
         print(pcapconvertcommand)
-        #os.system(pcapconvertcommand)
+        os.system(pcapconvertcommand)
 
         if basicconfig == 'b':
 
             newbasiccommand = 'bash -c "python3 old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +b +t"'
             print(newbasiccommand)
             file_type = 'benf_time'
-            #os.system(newbasiccommand)
+            os.system(newbasiccommand)
 
         elif basicconfig == 'z':
 
             newbasiccommand = 'bash -c "python3 old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +z +t"'
             print(newbasiccommand)
             file_type = 'zipf_time'
-            #os.system(newbasiccommand)
+            os.system(newbasiccommand)
 
         else:
             print("Enter a proper configuration item, please")
