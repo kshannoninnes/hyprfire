@@ -33,6 +33,11 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
         print(pcapconvertcommand)
         os.system(pcapconvertcommand)
 
+        mv_tcpd = 'bash -c "rm ' + path + '.tcpd"'
+        print(mv_tcpd)
+        os.system(mv_tcpd)
+
+
         if basicconfig == 'Benford':
 
             newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + path + '.tcpd.n2d +b +t"'
@@ -50,11 +55,22 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
         else:
             print("Enter a proper configuration item, please")
 
-        print("SCRIPT PROCESSOR is DONE!")
+
+        mv_n2d = 'bash -c "rm ' + path + '.tcpd.n2d"'
+        print(mv_n2d)
+        os.system(mv_n2d)
 
         csv_file = path + '.tcpd.n2d' + '_' + file_type + '.csv'
 
         response = plot.get_plot(csv_file)
+
+
+        temp = os.path.abspath("temp")
+        mv_csv = 'bash -c "mv ' + csv_file + ' ' + temp + '"'
+        print(mv_csv)
+        os.system(mv_csv)
+
+        print("SCRIPT PROCESSOR is DONE!")
 
         return response
 
