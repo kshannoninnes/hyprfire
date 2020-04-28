@@ -15,7 +15,7 @@ ALGORITHMS = [
 
 class AnalyseForm(forms.Form):
     project_root = os.path.dirname(os.path.abspath(__file__))
-    pcaps_path = os.path.join(project_root, '..\\pcaps')
+    pcaps_path = os.path.join(project_root, '../pcaps')
 
     path = Path(pcaps_path)
 
