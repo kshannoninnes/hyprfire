@@ -34,11 +34,6 @@
   bottom: 0;
 }
 
-/* Style the image inside the centered container, if needed */
-.centered img {
-  position:relative;
-}
-
 /* put an underline under configuration header for consistency with above */
 .underlinexyz {
   border-bottom: 1px solid #d3d3d3;

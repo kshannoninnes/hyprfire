@@ -35,5 +35,5 @@ def plottify(filename, xcol, ycol):
 # Get a plot using the data in the supplied file
 def get_plot(filename):
     plt = plottify(filename, 0, 1)
-    return plot(plt, output_type='div', include_plotlyjs=False)
+    return plot(plt, output_type='div')
 
