@@ -3,13 +3,10 @@
 
 from django.http import HttpResponse
 import os
-import scripts.plotting as plot
+from .scripts import plotting as plot
 
-# The variables below, are testing variables to see if this function actually works
-
-basicconfig = 'b'
-filename = "dump2941"
-windowsize = '1000'
+#basicconfig = 'b'
+#windowsize = '1000'
 
 '''
 Function Name: ScriptProcessor
@@ -56,7 +53,6 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
 
         response = plot.get_plot(csv_file)
 
-        #return response
         return HttpResponse(response, content_type='text/html')
 
     else:
@@ -72,7 +68,6 @@ Output: returns a boolean
 
 
 def arguments_valid(name, config, size):
-
     if check_filename(name) and check_config(config) and check_size(size):
         check = True
     else:
@@ -90,7 +85,6 @@ Output: A boolean
 
 
 def check_filename(name):
-
     # results = True
     results = os.path.exists(name)
     # print(results)
@@ -106,7 +100,6 @@ Output: A boolean
 
 
 def check_config(config):
-
     results = False
 
     if config == 'b':
@@ -126,7 +119,6 @@ Output: A boolean
 
 
 def check_size(size):
-
     int_size = int(size)
     results = False
 
@@ -136,6 +128,3 @@ def check_size(size):
         results = True
 
     return results
-
-# This is just calling the function to see if ti works
-ScriptProcessor(filename, basicconfig, windowsize)

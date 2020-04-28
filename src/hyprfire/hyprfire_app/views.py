@@ -20,3 +20,5 @@ class IndexView(generic.ListView):
             if name not in blacklist:
                 filenames.append(os.path.splitext(name)[0])
         return filenames
+
+
