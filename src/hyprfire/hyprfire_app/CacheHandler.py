@@ -19,7 +19,9 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
 
     path = file_name
 
-    # pcaptoN2D = os.path.abspath("old_scripts/PcapToN2DConverter.py")
+    pcaptoN2D = os.path.abspath("hyprfire_app/old_scripts/PcapToN2DConverter.py")
+    newbasics = os.path.abspath("hyprfire_app/old_scripts/NewBasics3.py")
+    print(pcaptoN2D)
 
     if arguments_valid(path, basicconfig, windowsize):
 
@@ -27,20 +29,20 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
         print(os_command)
         os.system(os_command)
 
-        pcapconvertcommand = 'bash -c "python3 hyprfire_app/old_scripts/PcapToN2DConverter.py ' + path + '.tcpd"'
+        pcapconvertcommand = 'bash -c "python3 ' + pcaptoN2D + ' ' + path + '.tcpd"'
         print(pcapconvertcommand)
         os.system(pcapconvertcommand)
 
         if basicconfig == 'Benford':
 
-            newbasiccommand = 'bash -c "python3 hyprfire_app/old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +b +t"'
+            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + path + '.tcpd.n2d +b +t"'
             print(newbasiccommand)
             file_type = 'benf_time'
             os.system(newbasiccommand)
 
         elif basicconfig == 'Zipf':
 
-            newbasiccommand = 'bash -c "python3 hyprfire_app/old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +z +t"'
+            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + path + '.tcpd.n2d +z +t"'
             print(newbasiccommand)
             file_type = 'zipf_time'
             os.system(newbasiccommand)
