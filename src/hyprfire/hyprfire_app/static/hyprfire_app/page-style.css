@@ -41,21 +41,21 @@
 }
 
 #id_filenames {
-  margin-bottom: 10px;
-  margin-left: 30px;
+  float: right;
 }
 
 #id_window {
-    margin-bottom: 10px;
-    margin-left: 20px;
+  float: right;
 }
 
 #id_algorithm {
-    margin-bottom: 10px;
-    margin-left: 35px;
+  float: right;
 }
 
 #id_analysis {
-  margin-bottom: 10px;
-  margin-left: 50px;
+  float: right;
+}
+
+.config_opt {
+  font-size: 16px;
 }
