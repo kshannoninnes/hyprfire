@@ -21,7 +21,7 @@ def index(request):
             algorithm = form.cleaned_data['algorithm']
             length = form.cleaned_data['length']
 
-            response = ScriptProcessor(algorithm, window)
+            response = ScriptProcessor(filename, algorithm, window)
             #print(response)
 
             return HttpResponse(response, content_type='text/html')

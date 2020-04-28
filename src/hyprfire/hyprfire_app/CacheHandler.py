@@ -5,8 +5,7 @@
 import os
 from .scripts import plotting as plot
 
-#basicconfig = 'b'
-#windowsize = '1000'
+
 
 '''
 Function Name: ScriptProcessor
@@ -16,16 +15,13 @@ Output: Returns a HTTPResponse that will contain the graph from plotting.py to b
 '''
 
 
-def ScriptProcessor(basicconfig, windowsize):
+def ScriptProcessor(file_name, basicconfig, windowsize):
 
-    file_name = 'dump2077'
-
-    path = 'pcaps/' + file_name
+    path = file_name
     print(path)
 
     if arguments_valid(path, basicconfig, windowsize):
 
-        #os_command = 'ls'
         os_command = 'bash -c "tcpdump -nnr ' + path + ' >> ' + path + '.tcpd"'
         print(os_command)
         os.system(os_command)
