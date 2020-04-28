@@ -18,7 +18,7 @@
     <div class="split left" id="left_container">
         <ul class="w3-ul" id="file_list">
         <li><h3>Files</h3></li>
-        {% for file in object_list %}
+        {% for file in filenames %}
             <li class="w3-hover-amber" onclick="set_selected('{{ file }}')">{{ file }}</li>
         {% endfor %}
         </ul>
