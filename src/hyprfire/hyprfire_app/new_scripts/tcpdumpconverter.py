@@ -1,7 +1,7 @@
 # tcpdumpconverter.py: takes in a filename for a tcpdump file and converts it to a file containing metadata in a format
 # which can be more easily converted to csv format
 # Author: Dean Quaife (a large amount of this code is Stefan's from PcapToN2DConverter.py, not mine)
-# Last edited: 2020/03/30
+# Last edited: 2020/04/05
 import sys
 import io
 import bz2
@@ -10,7 +10,7 @@ import os
 import time
 import hyprfire_app.scripts.CSVUtils as csv
 #import Queue
-import multiprocessing as satan #Just a hint, this thing is literally satan. Hi Satan! :D
+import multiprocessing
 #import OmniAnalysis as oa
 import hyprfire_app.scripts.n2dfilereader as n2df
 from hyprfire_app.scripts.superthreading import threadWorker
@@ -113,11 +113,11 @@ def FlagProc(stringz):
     return lerps
 
 def PrimaryIOThread(filename,bzMode):
-    foop = n2df.FileReader(filename,999)
-    cores = satan.cpu_count()
+    foop = n2df.FileReader(filename,999) #foop is a FileReader object from n2dfilereader.py
+    cores = multiprocessing.cpu_count()
     if cores > 8:
         cores = 8
-    inputQ = satan.Queue()
+    inputQ = multiprocessing.Queue()
     threadlist = []
     print("Beginning file processing with " + str(cores) + " cores.")
     for i in range(0,cores):
@@ -141,7 +141,7 @@ def tcpdumpConverter(filename):
     PrimaryIOThread(tcpdFilename,bzMode)
     print("Now writing file")
     files = []
-    for f in os.listdir("."):
+    for f in os.listdir("../scripts"):
         if re.search('.prt',f):
             files += [f]
     files.sort()

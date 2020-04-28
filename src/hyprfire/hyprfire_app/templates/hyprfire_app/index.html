@@ -16,22 +16,19 @@
     <!-- This div will take up 12% of the left side of the screen. -->
     <!-- It is used to display a list of clickable filenames sent by the server -->
     <div class="split left" id="left_container">
-        <ul class="w3-ul" id="file_list">
-        <li><h3>Files</h3></li>
-        {% for file in object_list %}
-            <li class="w3-hover-amber" onclick="set_selected('{{ file }}')">{{ file }}</li>
-        {% endfor %}
-        </ul>
 
-        <div class="button-panel">
-            <button class="w3-btn w3-block hf_btn w3-blue" onclick="analyse()">Analyse</button>
-        </div>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" class="w3-btn w3-block hf_btn w3-blue" value="Analyse">
+        </form>
+
     </div>
 
     <!-- This div takes up the remaining 88% of the right side of the screen. -->
     <!-- It will be used to show a graph and the raw data under the graph -->
     <div class="split right centered" id="right_container">
-
+        {{ graph|safe }}
     </div>
 
 
