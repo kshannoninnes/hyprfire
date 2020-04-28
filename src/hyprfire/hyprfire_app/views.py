@@ -16,6 +16,7 @@ def index(request):
     if request.method == "POST":
         form = AnalyseForm(request.POST)
         if form.is_valid():
+            filename = form.cleaned_data['filenames']
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
             length = form.cleaned_data['length']
