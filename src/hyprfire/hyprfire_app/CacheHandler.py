@@ -18,7 +18,8 @@ Output: Returns a HTTPResponse that will contain the graph from plotting.py to b
 def ScriptProcessor(file_name, basicconfig, windowsize):
 
     path = file_name
-    print(path)
+
+    # pcaptoN2D = os.path.abspath("old_scripts/PcapToN2DConverter.py")
 
     if arguments_valid(path, basicconfig, windowsize):
 
@@ -37,7 +38,7 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
             file_type = 'benf_time'
             os.system(newbasiccommand)
 
-        elif basicconfig == 'z':
+        elif basicconfig == 'Zipf':
 
             newbasiccommand = 'bash -c "python3 hyprfire_app/old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +z +t"'
             print(newbasiccommand)
@@ -105,7 +106,7 @@ def check_config(config):
 
     if config == 'Benford':
         results = True
-    elif config == 'z':
+    elif config == 'Zipf':
         results = True
 
     return results

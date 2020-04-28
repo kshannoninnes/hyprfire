@@ -1,9 +1,9 @@
 from django.shortcuts import render
-#from django.views import generic
+
 from .forms import AnalyseForm
 import os
 from .CacheHandler import ScriptProcessor
-from django.http import HttpResponse
+
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -22,9 +22,8 @@ def index(request):
             length = form.cleaned_data['length']
 
             response = ScriptProcessor(filename, algorithm, window)
-            #print(response)
 
-            return HttpResponse(response, content_type='text/html')
+            return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
 
     else:
         form = AnalyseForm()
