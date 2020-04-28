@@ -23,7 +23,7 @@
         {% endfor %}
         </ul>
         <div class="button-panel">
-            <form action="/analyse/" method="POST">
+            <form method="POST">
                 {% csrf_token %}
                 {{ form }}
                 <input type="submit" class="w3-btn w3-block hf_btn w3-blue" value="Analyse">
