@@ -19,7 +19,7 @@ def index(request):
             filename = form.cleaned_data['filenames']
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
-            length = form.cleaned_data['length']
+            analyse = form.cleaned_data['analyse']
 
             response = ScriptProcessor(filename, algorithm, window)
 
