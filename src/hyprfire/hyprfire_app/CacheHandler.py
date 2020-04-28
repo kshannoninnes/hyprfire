@@ -1,7 +1,7 @@
 # This File here will handle the "anaylze request" from the Django Framework
 # The file must be able to handle the configuration items that have been sent from the analyze request.
 
-from django.http import HttpResponse
+
 import os
 from .scripts import plotting as plot
 
@@ -16,30 +16,34 @@ Output: Returns a HTTPResponse that will contain the graph from plotting.py to b
 '''
 
 
-def ScriptProcessor(file_name, basicconfig, windowsize):
+def ScriptProcessor(basicconfig, windowsize):
 
-    path = '../pcaps/' + file_name
+    file_name = 'dump2077'
+
+    path = 'pcaps/' + file_name
+    print(path)
 
     if arguments_valid(path, basicconfig, windowsize):
 
+        #os_command = 'ls'
         os_command = 'bash -c "tcpdump -nnr ' + path + ' >> ' + path + '.tcpd"'
         print(os_command)
         os.system(os_command)
 
-        pcapconvertcommand = 'bash -c "python3 old_scripts/PcapToN2DConverter.py ' + path + '.tcpd"'
+        pcapconvertcommand = 'bash -c "python3 hyprfire_app/old_scripts/PcapToN2DConverter.py ' + path + '.tcpd"'
         print(pcapconvertcommand)
         os.system(pcapconvertcommand)
 
-        if basicconfig == 'b':
+        if basicconfig == 'Benford':
 
-            newbasiccommand = 'bash -c "python3 old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +b +t"'
+            newbasiccommand = 'bash -c "python3 hyprfire_app/old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +b +t"'
             print(newbasiccommand)
             file_type = 'benf_time'
             os.system(newbasiccommand)
 
         elif basicconfig == 'z':
 
-            newbasiccommand = 'bash -c "python3 old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +z +t"'
+            newbasiccommand = 'bash -c "python3 hyprfire_app/old_scripts/NewBasics3.py --win ' + windowsize + ' ' + path + '.tcpd.n2d +z +t"'
             print(newbasiccommand)
             file_type = 'zipf_time'
             os.system(newbasiccommand)
@@ -53,7 +57,7 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
 
         response = plot.get_plot(csv_file)
 
-        return HttpResponse(response, content_type='text/html')
+        return response
 
     else:
         print("Error Processing")
@@ -88,6 +92,7 @@ def check_filename(name):
     # results = True
     results = os.path.exists(name)
     # print(results)
+    print(results)
     return results
 
 
@@ -102,7 +107,7 @@ Output: A boolean
 def check_config(config):
     results = False
 
-    if config == 'b':
+    if config == 'Benford':
         results = True
     elif config == 'z':
         results = True

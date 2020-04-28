@@ -3,6 +3,7 @@ from django.shortcuts import render
 from .forms import AnalyseForm
 import os
 from .CacheHandler import ScriptProcessor
+from django.http import HttpResponse
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -18,11 +19,15 @@ def index(request):
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
             length = form.cleaned_data['length']
-            # filename = form.cleaned_data['filename']
 
-            # response = ScriptProcessor()
+            response = ScriptProcessor(algorithm, window)
+            #print(response)
+
+            return HttpResponse(response, content_type='text/html')
+
     else:
         form = AnalyseForm()
+
     return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames})
 
 
