@@ -1,18 +1,19 @@
 """
 File: n2dconverter.py
 Author: Quang Le
-Purpose: porting Stefan's NewBasics3.py script to turn n2d data into csv data
+Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
 """
-import benfordsAnalysis as ba
-import zipfAnalysis as za
-import n2dfilereader as n2df
+from hyprfire_app.new_scripts.packetdata import PacketData
+from hyprfire_app.new_scripts.dumpfile import Dumpfile
+import hyprfire_app.new_scripts.benfordsAnalysis as ba
+import hyprfire_app.new_scripts.zipfAnalysis as za
 import multiprocessing as mp
-import superthreading as st
+import hyprfire_app.new_scripts.superthreading as st
 from operator import itemgetter
 import queue
 
 
-def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator):
+def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator, filename):
     # inQ = mastertuple[0]
     # outQ = mastertuple[1]
     while True:
@@ -22,38 +23,48 @@ def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator):
                 if Timeo:
                     # print window
                     # print "hi"
-                    intArrTimes = ba.GetInterArrivalTimes(window)
+                    times = [i[0] for i in window]
+                    epochs = [i[1] for i in window]
+                    intArrTimes = ba.get_interarrival_times(times)
                     benfBucks = ba.get_benfords_buckets(intArrTimes, 1)
                     uValue = ba.get_benford_u_value(benfBucks, 1)
-                    timeVal = int((window[0] + window[len(window) - 1]) / 2)
-                    tups = (timeVal, uValue)
-                    outQ.put(tups)
+                    timeVal = int((times[0] + times[len(window) - 1]) / 2)
+                    epochVal = epochs[0]
+                    tups = (timeVal, uValue, epochVal, filename, len(window))  # redundant
+                    outQ.put(tups)  # redundant
                     # print tups
                 else:
                     # intArrTimes = ba.GetInterArrivalTimes(window)
                     lens = [i[1] for i in window]
                     times = [i[0] for i in window]
+                    epochs = [i[2] for i in window]
                     benfBucks = ba.get_benfords_buckets(lens, 1)
                     uValue = ba.get_benford_u_value(benfBucks, 1)
                     timeVal = int((times[0] + times[len(times) - 1]) / 2)
-                    tups = (timeVal, uValue)
+                    epochVal = epochs[0]
+                    tups = (timeVal, uValue, epochVal, filename)
                     outQ.put(tups)
             else:
                 if Timeo:
-                    intArrTimes = ba.GetInterArrivalTimes(window)
+                    times = [i[0] for i in window]
+                    epochs = [i[1] for i in window]
+                    intArrTimes = ba.get_interarrival_times(times)
                     zipfBucks = za.get_zipf_buckets(intArrTimes)
                     uValue = za.get_zipf_u_value(zipfBucks)
-                    timeVal = int((window[0] + window[len(window) - 1]) / 2)
-                    tups = (timeVal, uValue)
+                    timeVal = int((times[0] + times[len(window) - 1]) / 2)
+                    epochVal = epochs[0]
+                    tups = (timeVal, uValue, epochVal, filename)
                     outQ.put(tups)
                 else:
                     # intArrTimes = ba.GetInterArrivalTimes(window)
                     lens = [i[1] for i in window]
                     times = [i[0] for i in window]
+                    epochs = [i[2] for i in window]
                     zipfBucks = za.get_zipf_buckets(lens)
                     uValue = za.get_zipf_u_value(zipfBucks)
                     timeVal = int((times[0] + times[len(times) - 1]) / 2)
-                    tups = (timeVal, uValue)
+                    epochVal = epochs[0]
+                    tups = (timeVal, uValue, epochVal, filename)
                     outQ.put(tups)
         except queue.Empty:
             if veruficator.value == 1:
@@ -62,11 +73,25 @@ def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator):
     # time.sleep(10)
 
 
-# Currently converts n2d file instead of n2d data as format of data is not known yet
-def convert(n2ddata, anaType, winsize, timelen):
+def get_packets_window(packets, winsize):
+    packets_win = []
+    counter = 0
+    for packet in packets:
+        try:
+            packets_win.append(packet)
+            counter += 1
+            if counter == winsize:
+                yield packets_win
+                packets_win = []
+                counter = 0
+        except LookupError:
+            print("Index Error Exception Raised, list index out of range")
+
+
+def convert(dumpfile, ana_type, winsize, timelen):
     veruficator = mp.Value('i', 0)
 
-    if anaType == 'b':
+    if ana_type == 'b':
         Benf = True
     else:
         Benf = False
@@ -76,31 +101,33 @@ def convert(n2ddata, anaType, winsize, timelen):
     else:
         Timeo = False
 
-    windowsize = winsize
-    filereader = n2df.FileReader(n2ddata, windowsize)
     cores = mp.cpu_count()
-
     if cores > 8:
         cores = 8
 
     inQ = mp.Queue()
     outQ = mp.Queue()
     threadz = []
+
+    filename = dumpfile.filename
+    packets = dumpfile.packets
+
+    # Now loading data
+    for window in get_packets_window(packets, winsize):
+        d = []
+        if Timeo:
+            d = [(packetdata.timestamp, packetdata.epochTimestamp) for packetdata in window]
+        else:
+            d = [(packetdata.timestamp, packetdata.len, packetdata.epochTimestamp) for packetdata in window]
+        print(len(d))
+        inQ.put(d)
+
     # Generating threads
     for i in range(0, cores):
-        threadz.append(st.threadWorker(ThreadProcess))
-    qsender = (inQ, outQ, Benf, Timeo, veruficator)
+        threadz.append(st.ThreadWorker(ThreadProcess))
+    qsender = (inQ, outQ, Benf, Timeo, veruficator, filename)
     for thread in threadz:
         thread.run(qsender)
-    # Now loading data
-    for window in filereader.Get():
-        d = []
-        if Timeo=True:
-            d = [int(x[1]) for x in window]
-        else:
-            d = [(int(x[1]), int(x[6])) for x in window]
-        # print len(d)
-        inQ.put(d)
 
     with veruficator.get_lock():
         veruficator.value = 1
