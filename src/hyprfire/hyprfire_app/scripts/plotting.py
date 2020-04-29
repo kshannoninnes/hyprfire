@@ -1,6 +1,9 @@
 from plotly.offline import plot
 import plotly.graph_objects as go
 
+# Read filename / csv string (Ask Quang)
+# get_xy changes? (needs to end with ret_thing = [] basically double array
+# feed ret_thing array into plottify as xy
 
 # Get the x and y locations from the supplied file
 def get_xy(filename, xcol, ycol):
@@ -33,6 +36,7 @@ def plottify(filename, xcol, ycol):
 
 
 # Get a plot using the data in the supplied file
+# change filename to csv string
 def get_plot(filename):
     plt = plottify(filename, 0, 1)
     return plot(plt, output_type='div')

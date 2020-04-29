@@ -120,3 +120,37 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# DataFlair #Logging Information
+LOGGING = {
+    'version': 1,
+    # disable logging; tell Django to do not disable loggers. By default, Django uses some of its own loggers.
+    'disable_existing_loggers': False,
+    # LEVELS
+    # CRITICAL (50): Problems that crash the app
+    # ERROR (40): Problems that break the current function
+    # WARNING (30): Unexpected or undesirable events
+    # INFO (20): Interesting runtime events. Notice that things are working
+    # DEBUG (10): Detail for debugging in development and diagnosing problems
+    # Handlers
+    # MailHandlers and AdminEmailHandlers are possible options but over-kill for our application.
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': './logs/Debug.log',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    # Loggers ####################################################################
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
+        },
+    },
+}
