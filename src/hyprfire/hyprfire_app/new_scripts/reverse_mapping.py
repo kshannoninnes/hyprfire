@@ -13,6 +13,7 @@ def _collect_packets(filename, timestamp, num_packets):
     collect_packets
 
     Find a number of packets in a file starting from the packet which matches the timestamp provided
+    Note: Currently very very slow (thanks scapy -_-)
 
     Parameters
     filename: the file to search
@@ -24,12 +25,12 @@ def _collect_packets(filename, timestamp, num_packets):
     """
 
     count = num_packets
-    timestamp = Decimal(timestamp)
     start_collecting = False
     packet_list = []
 
     for packet in PcapReader(str(input_path / filename)):
         match = timestamp.compare(packet.time) == 0
+
         if match:
             start_collecting = True
 
@@ -73,8 +74,48 @@ def export_packets(filename, timestamp, num_packets):
     Return
     the path to the exported file
     """
-    packets = _collect_packets(filename, timestamp, num_packets)
-    output_file = str(output_path / str(filename + '.filtered.pcap'))
-    _write_packets_to_file(output_file, packets)
+    dec_timestamp = Decimal(timestamp)
+    valid = validate_timestamp(dec_timestamp) and validate_num_packets(num_packets)
 
-    return output_file
+    if valid:
+        packets = _collect_packets(filename, dec_timestamp, num_packets)
+        output_file = str(output_path / str(filename + '.filtered.pcap'))
+        _write_packets_to_file(output_file, packets)
+
+        return output_file
+
+
+def validate_timestamp(timestamp):
+    """
+    validate_timestamp
+
+    A valid timestamp is a decimal greater than 0.0 (the epoch)
+
+    Parameters
+    timestamp: the decimal timestamp to validate
+
+    Return
+    boolean indicating timestamp validity
+    """
+    if timestamp.compare(0) == 1:
+        return True
+    else:
+        raise ValueError("Timestamp must be greater then 0.0 (the unix epoch)")
+
+
+def validate_num_packets(num_packets):
+    """
+    validate_num_packets
+
+    A valid number of packets is a decimal greater than 0
+
+    Parameters
+    num_packets: the number of packets
+
+    Return
+    boolean indicating whether the number of packets is valid
+    """
+    if num_packets > 0:
+        return True
+    else:
+        raise ValueError("Number of packets cannot be <= 0")
