@@ -1,5 +1,6 @@
 from scapy.all import PcapReader, PcapWriter
 from pathlib import Path
+from decimal import Decimal
 
 
 root_path = Path(__file__).parent.parent.parent
@@ -21,12 +22,14 @@ def _collect_packets(filename, timestamp, num_packets):
     Return
     A list of packets of size num_packets, starting from the packet with the matching timestamp
     """
+
     count = num_packets
+    timestamp = Decimal(timestamp)
     start_collecting = False
     packet_list = []
 
     for packet in PcapReader(str(input_path / filename)):
-        match = timestamp.rstrip('0') == str(packet.time)
+        match = timestamp.compare(packet.time) == 0
         if match:
             start_collecting = True
 
