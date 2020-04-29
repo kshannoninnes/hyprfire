@@ -126,31 +126,55 @@ LOGGING = {
     'version': 1,
     # disable logging; tell Django to do not disable loggers. By default, Django uses some of its own loggers.
     'disable_existing_loggers': False,
-    # LEVELS
-    # CRITICAL (50): Problems that crash the app
-    # ERROR (40): Problems that break the current function
-    # WARNING (30): Unexpected or undesirable events
-    # INFO (20): Interesting runtime events. Notice that things are working
-    # DEBUG (10): Detail for debugging in development and diagnosing problems
+
+    # Loggers ####################################################################
+    'loggers': {
+        #one logger so all messages go through here
+        'django': {
+            # attach django logger with 'file' and 'console' handler
+            'handlers': ['file', 'console', 'verboseFile'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'propagate': True,
+        },
+        # possible django.request, django.server, django.template, django.db.backends
+    },
+
     # Handlers
     # MailHandlers and AdminEmailHandlers are possible options but over-kill for our application.
     'handlers': {
+        # 'file' handler - logs to  "warning.log" file with basic detail, only writing warning, error, critical messages
         'file': {
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': './logs/Debug.log',
+            'filename': './logs/warning.log',
+            'formatter': 'basicFormat',
         },
+        # 'console' handler - logs to the console with basic information, only about errors and critical messages
         'console': {
             'class': 'logging.StreamHandler',
+            'level': 'ERROR',
+            'formatter': 'basicFormat',
         },
-    },
-    # Loggers ####################################################################
-    'loggers': {
-        'django': {
-            'handlers': ['file', 'console'],
+        # 'verboseFile' handler - logs to "verboseDebug.log" file with most details
+        'verboseFile': {
             'level': 'DEBUG',
-            'propagate': True,
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
-        },
+            'class': 'logging.FileHandler',
+            'filename': './logs/verboseDebug.log',
+            'formatter': 'verboseFormat',
+        }
     },
+    'formatters': {
+        'basicFormat': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'verboseFormat': {
+            'format': '{levelname} {asctime} {module} {lineno} {process} {processName} {thread} {threadName} {message}',
+            'style': '{',
+        }
+    }
+    # after modules are finalised, add the following to start of all modules
+    # import logging
+    #
+    # log = logging.getLogger(__name__)
 }
