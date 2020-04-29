@@ -1,15 +1,15 @@
-from scapy.all import RawPcapReader, PcapReader, PcapWriter
-import time
+from scapy.all import PcapReader, PcapWriter
 from pathlib import Path
+
 
 root_path = Path(__file__).parent.parent.parent
 input_path = Path(root_path / 'pcaps')
 output_path = Path(input_path / 'exported_pcaps')
 
 
-def find_packets(filename, timestamp, num_packets):
+def _collect_packets(filename, timestamp, num_packets):
     """
-    find_packets
+    collect_packets
 
     Find a number of packets in a file starting from the packet which matches the timestamp provided
 
@@ -17,29 +17,61 @@ def find_packets(filename, timestamp, num_packets):
     filename: the file to search
     timestamp: a unique seconds-based epoch timestamp to identify the starting packet
     num_packets: the number of packets to collect
-    """
-    start = time.time()
-    print('Starting search at ' + str(start))
 
+    Return
+    A list of packets of size num_packets, starting from the packet with the matching timestamp
+    """
     count = num_packets
     start_collecting = False
+    packet_list = []
 
     for packet in PcapReader(str(input_path / filename)):
         match = timestamp.rstrip('0') == str(packet.time)
-        print('Matching ' + timestamp.rstrip('0') + ' against ' + str(packet.time))
         if match:
             start_collecting = True
-            print('Beginning collection of packets!')
 
         if start_collecting:
-            packet_writer = PcapWriter(str(output_path / str(filename + '.filtered.pcap')), append=True, sync=True)
-            packet_writer.write(packet)
+            packet_list.append(packet)
             count = count - 1
 
             if count <= 0:
                 break
 
-    finished = time.time()
-    print('Finished searching at ' + str(finished))
-    duration = finished - start
-    print('Search took ' + str(duration) + ' seconds to complete.')
+    return packet_list
+
+
+def _write_packets_to_file(path, packets):
+    """
+    write_packets_to_file
+
+    Write a list of packets to a pcap file
+
+    Parameters
+    path: the file to write the packets to
+    packets: a list of packets to write to file
+    """
+    writer = PcapWriter(path, append=True, sync=True)
+
+    for packet in packets:
+        writer.write(packet)
+
+
+def export_packets(filename, timestamp, num_packets):
+    """
+    export_packets
+
+    Public interface for exporting packets to a file
+
+    Parameters
+    filename: file to export packets from
+    timestamp: a unique seconds-based epoch timestamp to identify the starting packet
+    num_packets: number of packets to export, including the initial packet matching the timestamp
+
+    Return
+    the path to the exported file
+    """
+    packets = _collect_packets(filename, timestamp, num_packets)
+    output_file = str(output_path / str(filename + '.filtered.pcap'))
+    _write_packets_to_file(output_file, packets)
+
+    return output_file
