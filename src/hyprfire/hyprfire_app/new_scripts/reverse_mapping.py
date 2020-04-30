@@ -1,36 +1,88 @@
-from scapy.all import PcapReader, PcapWriter
 from pathlib import Path
 from decimal import Decimal
-import os
+from datetime import datetime, timedelta
+from scapy.all import PcapReader, PcapWriter
+import subprocess
 
-root_path = Path(__file__).parent.parent.parent
-input_path = Path(root_path / 'pcaps')
-output_path = Path(input_path / 'exported_pcaps')
+# Constants
+root_dir = Path(__file__).parent.parent.parent
+input_dir = Path(root_dir / 'pcaps')
+output_dir = Path(input_dir / 'exported_pcaps')
 
 
 def _collect_packets(filename, start_timestamp, end_timestamp):
     """
     collect_packets
 
-    Find a number of packets in a pcap file between the two provided timestamps
+    Collect all packets from a file with an epoch time between start_timestamp and end_timestamp
 
     Parameters
     filename: the file to search
-    start_timestamp:
-    end_timestamp:
+    start_timestamp: decimal unix timestamp of the first packet
+    end_timestamp: decimal unix timestamp of the last packet
 
     Return
-    A list of all packets from the start_time to the end_time
+    A list of all packets from the start_timestamp to the end_timestamp
     """
 
     packet_list = []
+    matching_started = False
 
-    # Convert timestamps to "YYYY-MM-DD hh:mm:ss"
-    # If timestamps are the same, add 1s to end timestamp
-    # Use editcap to cut file down to 1s worth of packets
-    # Tshark the new file with exact display filter (including epoch timestamps) to get a pcap of exact match
+    with PcapReader(filename) as reader:
+        for packet in reader:
+
+            # In scapy, packet.time is stored as a float. Due to precision issues with floats (represented in binary)
+            # the time is converted to a string (to preserve the exact timestamp), and then converted to a decimal
+            # (for comparison purposes)
+            packet_timestamp = Decimal(str(packet.time))
+
+            # Decimal Comparison
+            # a < b: -1
+            # a == b: 0
+            # a > b:  1
+            if start_timestamp.compare(packet_timestamp) == 0:
+                matching_started = True
+
+            if matching_started:
+                packet_list.append(packet)
+
+            if end_timestamp.compare(packet_timestamp) <= 0:
+                break
 
     return packet_list
+
+
+def _slice_with_editcap(filename, start, end):
+    """
+    _slice_with_editcap
+
+    Cuts a pcap file down to only packets contained within the range of start:end
+    Note: Minimum range of 1s is enforced
+
+    Parameters
+    filename: file to slice
+    start: start unix timestamp
+    end: end unix timestamp
+
+    Returns
+    A string path for the output file
+    """
+
+    # editcap requires timestamps in the format of "YYYY-MM-DD hh:mm:ss"
+    ec_start = datetime.fromtimestamp(start)
+    ec_end = datetime.fromtimestamp(end)
+
+    # editcap can only capture packets with a 1s gap (eg. 16:47:24 - 16:47:24 will result in an empty file)
+    if abs(start - end) < 1:
+        ec_end += timedelta(seconds=1)
+
+    ec_output_file = output_dir / f'{filename}-editcapped.pcap'
+    input_file = input_dir / filename
+    editcap_command = f'editcap -A "{ec_start}" -B "{ec_end}" "{input_file}" "{ec_output_file}"'
+
+    subprocess.call(editcap_command)
+
+    return str(ec_output_file)
 
 
 def _write_packets_to_file(path, packets):
@@ -49,7 +101,7 @@ def _write_packets_to_file(path, packets):
         writer.write(packet)
 
 
-def export_packets(filename, timestamp, num_packets):
+def export_packets(filename, start_timestamp, end_timestamp):
     """
     export_packets
 
@@ -63,20 +115,21 @@ def export_packets(filename, timestamp, num_packets):
     Return
     the path to the exported file
     """
-    dec_timestamp = Decimal(timestamp)
-    valid = validate_timestamp(dec_timestamp) and validate_num_packets(num_packets)
+    dec_start = Decimal(start_timestamp)
+    dec_end = Decimal(end_timestamp)
 
-    if valid:
-        packets = _collect_packets(filename, dec_timestamp, num_packets)
-        output_file = str(output_path / str(filename + '.filtered.pcap'))
-        _write_packets_to_file(output_file, packets)
+    if _validate_timestamps(dec_start, dec_end):
+        editcap_slice = _slice_with_editcap(filename, dec_start, dec_end)
+        packet_list = _collect_packets(editcap_slice, dec_start, dec_end)
+        output_file = str(output_dir / str(filename + '-filtered.pcap'))
+        _write_packets_to_file(output_file, packet_list)
 
         return output_file
 
 
-def validate_timestamp(timestamp):
+def _validate_timestamps(start, end):
     """
-    validate_timestamp
+    _validate_timestamps
 
     A valid timestamp is a decimal greater than 0.0 (the epoch)
 
@@ -86,25 +139,12 @@ def validate_timestamp(timestamp):
     Return
     boolean indicating timestamp validity
     """
-    if timestamp.compare(0) == 1:
+
+    # Decimal Comparison
+    # a < b: -1
+    # a == b: 0
+    # a > b:  1
+    if start.compare(0) == 1 and start.compare(end) == -1:
         return True
     else:
-        raise ValueError("Timestamp must be greater then 0.0 (the unix epoch)")
-
-
-def validate_num_packets(num_packets):
-    """
-    validate_num_packets
-
-    A valid number of packets is a decimal greater than 0
-
-    Parameters
-    num_packets: the number of packets
-
-    Return
-    boolean indicating whether the number of packets is valid
-    """
-    if num_packets > 0:
-        return True
-    else:
-        raise ValueError("Number of packets cannot be <= 0")
+        raise ValueError("Timestamp invalid")
