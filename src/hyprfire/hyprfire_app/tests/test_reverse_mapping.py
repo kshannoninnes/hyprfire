@@ -22,6 +22,11 @@ def remove_test_files():
             path.unlink()
 
 
+def timestamps_equal(first, second):
+    eps = 0.000001
+    return abs(first - second) < eps
+
+
 class ExportPacketsTestCase(TestCase):
 
     def setUp(self):
@@ -47,8 +52,8 @@ class ExportPacketsTestCase(TestCase):
         Ensure that the packet list contains the correct number of packets
         """
         filename = 'testdump'
-        start_timestamp = '1588155523.974957000'
-        end_timestamp = '1588155524.007546000'
+        start_timestamp = '1588259869.856041149'
+        end_timestamp = '1588259869.862443020'
         expected_num_packets = 20
         actual_num_packets = 0
 
@@ -66,22 +71,22 @@ class ExportPacketsTestCase(TestCase):
         """
         filename = 'testdump'
         packet_list = []
-        first_timestamp = '1588155523.764835000'
-        second_timestamp = '1588155523.764843000'
-        third_timestamp = '1588155523.766769000'
-        fourth_timestamp = '1588155523.771269000'
-        last_timestamp = '1588155523.771711000'
+        first_timestamp = '1588259869.969993977'
+        second_timestamp = '1588259869.970000623'
+        third_timestamp = '1588259869.970755235'
+        fourth_timestamp = '1588259869.970759984'
+        last_timestamp = '1588259869.971553914'
 
         output_path = reverse_mapping.export_packets(filename, first_timestamp, last_timestamp)
         for packet in PcapReader(output_path):
             packet_list.append(packet)
 
         # Decimal.compare returns 0 if the two values being compared are considered equivalent
-        self.assertEqual(packet_list[0].time.compare(Decimal(first_timestamp)), 0)
-        self.assertEqual(packet_list[1].time.compare(Decimal(second_timestamp)), 0)
-        self.assertEqual(packet_list[2].time.compare(Decimal(third_timestamp)), 0)
-        self.assertEqual(packet_list[3].time.compare(Decimal(fourth_timestamp)), 0)
-        self.assertEqual(packet_list[4].time.compare(Decimal(last_timestamp)), 0)
+        self.assertTrue(timestamps_equal(Decimal(first_timestamp), packet_list[0].time))
+        self.assertTrue(timestamps_equal(Decimal(second_timestamp), packet_list[1].time))
+        self.assertTrue(timestamps_equal(Decimal(third_timestamp), packet_list[2].time))
+        self.assertTrue(timestamps_equal(Decimal(fourth_timestamp), packet_list[3].time))
+        self.assertTrue(timestamps_equal(Decimal(last_timestamp), packet_list[4].time))
 
     def test_invalid_file(self):
         """
@@ -90,8 +95,8 @@ class ExportPacketsTestCase(TestCase):
         Ensure correct exception is thrown when an invalid file is supplied.
         """
         filename = 'undefined'
-        start_timestamp = '1583398791.536443000'
-        end_timestamp = '1583398792.536443000'
+        start_timestamp = '1588259870.211190166'
+        end_timestamp = '1588259871.211190166'
 
         self.assertRaises(IOError, reverse_mapping.export_packets, filename, start_timestamp, end_timestamp)
 

@@ -36,17 +36,13 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
             # (for comparison purposes)
             packet_timestamp = Decimal(str(packet.time))
 
-            # Decimal Comparison
-            # a < b: -1
-            # a == b: 0
-            # a > b:  1
-            if start_timestamp.compare(packet_timestamp) == 0:
+            if _timestamps_equal(start_timestamp, packet_timestamp):
                 matching_started = True
 
             if matching_started:
                 packet_list.append(packet)
 
-            if end_timestamp.compare(packet_timestamp) <= 0:
+            if _timestamps_equal(end_timestamp, packet_timestamp):
                 break
 
     return packet_list
@@ -115,11 +111,13 @@ def _validate_timestamps(start, end):
     boolean indicating timestamp validity
     """
 
-    # Decimal Comparison
-    # a < b: -1
-    # a == b: 0
-    # a > b:  1
-    return start.compare(0) == 1 and start.compare(end) == -1
+    return end > start > 0
+
+
+# TODO Move to a utils module (compare floats)
+def _timestamps_equal(first, second):
+    eps = 0.000001
+    return abs(first - second) < eps
 
 
 def export_packets(filename, start_timestamp, end_timestamp):
