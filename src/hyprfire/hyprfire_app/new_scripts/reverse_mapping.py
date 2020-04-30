@@ -1,45 +1,34 @@
 from scapy.all import PcapReader, PcapWriter
 from pathlib import Path
 from decimal import Decimal
-
+import os
 
 root_path = Path(__file__).parent.parent.parent
 input_path = Path(root_path / 'pcaps')
 output_path = Path(input_path / 'exported_pcaps')
 
 
-def _collect_packets(filename, timestamp, num_packets):
+def _collect_packets(filename, start_timestamp, end_timestamp):
     """
     collect_packets
 
-    Find a number of packets in a file starting from the packet which matches the timestamp provided
-    Note: Currently very very slow (thanks scapy -_-)
+    Find a number of packets in a pcap file between the two provided timestamps
 
     Parameters
     filename: the file to search
-    timestamp: a unique seconds-based epoch timestamp to identify the starting packet
-    num_packets: the number of packets to collect
+    start_timestamp:
+    end_timestamp:
 
     Return
-    A list of packets of size num_packets, starting from the packet with the matching timestamp
+    A list of all packets from the start_time to the end_time
     """
 
-    count = num_packets
-    start_collecting = False
     packet_list = []
 
-    for packet in PcapReader(str(input_path / filename)):
-        match = timestamp.compare(packet.time) == 0
-
-        if match:
-            start_collecting = True
-
-        if start_collecting:
-            packet_list.append(packet)
-            count = count - 1
-
-            if count <= 0:
-                break
+    # Convert timestamps to "YYYY-MM-DD hh:mm:ss"
+    # If timestamps are the same, add 1s to end timestamp
+    # Use editcap to cut file down to 1s worth of packets
+    # Tshark the new file with exact display filter (including epoch timestamps) to get a pcap of exact match
 
     return packet_list
 
