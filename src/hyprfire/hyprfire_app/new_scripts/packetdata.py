@@ -15,3 +15,9 @@ class PacketData:
         self.len = len
         self.winLen = winLen
         self.flags = flags
+
+    #required for comparing packets in testing
+    def __eq__(self, other):
+        if not isinstance(other, PacketData):
+            return NotImplemented
+        return self.__dict__ == other.__dict__
