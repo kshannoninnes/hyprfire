@@ -3,14 +3,23 @@ File: n2dconverter.py
 Author: Quang Le
 Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
 """
+import operator
 from hyprfire_app.new_scripts.packetdata import PacketData
 from hyprfire_app.new_scripts.dumpfile import Dumpfile
 import hyprfire_app.new_scripts.benfordsAnalysis as ba
 import hyprfire_app.new_scripts.zipfAnalysis as za
 import multiprocessing as mp
 import hyprfire_app.new_scripts.superthreading as st
-from operator import itemgetter
 import queue
+
+
+class CSVData:
+    def __init__(self, timestamp, uvalue, start_epoch, end_epoch, filename):
+        self.timestamp = timestamp
+        self.uvalue = uvalue
+        self.start_epoch = start_epoch
+        self.end_epoch = end_epoch
+        self.filename = filename
 
 
 def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator, filename):
@@ -28,10 +37,11 @@ def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator, filename):
                     intArrTimes = ba.get_interarrival_times(times)
                     benfBucks = ba.get_benfords_buckets(intArrTimes, 1)
                     uValue = ba.get_benford_u_value(benfBucks, 1)
-                    timeVal = int((times[0] + times[len(window) - 1]) / 2)
-                    epochVal = epochs[0]
-                    tups = (timeVal, uValue, epochVal, filename, len(window))  # redundant
-                    outQ.put(tups)  # redundant
+                    timeVal = int((times[0] + times[len(times) - 1]) / 2)
+                    start = epochs[0]
+                    end = epochs[len(epochs)-1]
+                    csv = CSVData(timeVal, uValue, start, end, filename)
+                    outQ.put(csv)  # redundant
                     # print tups
                 else:
                     # intArrTimes = ba.GetInterArrivalTimes(window)
@@ -41,9 +51,10 @@ def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator, filename):
                     benfBucks = ba.get_benfords_buckets(lens, 1)
                     uValue = ba.get_benford_u_value(benfBucks, 1)
                     timeVal = int((times[0] + times[len(times) - 1]) / 2)
-                    epochVal = epochs[0]
-                    tups = (timeVal, uValue, epochVal, filename)
-                    outQ.put(tups)
+                    start = epochs[0]
+                    end = epochs[len(epochs) - 1]
+                    csv = CSVData(timeVal, uValue, start, end, filename)
+                    outQ.put(csv)  # redundant
             else:
                 if Timeo:
                     times = [i[0] for i in window]
@@ -51,10 +62,11 @@ def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator, filename):
                     intArrTimes = ba.get_interarrival_times(times)
                     zipfBucks = za.get_zipf_buckets(intArrTimes)
                     uValue = za.get_zipf_u_value(zipfBucks)
-                    timeVal = int((times[0] + times[len(window) - 1]) / 2)
-                    epochVal = epochs[0]
-                    tups = (timeVal, uValue, epochVal, filename)
-                    outQ.put(tups)
+                    timeVal = int((times[0] + times[len(times) - 1]) / 2)
+                    start = epochs[0]
+                    end = epochs[len(epochs) - 1]
+                    csv = CSVData(timeVal, uValue, start, end, filename)
+                    outQ.put(csv)  # redundant
                 else:
                     # intArrTimes = ba.GetInterArrivalTimes(window)
                     lens = [i[1] for i in window]
@@ -63,9 +75,10 @@ def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator, filename):
                     zipfBucks = za.get_zipf_buckets(lens)
                     uValue = za.get_zipf_u_value(zipfBucks)
                     timeVal = int((times[0] + times[len(times) - 1]) / 2)
-                    epochVal = epochs[0]
-                    tups = (timeVal, uValue, epochVal, filename)
-                    outQ.put(tups)
+                    start = epochs[0]
+                    end = epochs[len(epochs) - 1]
+                    csv = CSVData(timeVal, uValue, start, end, filename)
+                    outQ.put(csv)  # redundant
         except queue.Empty:
             if veruficator.value == 1:
                 break
@@ -119,7 +132,7 @@ def convert(dumpfile, ana_type, winsize, timelen):
             d = [(packetdata.timestamp, packetdata.epochTimestamp) for packetdata in window]
         else:
             d = [(packetdata.timestamp, packetdata.len, packetdata.epochTimestamp) for packetdata in window]
-        print(len(d))
+        #print(len(d))
         inQ.put(d)
 
     # Generating threads
@@ -131,12 +144,12 @@ def convert(dumpfile, ana_type, winsize, timelen):
 
     with veruficator.get_lock():
         veruficator.value = 1
-    outputlist = []
+    csvlist = []
 
     # accumulating...")
     try:
         while True:
-            outputlist.append(outQ.get(block=False))
+            csvlist.append(outQ.get(block=False))
             # print "blop"
     except Exception:
         pass
@@ -146,6 +159,6 @@ def convert(dumpfile, ana_type, winsize, timelen):
     for thread in threadz:
         thread.end()
 
-    # sort outputlist and return to handler
-    outputlist.sort(key=itemgetter(0))
-    return outputlist
+    # sort csvlist and return to handler
+    sorted_list = sorted(csvlist, key=operator.attrgetter("timestamp"))
+    return sorted_list
