@@ -14,17 +14,17 @@ class ScriptProcessorTestCase(TestCase):
     def test_valid_arguments(self):
         """
         This test function will run ScriptProcessor with everything valid.
-        If there is a file inside the ../../temp/ directory named: "dump2941benfedecit.tcpd.n2d_benf_time.csv
+        If there is a file inside the ../../temp/ directory named: "testdump.tcpd.n2d_benf_time.csv
         This test function will return True.
 
-        The test file will be: dump2941benfedit
+        The test file will be: testdump
 
         :return: True if a csv file is then created.
         """
 
-        filename = os.path.abspath('../hyprfire/pcaps/dump2941benfedit')
+        filename = os.path.abspath('../hyprfire/pcaps/testdump')
 
-        result_file = os.path.abspath("../hyprfire/temp/dump2941benfedit.tcpd.n2d_benf_time.csv")
+        result_file = os.path.abspath("../hyprfire/temp/testdump.tcpd.n2d_benf_time.csv")
 
         ch.ScriptProcessor(filename, 'Benford', '1000')
 
@@ -57,7 +57,7 @@ class ScriptProcessorTestCase(TestCase):
             ch.ScriptProcessor(filename, 'Benford', '1000')
 
         except ValueError:
-            print("Value Error Throw works!")
+            print("Value Error Throw works! Invalid filename was caught!")
             answer = True
 
         return answer
@@ -74,7 +74,7 @@ class ScriptProcessorTestCase(TestCase):
         :return: True if test passes, False otherwise
         """
 
-        filename = os.path.abspath('../hyprfire/pcaps/dump2941benfedit')
+        filename = os.path.abspath('../hyprfire/pcaps/testdump')
 
         answer = False
 
@@ -97,7 +97,7 @@ class ScriptProcessorTestCase(TestCase):
 
         :return: True if Test Passes and False otherwise
         """
-        filename = os.path.abspath('../hyprfire/pcaps/dump2941benfedit')
+        filename = os.path.abspath('../hyprfire/pcaps/testdump')
 
         answer = False
 
