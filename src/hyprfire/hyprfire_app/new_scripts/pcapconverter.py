@@ -3,58 +3,49 @@
 # Author: Dean Quaife
 # Last edited: 2020/04/27
 
-from scapy.utils import RawPcapReader
+from scapy.utils import PcapReader
 from scapy.layers.l2 import Ether
 from scapy.layers.inet import IP, TCP, UDP
 from hyprfire_app.new_scripts.packetdata import PacketData
 from hyprfire_app.new_scripts.dumpfile import Dumpfile
 import datetime
 
-filters = [514, 123, 53, 161] #used to filter out non TCP/UDP packets (syslog, NTP, domain, SNMP)
+filters = [514, 123, 53, 161] #used to filter out certain packets (syslog, NTP, domain, SNMP)
 
 #main pcapconverter method; takes in a pcap filename and returns a list of PacketData objects
 def pcapConverter(filename):
     packets = []
 
-    for (pkt_data, pkt_metadata,) in RawPcapReader(filename):
-        ether_pkt = Ether(pkt_data)
-        decimal = pkt_metadata.usec
-        while decimal > 1:
-            decimal/=10
-        epochTimestamp = pkt_metadata.sec + decimal
-        epochDate = datetime.datetime.fromtimestamp(epochTimestamp)
-        timestamp = sinceMidnight(epochDate)
+    for packet in PcapReader(filename):
+        ether_pkt = Ether(packet)
+        epochTimestamp = float(packet.time)
+        timestamp = sinceMidnight(epochTimestamp)
         try:
-            ip_pkt = ether_pkt[IP]
-            tcp_pkt = ip_pkt[TCP]
+            ip_pkt = packet[IP]
+        except IndexError:
+            continue #filter ARP, STP, DHCP and IPv6 packets missing relevant info
+        try:
+            packet = buildTCP(epochTimestamp, timestamp, ip_pkt)
+            packets.append(packet)
+        except IndexError: #packet is UDP, ICMP or VRRP
+            if ip_pkt.proto == 1 or ip_pkt.proto == 112: #filter ICMP and VRRP
+                continue
+            udp_pkt = ip_pkt[UDP]
+            skip = False
+            for port in filters:  # filter UDP packets via list
+                if udp_pkt.sport == port or udp_pkt.dport == port:
+                    skip = True
+            if skip:
+                continue
             ipFrom = ip_pkt.src
             ipTo = ip_pkt.dst
-            portFrom = tcp_pkt.sport
-            portTo = tcp_pkt.dport
-            length = ip_pkt.len - 40
-            winLen = tcp_pkt.window
-            tcpFlags = tcp_pkt.flags
-            flags = flagFormat(tcpFlags)
+            portFrom = udp_pkt.sport
+            portTo = udp_pkt.dport
+            length = ip_pkt.len - 28
+            winLen = "N/A" #no windows in UDP!
+            flags = "0,0,0,0,0,0,1"
             packet = PacketData(epochTimestamp, timestamp, ipFrom, ipTo, portFrom, portTo, length, winLen, flags)
             packets.append(packet)
-        except IndexError:
-            try: #check whether packet is a UDP packet before ignoring it
-                ip_pkt = ether_pkt[IP]
-                udp_pkt = ip_pkt[UDP]
-                for port in filters: #filter packets via list. ARP, ICMP and VRRPv3 packets do not have either [TCP] or [UDP]
-                    if udp_pkt.sport == port or udp_pkt.dport == port:
-                        raise IndexError
-                ipFrom = ip_pkt.src
-                ipTo = ip_pkt.dst
-                portFrom = udp_pkt.sport
-                portTo = udp_pkt.dport
-                length = ip_pkt.len - 28
-                winLen = "N/A" #no windows in UDP!
-                flags = "0,0,0,0,0,0,1"
-                packet = PacketData(epochTimestamp, timestamp, ipFrom, ipTo, portFrom, portTo, length, winLen, flags)
-                packets.append(packet)
-            except IndexError: #filter
-                pass
     return Dumpfile(filename, packets)
 
 #converts TCP flags returned by Scapy into a number format which is how they will be represented in the csv
@@ -78,9 +69,26 @@ def flagFormat(string):
     return flags
 
 #returns number of microseconds since midnight on the day the packet arrived
-def sinceMidnight(date):
+def sinceMidnight(epochTimestamp):
+    date = datetime.datetime.fromtimestamp(epochTimestamp)
     hours = date.hour
     minutes = date.minute + 60 * hours
     seconds = date.second + 60 * minutes
     microseconds = date.microsecond + 1000000 * seconds
     return microseconds
+
+#builds a TCP packet
+def buildTCP(epochTimestamp, timestamp, ip_pkt):
+    tcp_pkt = ip_pkt[TCP]
+    ipFrom = ip_pkt.src
+    ipTo = ip_pkt.dst
+    portFrom = tcp_pkt.sport
+    portTo = tcp_pkt.dport
+    length = ip_pkt.len - 40
+    winLen = tcp_pkt.window
+    tcpFlags = tcp_pkt.flags
+    flags = flagFormat(tcpFlags)
+    return PacketData(epochTimestamp, timestamp, ipFrom, ipTo, portFrom, portTo, length, winLen, flags)
+
+def buildUDP(epochTimestamp, timestamp, ip_pkt):
+    udp_pkt = ip_pkt[UDP]
