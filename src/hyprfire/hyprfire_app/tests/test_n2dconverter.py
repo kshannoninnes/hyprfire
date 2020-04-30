@@ -10,10 +10,11 @@ from hyprfire_app.new_scripts import n2dconverter
 import unittest
 
 
+
 class TestUnit(unittest.TestCase):
 
     def setUp(self):
-        self.pcapfile = "54"
+        self.pcapfile = 'testdump'
         self.pcapdata = pcapConverter(self.pcapfile)
 
     def test_invalid_analysis_value(self):
