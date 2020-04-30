@@ -1,53 +1,56 @@
 # This File here will handle the "anaylze request" from the Django Framework
 # The file must be able to handle the configuration items that have been sent from the analyze request.
 
-
 import os
 from .scripts import plotting as plot
 
 
+def ScriptProcessor(file_name, algorithm_type, windowsize):
+    """
+     ScriptProcessor
+     Compiles all of Stefan Prandl's old scripts to turn a single pcap file into a csv of either benford or zipf
 
-'''
-Function Name: ScriptProcessor
-Description: Compiles all of Stefan's old script to turn a single pcap file into a csv of either benford or zipf
-Input: filepath with the name/extension and configuration item (assumed to be strings)
-Output: Returns a HTTPResponse that will contain the graph from plotting.py to be displayed to the front end.
-'''
+     Parameters
+     filename: the base pcap file (found in the hyprfire/pcaps directory)
+     algorithm_type: whether to use benfords or zipf algorithm
+     windowsize: the window size of the pcap analysis done in NewBasics3.py script
 
-
-def ScriptProcessor(file_name, basicconfig, windowsize):
-
-    path = file_name
+     Returns
+     HTML/JavaScript to display a plotly generated graph based on the data from the pcap
+     """
 
     pcaptoN2D = os.path.abspath("hyprfire_app/old_scripts/PcapToN2DConverter.py")
     newbasics = os.path.abspath("hyprfire_app/old_scripts/NewBasics3.py")
-    print(pcaptoN2D)
 
-    if arguments_valid(path, basicconfig, windowsize):
+    # Checks if arguments being passed through is valid
+    if arguments_valid(file_name, algorithm_type, windowsize):
 
-        os_command = 'bash -c "tcpdump -nnr ' + path + ' >> ' + path + '.tcpd"'
+        # This section is temporary, new scripts will be replacing this messy section
+
+        os_command = 'bash -c "tcpdump -nnr ' + file_name + ' >> ' + file_name + '.tcpd"'
         print(os_command)
         os.system(os_command)
 
-        pcapconvertcommand = 'bash -c "python3 ' + pcaptoN2D + ' ' + path + '.tcpd"'
+        pcapconvertcommand = 'bash -c "python3 ' + pcaptoN2D + ' ' + file_name + '.tcpd"'
         print(pcapconvertcommand)
         os.system(pcapconvertcommand)
 
-        mv_tcpd = 'bash -c "rm ' + path + '.tcpd"'
+        mv_tcpd = 'bash -c "rm ' + file_name + '.tcpd"'
         print(mv_tcpd)
         os.system(mv_tcpd)
 
+        # Checks what type of alrgorithm to use
 
-        if basicconfig == 'Benford':
+        if algorithm_type == 'Benford':
 
-            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + path + '.tcpd.n2d +b +t"'
+            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + file_name + '.tcpd.n2d +b +t"'
             print(newbasiccommand)
             file_type = 'benf_time'
             os.system(newbasiccommand)
 
-        elif basicconfig == 'Zipf':
+        elif algorithm_type == 'Zipf':
 
-            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + path + '.tcpd.n2d +z +t"'
+            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + file_name + '.tcpd.n2d +z +t"'
             print(newbasiccommand)
             file_type = 'zipf_time'
             os.system(newbasiccommand)
@@ -55,15 +58,16 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
         else:
             print("Enter a proper configuration item, please")
 
+        # This is just moving the csv file to a temporary file for now, will be removed when new scripts come in
 
-        mv_n2d = 'bash -c "rm ' + path + '.tcpd.n2d"'
+        mv_n2d = 'bash -c "rm ' + file_name + '.tcpd.n2d"'
         print(mv_n2d)
         os.system(mv_n2d)
 
-        csv_file = path + '.tcpd.n2d' + '_' + file_type + '.csv'
+        csv_file = file_name + '.tcpd.n2d' + '_' + file_type + '.csv'
 
+        # Get the plotly graph to return to the views.py
         response = plot.get_plot(csv_file)
-
 
         temp = os.path.abspath("temp")
         mv_csv = 'bash -c "mv ' + csv_file + ' ' + temp + '"'
@@ -75,19 +79,21 @@ def ScriptProcessor(file_name, basicconfig, windowsize):
         return response
 
     else:
-        print("Error Processing")
+        raise ValueError("Error in Processing Arguments: filenames, algorithm, windowsize")
 
 
-'''
-Function Name: arguments_valid
-Description: This function checks if the configuration items sent from the front end are valid
-Input: filename, configuration item +b/+z and window size (1000/2000)
-Output: returns a boolean
-'''
+def arguments_valid(name, algorithm, size):
+    """
+    Function Name: arguments_valid
+    This function checks if the configuration items sent from the front end are valid
 
+    :param name: the name of the file (path included)
+    :param algorithm: the type of algorithm being used.
+    :param size: the window size for the amount of pcaps to analyze
+    :return: True if all checks passes, False if at least one fails
+    """
 
-def arguments_valid(name, config, size):
-    if check_filename(name) and check_config(config) and check_size(size):
+    if check_filename(name) and check_config(algorithm) and check_size(size):
         check = True
     else:
         check = False
@@ -95,50 +101,50 @@ def arguments_valid(name, config, size):
     return check
 
 
-'''
-Function Name: check_filename
-Description: Checks if a file name exists or if it is a valid file/directory
-Input: a filepath - currently been set to the project's pcaps folder
-Output: A boolean
-'''
-
-
 def check_filename(name):
-    # results = True
+    """
+    Funcion name: check_filename
+    Checks if a file exist or not, throws an exception if it does not exist.
+
+    :param name: the name of the file (including its path)
+    :return: True if file exist, ValueError if file does not exist
+    """
+
     results = os.path.exists(name)
-    # print(results)
+
+    if results == False:
+
+        raise ValueError("Incorrect File name!")
     print(results)
     return results
 
 
-'''
-Function Name: check_config
-Description: Checks the configuration item that has been entered, either if its a benford or zipf
-Input: A character to determine what configuration to use
-Output: A boolean
-'''
+def check_config(algorithm):
+    """
+    Function Name: check_config
+    Checks the algorithm thats been passed through the function,
 
-
-def check_config(config):
+    :param algorithm:
+    :return:
+    """
     results = False
 
-    if config == 'Benford':
+    if algorithm == 'Benford':
         results = True
-    elif config == 'Zipf':
+    elif algorithm == 'Zipf':
         results = True
 
     return results
 
 
-'''
-Function Name: check_size
-Description: Checks if the windows size entered in the configuration is valid
-Input: A string that is able to be type casted to be an integer
-Output: A boolean
-'''
-
-
 def check_size(size):
+    """
+    Function Name: check_size
+    Checks the size of the Window for analysis, currently it is checking if it is either 1000 or 2000, (subject to change)
+
+    :param size: a string that is converted to an integer
+    :return: True if size is either 1000 or 2000, False otherwise
+    """
     int_size = int(size)
     results = False
 
