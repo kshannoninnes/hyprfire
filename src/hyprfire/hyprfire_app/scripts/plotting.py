@@ -5,8 +5,7 @@ import plotly.graph_objects as go
 # Get the x and y locations from the supplied file
 def get_xy(filename, xcol, ycol):
     ret_thing = []
-    file_path = f'csv\\{filename}.csv'
-    with open(file_path) as file:
+    with open(filename) as file:
         for line in file:
             try:
                 lin = line.split(",")
@@ -36,5 +35,5 @@ def plottify(filename, xcol, ycol):
 # Get a plot using the data in the supplied file
 def get_plot(filename):
     plt = plottify(filename, 0, 1)
-    return plot(plt, output_type='div', include_plotlyjs=False)
+    return plot(plt, output_type='div')
 

@@ -21,7 +21,7 @@
 }
 
 .button-panel {
-  height: 25%;
+  height: 35%;
   width: inherit;
   position: absolute;
   bottom: 0;
@@ -34,8 +34,22 @@
   bottom: 0;
 }
 
-/* Style the image inside the centered container, if needed */
-.centered img {
-  position:relative;
+/* put an underline under configuration header for consistency with above */
+.underlinexyz {
+  border-bottom: 1px solid #d3d3d3;
+  padding-bottom: 20px;
 }
 
+#id_window {
+    margin-bottom: 10px;
+    margin-left: 20px;
+}
+
+#id_algorithm {
+    margin-bottom: 10px;
+    margin-left: 35px;
+}
+
+#id_length {
+  display: block;
+}
