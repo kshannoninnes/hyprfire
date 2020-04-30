@@ -14,7 +14,7 @@ def remove_test_files():
 
     Removes all test files created during testing
     """
-    proj_root = Path(__file__).parent.parent
+    proj_root = Path(__file__).parent.parent.parent
     test_dir = proj_root / 'pcaps' / 'exported_pcaps'
 
     for path in test_dir.glob('*'):
