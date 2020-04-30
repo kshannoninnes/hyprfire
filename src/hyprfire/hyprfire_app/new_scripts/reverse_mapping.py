@@ -150,6 +150,9 @@ def export_packets(filename, start_timestamp, end_timestamp):
         output_file = str(output_dir / str(filename + '-filtered.pcap'))
         _write_packets_to_file(output_file, packet_list)
 
+        redundant_file = Path(smaller_file)
+        redundant_file.unlink()
+
         return output_file
     else:
         raise ValueError('Invalid time range: start_timestamp must be after the unix epoch and before end_timestamp')
