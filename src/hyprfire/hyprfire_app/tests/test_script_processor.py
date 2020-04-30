@@ -26,7 +26,7 @@ class ScriptProcessorTestCase(TestCase):
 
         result_file = os.path.abspath("../hyprfire/temp/dump2941benfedit.tcpd.n2d_benf_time.csv")
 
-        # ch.ScriptProcessor(filename, 'Benford', '1000')
+        ch.ScriptProcessor(filename, 'Benford', '1000')
 
         if os.path.exists(result_file):
             print("csv test file found")
@@ -69,8 +69,9 @@ class ScriptProcessorTestCase(TestCase):
         Currently the Script Processor will check if its valid or not and return a ValueError if its invalid
 
         The test file will be: dump2941benfedit
+        The Test passes if a Value Error is caught
 
-        :return: True is test passes, False otherwise
+        :return: True if test passes, False otherwise
         """
 
         filename = os.path.abspath('../hyprfire/pcaps/dump2941benfedit')
@@ -82,6 +83,29 @@ class ScriptProcessorTestCase(TestCase):
 
         except ValueError:
             print("Value Error Throw works for invalid window size")
+            answer = True
+
+        return answer
+
+    def test_invalid_algortihm(self):
+        """
+        This test function will test how the Script Processor will handle invalid algorithm input
+        Currently the Script Processor will check for Benford and Zipf and return a ValueError if it is none of those
+
+        The test file will be: dump2941benfedit
+        Test will pass if a ValueError is caught.
+
+        :return: True if Test Passes and False otherwise
+        """
+        filename = os.path.abspath('../hyprfire/pcaps/dump2941benfedit')
+
+        answer = False
+
+        try:
+            ch.ScriptProcessor(filename, 'Invalid', '2000')
+
+        except ValueError:
+            print("Value Error Throw works for invalid algorithm input")
             answer = True
 
         return answer

@@ -115,7 +115,7 @@ def check_filename(name):
     if results == False:
 
         raise ValueError("Incorrect File name!")
-    print(results)
+
     return results
 
 
