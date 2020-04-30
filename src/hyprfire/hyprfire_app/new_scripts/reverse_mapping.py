@@ -101,35 +101,6 @@ def _write_packets_to_file(path, packets):
         writer.write(packet)
 
 
-def export_packets(filename, start_timestamp, end_timestamp):
-    """
-    export_packets
-
-    Public interface for exporting packets to a file
-
-    Parameters
-    filename: file to export packets from
-    timestamp: a unique seconds-based epoch timestamp to identify the starting packet
-    num_packets: number of packets to export, including the initial packet matching the timestamp
-
-    Return
-    the path to the exported file
-    """
-    dec_start = Decimal(start_timestamp)
-    dec_end = Decimal(end_timestamp)
-
-    if _validate_timestamps(dec_start, dec_end):
-        smaller_file = _slice_with_editcap(filename, dec_start, dec_end)
-        packet_list = _collect_packets(smaller_file, dec_start, dec_end)
-
-        output_file = str(output_dir / str(filename + '-filtered.pcap'))
-        _write_packets_to_file(output_file, packet_list)
-
-        return output_file
-    else:
-        raise ValueError('Invalid time range: start_timestamp must be after the unix epoch and before end_timestamp')
-
-
 def _validate_timestamps(start, end):
     """
     _validate_timestamps
@@ -149,3 +120,36 @@ def _validate_timestamps(start, end):
     # a == b: 0
     # a > b:  1
     return start.compare(0) == 1 and start.compare(end) == -1
+
+
+def export_packets(filename, start_timestamp, end_timestamp):
+    """
+    export_packets
+
+    Public interface for exporting packets to a file
+
+    Parameters
+    filename: file to export packets from
+    timestamp: a unique seconds-based epoch timestamp to identify the starting packet
+    num_packets: number of packets to export, including the initial packet matching the timestamp
+
+    Return
+    the path to the exported file
+
+    Raises
+    ValueError if the timestamps are invalid
+    IOError if there's an issue reading the file
+    """
+    dec_start = Decimal(start_timestamp)
+    dec_end = Decimal(end_timestamp)
+
+    if _validate_timestamps(dec_start, dec_end):
+        smaller_file = _slice_with_editcap(filename, dec_start, dec_end)
+        packet_list = _collect_packets(smaller_file, dec_start, dec_end)
+
+        output_file = str(output_dir / str(filename + '-filtered.pcap'))
+        _write_packets_to_file(output_file, packet_list)
+
+        return output_file
+    else:
+        raise ValueError('Invalid time range: start_timestamp must be after the unix epoch and before end_timestamp')
