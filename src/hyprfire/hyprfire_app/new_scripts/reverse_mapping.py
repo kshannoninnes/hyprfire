@@ -119,12 +119,15 @@ def export_packets(filename, start_timestamp, end_timestamp):
     dec_end = Decimal(end_timestamp)
 
     if _validate_timestamps(dec_start, dec_end):
-        editcap_slice = _slice_with_editcap(filename, dec_start, dec_end)
-        packet_list = _collect_packets(editcap_slice, dec_start, dec_end)
+        smaller_file = _slice_with_editcap(filename, dec_start, dec_end)
+        packet_list = _collect_packets(smaller_file, dec_start, dec_end)
+
         output_file = str(output_dir / str(filename + '-filtered.pcap'))
         _write_packets_to_file(output_file, packet_list)
 
         return output_file
+    else:
+        raise ValueError('Invalid time range: start_timestamp must be after the unix epoch and before end_timestamp')
 
 
 def _validate_timestamps(start, end):
@@ -134,7 +137,8 @@ def _validate_timestamps(start, end):
     A valid timestamp is a decimal greater than 0.0 (the epoch)
 
     Parameters
-    timestamp: the decimal timestamp to validate
+    start: the start decimal timestamp
+    end: the end decimal timestamp
 
     Return
     boolean indicating timestamp validity
@@ -144,7 +148,4 @@ def _validate_timestamps(start, end):
     # a < b: -1
     # a == b: 0
     # a > b:  1
-    if start.compare(0) == 1 and start.compare(end) == -1:
-        return True
-    else:
-        raise ValueError("Timestamp invalid")
+    return start.compare(0) == 1 and start.compare(end) == -1
