@@ -46,10 +46,10 @@ class ExportPacketsTestCase(TestCase):
 
         Ensure that the packet list contains the correct number of packets
         """
-        filename = 'dump16'
-        end_timestamp = '1583398044.833782000'
-        start_timestamp = '1583398044.833377000'
-        expected_num_packets = 16
+        filename = 'testdump'
+        start_timestamp = '1588155523.974957000'
+        end_timestamp = '1588155524.007546000'
+        expected_num_packets = 20
         actual_num_packets = 0
 
         output_path = reverse_mapping.export_packets(filename, start_timestamp, end_timestamp)
