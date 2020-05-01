@@ -40,16 +40,22 @@
   padding-bottom: 20px;
 }
 
+#id_filenames {
+  float: right;
+}
+
 #id_window {
-    margin-bottom: 10px;
-    margin-left: 20px;
+  float: right;
 }
 
 #id_algorithm {
-    margin-bottom: 10px;
-    margin-left: 35px;
+  float: right;
 }
 
-#id_length {
-  display: block;
+#id_analysis {
+  float: right;
+}
+
+.config_opt {
+  font-size: 16px;
 }
