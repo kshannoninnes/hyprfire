@@ -16,16 +16,26 @@
     <!-- This div will take up 12% of the left side of the screen. -->
     <!-- It is used to display a list of clickable filenames sent by the server -->
     <div class="split left" id="left_container">
-        <h3 class="underlinexyz">Configuration</h3>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="config_opt"> {{ form.filenames.label }}:{{ form.filenames }}</div>
-            <div class="config_opt"> {{ form.window.label }}:{{ form.window }}</div>
-            <div class="config_opt"> {{ form.algorithm.label }}:{{ form.algorithm }}</div>
-            <div class="config_opt">{{ form.analysis.label }}: {{ form.analysis }}</div>
-            <input type="submit" class="w3-btn w3-block hf_btn w3-blue" value="Analyse">
-        </form>
+        <h3 class="underlinexyz">Analysis</h3>
+        <div class="form_thing">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="config_opt"> {{ form.filenames.label }}:{{ form.filenames }}</div>
+                <div class="config_opt"> {{ form.window.label }}:{{ form.window }}</div>
+                <div class="config_opt"> {{ form.algorithm.label }}:{{ form.algorithm }}</div>
+                <div class="config_opt">{{ form.analysis.label }}: {{ form.analysis }}</div>
+            </form>
+        </div>
 
+       <h3 class="underlinexyz">Pre-Analysed Files</h3>
+       <div class="list_analysed">
+           <ul class="w3-ul" id="file_list">
+               {% for file in filenames %}
+                   <li> {{ file }} </li>
+               {% endfor %}
+           </ul>
+        <input type="submit" class="w3-btn w3-block hf_btn w3-blue" value="Analyse">
+       </div>
     </div>
 
     <!-- This div takes up the remaining 88% of the right side of the screen. -->

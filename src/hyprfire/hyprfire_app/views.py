@@ -4,7 +4,6 @@ from .forms import AnalyseForm
 import os
 from .CacheHandler import ScriptProcessor
 
-
 monitored_dir = 'pcaps'
 blacklist = [
     '.gitignore'
@@ -19,8 +18,6 @@ def index(request):
             filename = form.cleaned_data['filenames']
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
-            analyse = form.cleaned_data['analyse']
-
             response = ScriptProcessor(filename, algorithm, window)
 
             return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
