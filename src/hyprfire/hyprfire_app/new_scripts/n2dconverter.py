@@ -1,124 +1,201 @@
-"""
+'''
 File: n2dconverter.py
 Author: Quang Le
-Purpose: porting Stefan's NewBasics3.py script to turn n2d data into csv data
-"""
-import benfordsAnalysis as ba
-import zipfAnalysis as za
-import n2dfilereader as n2df
+Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
+'''
+import operator
+from hyprfire_app.new_scripts.packetdata import PacketData
+from hyprfire_app.new_scripts.dumpfile import Dumpfile
+import hyprfire_app.new_scripts.benfordsAnalysis as ba
+import hyprfire_app.new_scripts.zipfAnalysis as za
 import multiprocessing as mp
-import superthreading as st
-from operator import itemgetter
+import hyprfire_app.new_scripts.superthreading as st
 import queue
 
+'''
+Class name: CSVData
+This class is used to store each row of the csv as an object
+'''
+class CSVData:
+    def __init__(self, timestamp, uvalue, start_epoch, end_epoch, filename):
+        self.timestamp = timestamp
+        self.uvalue = uvalue
+        self.start_epoch = start_epoch
+        self.end_epoch = end_epoch
+        self.filename = filename
 
-def ThreadProcess(inQ, outQ, Benf, Timeo, veruficator):
-    # inQ = mastertuple[0]
-    # outQ = mastertuple[1]
+
+'''
+Function: thread_process
+Descriptions: This is where benfords or zipf algorithms are used to calculate the values needed for CSVData
+Input: 
+    in_q: queue of variables from each PacketData object 
+    out_q: queue of CSVData objects 
+    mp_value: multiprocessing value
+    is_benfords: boolean, True if benfords analysis is selected
+    is_time: boolean, True if time analysis is selected
+    filename: name of original pcap file
+'''
+def thread_process(in_q, out_q, is_benfords, is_time, mp_value, filename):
     while True:
         try:
-            window = inQ.get(block=False)
-            if Benf:
-                if Timeo:
-                    # print window
-                    # print "hi"
-                    intArrTimes = ba.GetInterArrivalTimes(window)
-                    benfBucks = ba.get_benfords_buckets(intArrTimes, 1)
-                    uValue = ba.get_benford_u_value(benfBucks, 1)
-                    timeVal = int((window[0] + window[len(window) - 1]) / 2)
-                    tups = (timeVal, uValue)
-                    outQ.put(tups)
-                    # print tups
+            window = in_q.get(block=False)
+            if is_benfords:
+                if is_time:
+                    # calculates using benfords and time analysis
+                    times = [i[0] for i in window]
+                    epochs = [i[1] for i in window]
+                    int_arr_times = ba.get_interarrival_times(times)
+                    benf_bucks = ba.get_benfords_buckets(int_arr_times, 1)
+                    u_value = ba.get_benford_u_value(benf_bucks, 1)
+                    time_val = int((times[0] + times[len(times) - 1]) / 2)
+                    start = epochs[0]
+                    end = epochs[len(epochs) - 1]
+                    csv = CSVData(time_val, u_value, start, end, filename)
+                    out_q.put(csv)
                 else:
-                    # intArrTimes = ba.GetInterArrivalTimes(window)
+                    # calculates using benfords and length analysis
                     lens = [i[1] for i in window]
                     times = [i[0] for i in window]
-                    benfBucks = ba.get_benfords_buckets(lens, 1)
-                    uValue = ba.get_benford_u_value(benfBucks, 1)
-                    timeVal = int((times[0] + times[len(times) - 1]) / 2)
-                    tups = (timeVal, uValue)
-                    outQ.put(tups)
+                    epochs = [i[2] for i in window]
+                    benf_bucks = ba.get_benfords_buckets(lens, 1)
+                    u_value = ba.get_benford_u_value(benf_bucks, 1)
+                    time_val = int((times[0] + times[len(times) - 1]) / 2)
+                    start = epochs[0]
+                    end = epochs[len(epochs) - 1]
+                    csv = CSVData(time_val, u_value, start, end, filename)
+                    out_q.put(csv)
             else:
-                if Timeo:
-                    intArrTimes = ba.GetInterArrivalTimes(window)
-                    zipfBucks = za.get_zipf_buckets(intArrTimes)
-                    uValue = za.get_zipf_u_value(zipfBucks)
-                    timeVal = int((window[0] + window[len(window) - 1]) / 2)
-                    tups = (timeVal, uValue)
-                    outQ.put(tups)
+                if is_time:
+                    # calculates using zipf and time analysis
+                    times = [i[0] for i in window]
+                    epochs = [i[1] for i in window]
+                    int_arr_times = ba.get_interarrival_times(times)
+                    zipf_bucks = za.get_zipf_buckets(int_arr_times)
+                    u_value = za.get_zipf_u_value(zipf_bucks)
+                    time_val = int((times[0] + times[len(times) - 1]) / 2)
+                    start = epochs[0]
+                    end = epochs[len(epochs) - 1]
+                    csv = CSVData(time_val, u_value, start, end, filename)
+                    out_q.put(csv)
                 else:
-                    # intArrTimes = ba.GetInterArrivalTimes(window)
+                    # calculates using zipf and length analysis
                     lens = [i[1] for i in window]
                     times = [i[0] for i in window]
-                    zipfBucks = za.get_zipf_buckets(lens)
-                    uValue = za.get_zipf_u_value(zipfBucks)
-                    timeVal = int((times[0] + times[len(times) - 1]) / 2)
-                    tups = (timeVal, uValue)
-                    outQ.put(tups)
+                    epochs = [i[2] for i in window]
+                    zipf_bucks = za.get_zipf_buckets(lens)
+                    u_value = za.get_zipf_u_value(zipf_bucks)
+                    time_val = int((times[0] + times[len(times) - 1]) / 2)
+                    start = epochs[0]
+                    end = epochs[len(epochs) - 1]
+                    csv = CSVData(time_val, u_value, start, end, filename)
+                    out_q.put(csv)
         except queue.Empty:
-            if veruficator.value == 1:
+            if mp_value.value == 1:
                 break
             pass
-    # time.sleep(10)
 
 
-# Currently converts n2d file instead of n2d data as format of data is not known yet
-def convert(n2ddata, anaType, winsize, timelen):
-    veruficator = mp.Value('i', 0)
+'''
+Function: get_packets_window
+Description: return a list of PacketData objects within a specific window size
+'''
+def get_packets_window(packets, winsize):
+    packets_win = []
+    counter = 0
+    for packet in packets:
+        try:
+            packets_win.append(packet)
+            counter += 1
+            if counter == winsize:
+                yield packets_win
+                packets_win = []
+                counter = 0
+        except LookupError:
+            print("Index Error Exception Raised, list index out of range")
 
-    if anaType == 'b':
-        Benf = True
+
+'''
+Function: convert_to_csv
+Description: Takes in a list of PacketData objects and the configuration options, runs through the selected algorithms 
+using multithreading and puts the results into CSVData objects, then it returns a sorted list of those objects 
+Inputs:
+    dumpfile: Dumpfile object which contains a list of PacketData objects and the filename
+    ana_type: the type of analysis selected by the user; 'b' for benfords or 'z' for zipf
+    winsize: the window size selected by the user
+    timelen: another type of analysis selected by the user; 't' for time or 'l' for length 
+Output:
+    sorted_list: a sorted list of CSVData objects
+'''
+def convert_to_csv(dumpfile, ana_type, winsize, timelen):
+    # Checks the arguments passed are valid
+    if ana_type == 'b':
+        is_benfords = True
+    elif ana_type == 'z':
+        is_benfords = False
     else:
-        Benf = False
+        raise ValueError(ana_type)
 
     if timelen == 't':
-        Timeo = True
+        is_time = True
+    elif timelen == 'l':
+        is_time = False
     else:
-        Timeo = False
+        raise ValueError(timelen)
 
-    windowsize = winsize
-    filereader = n2df.FileReader(n2ddata, windowsize)
+    if isinstance(dumpfile, Dumpfile):
+        filename = dumpfile.filename
+        packets = dumpfile.packets
+    else:
+        raise TypeError
+
+    if winsize < 1:
+        raise ValueError
+
+    mp_value = mp.Value('i', 0)
     cores = mp.cpu_count()
-
     if cores > 8:
         cores = 8
 
-    inQ = mp.Queue()
-    outQ = mp.Queue()
-    threadz = []
+    in_q = mp.Queue()
+    out_q = mp.Queue()
+    thread_list = []
+
     # Generating threads
     for i in range(0, cores):
-        threadz.append(st.threadWorker(ThreadProcess))
-    qsender = (inQ, outQ, Benf, Timeo, veruficator)
-    for thread in threadz:
-        thread.run(qsender)
-    # Now loading data
-    for window in filereader.Get():
+        thread_list.append(st.ThreadWorker(thread_process))
+    q_sender = (in_q, out_q, is_benfords, is_time, mp_value, filename)
+    for thread in thread_list:
+        thread.run(q_sender)
+
+    # Loads windowsize of packet data into the queue for processing
+    for window in get_packets_window(packets, winsize):
         d = []
-        if Timeo=True:
-            d = [int(x[1]) for x in window]
+        if is_time:
+            d = [(packetdata.timestamp, packetdata.epochTimestamp) for packetdata in window]
         else:
-            d = [(int(x[1]), int(x[6])) for x in window]
-        # print len(d)
-        inQ.put(d)
+            d = [(packetdata.timestamp, packetdata.len, packetdata.epochTimestamp) for packetdata in window]
+        # print(len(d))
+        in_q.put(d)
 
-    with veruficator.get_lock():
-        veruficator.value = 1
-    outputlist = []
+    with mp_value.get_lock():
+        mp_value.value = 1
+    csv_list = []
 
-    # accumulating...")
+    # Accumulates the CSVData objects and place them into a list
     try:
         while True:
-            outputlist.append(outQ.get(block=False))
+            csv_list.append(out_q.get(block=False))
             # print "blop"
     except Exception:
         pass
-    # starting thread kill")
-    inQ.cancel_join_thread()
-    outQ.cancel_join_thread()
-    for thread in threadz:
+
+    # Starts thread kill
+    in_q.cancel_join_thread()
+    out_q.cancel_join_thread()
+    for thread in thread_list:
         thread.end()
 
-    # sort outputlist and return to handler
-    outputlist.sort(key=itemgetter(0))
-    return outputlist
+    # Sort csv_list and return to handler
+    sorted_list = sorted(csv_list, key=operator.attrgetter("timestamp"))
+    return sorted_list
