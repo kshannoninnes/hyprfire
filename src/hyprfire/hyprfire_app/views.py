@@ -18,11 +18,7 @@ def index(request):
             filename = form.cleaned_data['filenames']
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
-<<<<<<< HEAD
-=======
-            # analyse = form.cleaned_data['analyse']
 
->>>>>>> 15d6296ede89895927555245fe2c2d5aad9a5b2e
             response = ScriptProcessor(filename, algorithm, window)
 
             return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
