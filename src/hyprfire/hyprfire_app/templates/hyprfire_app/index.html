@@ -10,28 +10,44 @@
     <link rel="stylesheet" href="{% static 'hyprfire_app/page-style.css' %}">
     <link rel="stylesheet" href="{% static 'hyprfire_app/card-style.css' %}">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="{% static 'hyprfire_app/main.js' %}"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body>
     <!-- This div will take up 12% of the left side of the screen. -->
-    <!-- It is used to display a list of clickablefilenames sent by the server -->
+    <!-- It is used to display a list of clickable filenames sent by the server -->
     <div class="split left" id="left_container">
-        <ul class="w3-ul" id="file_list">
-        <li><h3>Files</h3></li>
-        {% for file in object_list %}
-            <li class="w3-hover-amber" onclick="load_graph('{{ file }}')"> {{ file }} </li>
-        {% endfor %}
-        </ul>
+        <h3 class="underlinexyz">Analysis</h3>
+        <div class="form_thing">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="config_opt"> {{ form.filenames.label }}:{{ form.filenames }}</div>
+                <div class="config_opt"> {{ form.window.label }}:{{ form.window }}</div>
+                <div class="config_opt"> {{ form.algorithm.label }}:{{ form.algorithm }}</div>
+                <div class="config_opt">{{ form.analysis.label }}: {{ form.analysis }}</div>
+                <input type="submit" class="w3-btn w3-block hf_btn w3-blue" value="Analyse">
+            </form>
+        </div>
+
+       <h3 class="underlinexyz">Pre-Analysed Files</h3>
+       <div class="list_analysed">
+           <ul class="w3-ul" id="file_list">
+               {% for file in filenames %}
+                   <li> {{ file }} </li>
+               {% endfor %}
+           </ul>
+       </div>
     </div>
 
     <!-- This div takes up the remaining 88% of the right side of the screen. -->
-    <!-- It will be used to show everything else, such as graphs, or configuration options -->
-    <div class="split right centered" id="right_container">
-
+    <!-- It will be used to show a graph and the raw data under the graph -->
+    <div class="split right" id="right_container">
+        {{ graph|safe }}
     </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="{% static 'hyprfire_app/main.js' %}"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 
 </html>

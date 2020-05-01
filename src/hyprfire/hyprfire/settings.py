@@ -120,3 +120,61 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# DataFlair #Logging Information
+LOGGING = {
+    'version': 1,
+    # disable logging; tell Django to do not disable loggers. By default, Django uses some of its own loggers.
+    'disable_existing_loggers': False,
+
+    # Loggers ####################################################################
+    'loggers': {
+        #one logger so all messages go through here
+        'django': {
+            # attach django logger with 'file' and 'console' handler
+            'handlers': ['file', 'console', 'verboseFile'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'propagate': True,
+        },
+        # possible django.request, django.server, django.template, django.db.backends
+    },
+
+    # Handlers
+    # MailHandlers and AdminEmailHandlers are possible options but over-kill for our application.
+    'handlers': {
+        # 'file' handler - logs to  "warning.log" file with basic detail, only writing warning, error, critical messages
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': './logs/warning.log',
+            'formatter': 'basicFormat',
+        },
+        # 'console' handler - logs to the console with basic information, only about errors and critical messages
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'ERROR',
+            'formatter': 'basicFormat',
+        },
+        # 'verboseFile' handler - logs to "verboseDebug.log" file with most details
+        'verboseFile': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': './logs/verboseDebug.log',
+            'formatter': 'verboseFormat',
+        }
+    },
+    'formatters': {
+        'basicFormat': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'verboseFormat': {
+            'format': '{levelname} {asctime} {module} {lineno} {process} {processName} {thread} {threadName} {message}',
+            'style': '{',
+        }
+    }
+    # after modules are finalised, add the following to start of all modules
+    # import logging
+    #
+    # log = logging.getLogger(__name__)
+}
