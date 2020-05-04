@@ -2,6 +2,7 @@ from pathlib import Path
 from decimal import Decimal
 from datetime import datetime, timedelta
 from scapy.all import PcapReader, PcapWriter
+from hyprfire_app.utils.misc import _floats_equal
 import subprocess
 
 # Constants
@@ -36,13 +37,13 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
             # (for comparison purposes)
             packet_timestamp = Decimal(str(packet.time))
 
-            if _timestamps_equal(start_timestamp, packet_timestamp):
+            if _floats_equal(start_timestamp, packet_timestamp):
                 matching_started = True
 
             if matching_started:
                 packet_list.append(packet)
 
-            if _timestamps_equal(end_timestamp, packet_timestamp):
+            if _floats_equal(end_timestamp, packet_timestamp):
                 break
 
     return packet_list
@@ -112,12 +113,6 @@ def _validate_timestamps(start, end):
     """
 
     return end > start > 0
-
-
-# TODO Move to a utils module (compare floats)
-def _timestamps_equal(first, second):
-    eps = 0.000001
-    return abs(first - second) < eps
 
 
 def export_packets(filename, start_timestamp, end_timestamp):
