@@ -49,6 +49,7 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
     return packet_list
 
 
+# TODO Move path stuff out to base function
 def _slice_with_editcap(filename, start, end):
     """
     _slice_with_editcap
