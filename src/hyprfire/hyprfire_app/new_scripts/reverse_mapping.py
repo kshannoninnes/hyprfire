@@ -2,13 +2,8 @@ from pathlib import Path
 from decimal import Decimal
 from datetime import datetime, timedelta
 from scapy.all import PcapReader, PcapWriter
-from hyprfire_app.utils.misc import _floats_equal
+from hyprfire_app.utils.misc import floats_equal, PCAP_DIR, EXPORTED_PCAP_DIR
 import subprocess
-
-# Constants
-root_dir = Path(__file__).parent.parent.parent
-input_dir = Path(root_dir / 'pcaps')
-output_dir = Path(input_dir / 'exported_pcaps')
 
 
 def _collect_packets(filename, start_timestamp, end_timestamp):
@@ -37,13 +32,13 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
             # (for comparison purposes)
             packet_timestamp = Decimal(str(packet.time))
 
-            if _floats_equal(start_timestamp, packet_timestamp):
+            if floats_equal(start_timestamp, packet_timestamp):
                 matching_started = True
 
             if matching_started:
                 packet_list.append(packet)
 
-            if _floats_equal(end_timestamp, packet_timestamp):
+            if floats_equal(end_timestamp, packet_timestamp):
                 break
 
     return packet_list
@@ -74,8 +69,8 @@ def _slice_with_editcap(filename, start, end):
     if abs(start - end) < 1:
         ec_end += timedelta(seconds=1)
 
-    ec_output_file = output_dir / f'{filename}-editcapped.pcap'
-    input_file = input_dir / filename
+    ec_output_file = EXPORTED_PCAP_DIR / f'{filename}-editcapped.pcap'
+    input_file = PCAP_DIR / filename
     editcap_command = f'editcap -A "{ec_start}" -B "{ec_end}" "{input_file}" "{ec_output_file}"'
 
     subprocess.call(editcap_command)
@@ -141,7 +136,7 @@ def export_packets(filename, start_timestamp, end_timestamp):
         smaller_file = _slice_with_editcap(filename, dec_start, dec_end)
         packet_list = _collect_packets(smaller_file, dec_start, dec_end)
 
-        output_file = str(output_dir / str(filename + '-filtered.pcap'))
+        output_file = str(EXPORTED_PCAP_DIR / str(filename + '-filtered.pcap'))
         _write_packets_to_file(output_file, packet_list)
 
         redundant_file = Path(smaller_file)
