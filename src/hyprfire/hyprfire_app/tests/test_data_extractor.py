@@ -38,5 +38,7 @@ class GetDataTestCase(TestCase):
         remove_test_files()
 
     def test_correct_protocol(self):
-        pcap_data = get_data('testdump')
-        input()
+        pcap_data = get_data(Path(__file__).parent.parent.parent / 'pcaps' / 'testdump')
+        for packet in pcap_data:
+            if packet['category'] == 'OTHER':
+                input()

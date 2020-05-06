@@ -1,54 +1,78 @@
 from scapy.all import PcapReader
-from pathlib import Path
+from scapy.layers.inet import TCP, UDP, IP
 from socket import getservbyport
 
-from scapy.layers.inet import TCP, IP
-
-root_dir = Path(__file__).parent.parent.parent
-input_dir = Path(root_dir / 'pcaps')
-output_dir = Path(input_dir / 'exported_pcaps')
+from hyprfire_app.utils.misc import PCAP_DIR, EXPORTED_PCAP_DIR
 
 
 def get_data(filename):
     packet_data_list = []
+    count = 0
 
-    with PcapReader(str(input_dir / filename)) as reader:
+    with PcapReader(str(PCAP_DIR / filename)) as reader:
         for packet in reader:
+            count += 1
             packet_data_list.append(_get_protocol(packet))
 
     return packet_data_list
 
 
 def _get_protocol(packet):
-    # Set variables to the same default value
     packet_display_data = {
-        'protocol': 'N/A',
-        'src_ip': 'N/A',
-        'dst_ip': 'N/A',
-        'src_port': 'N/A',
-        'dst_port': 'N/A',
-        'src_port_name': 'N/A',
-        'dst_port_name': 'N/A'
+        'timestamp': _get_timestamp(packet),
+        'category': _get_type(packet),
+        'ip_data': _get_ip_data(packet),
+        'transport_data': _get_transport_data(packet)
     }
-
-    if IP in packet:
-        packet_display_data['protocol'] = packet[IP].proto
-        packet_display_data['src_ip'] = packet[IP].src
-        packet_display_data['dst_ip'] = packet[IP].dst
-
-    if TCP in packet:
-        packet_display_data['src_port'] = packet[TCP].sport
-        packet_display_data['dst_port'] = packet[TCP].dport
-        packet_display_data['src_port_name'] = _get_port_name(packet_display_data['src_port'])
-        packet_display_data['dst_port_name'] = _get_port_name(packet_display_data['dst_port'])
 
     return packet_display_data
 
 
-def _get_port_name(port_num):
+def _get_timestamp(packet):
+    return str(packet.time)
+
+
+def _get_type(packet):
+    category = 'OTHER'
+    if IP in packet:
+        proto_num = packet[IP].proto
+        category = packet[IP].fieldtype['proto'].i2s[proto_num]
+
+    return category.upper()
+
+
+def _get_ip_data(packet):
+
+    ip_data = {
+        'src': 'N/A',
+        'dst': 'N/A'
+    }
+
+    if IP in packet:
+        ip_data['src'] = packet[IP].src
+        ip_data['dst'] = packet[IP].dst
+
+    return ip_data
+
+
+def _get_transport_data(packet):
+
+    transport_data = {
+        'src_port': 'N/A',
+        'dst_port': 'N/A'
+    }
+
+    if TCP in packet or UDP in packet:
+        transport_data['src_port'] = _resolve_port(packet.sport)
+        transport_data['dst_port'] = _resolve_port(packet.dport)
+
+    return transport_data
+
+
+def _resolve_port(port_num):
     try:
-        port_name = getservbyport(port_num)
+        port_name = f'{port_num} ({getservbyport(port_num)})'
     except OSError:
-        port_name = 'N/A'
+        port_name = str(port_num)
 
     return port_name
