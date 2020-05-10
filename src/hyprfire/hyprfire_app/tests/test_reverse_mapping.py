@@ -3,23 +3,9 @@ from hyprfire_app.new_scripts import reverse_mapping
 
 from decimal import Decimal
 from scapy.all import PcapReader
-from pathlib import Path
+from .testing_utils import remove_test_files, TEST_FILE
 
 # Create your tests here.
-
-
-def remove_test_files():
-    """
-    remove_test_files
-
-    Removes all test files created during testing
-    """
-    proj_root = Path(__file__).parent.parent.parent
-    test_dir = proj_root / 'pcaps' / 'exported_pcaps'
-
-    for path in test_dir.glob('*'):
-        if path.is_file():
-            path.unlink()
 
 
 def timestamps_equal(first, second):
@@ -51,13 +37,12 @@ class ExportPacketsTestCase(TestCase):
 
         Ensure that the packet list contains the correct number of packets
         """
-        filename = 'testdump'
         start_timestamp = '1588259869.856041149'
         end_timestamp = '1588259869.862443020'
         expected_num_packets = 20
         actual_num_packets = 0
 
-        output_path = reverse_mapping.export_packets(filename, start_timestamp, end_timestamp)
+        output_path = reverse_mapping.export_packets(TEST_FILE, start_timestamp, end_timestamp)
         for _ in PcapReader(output_path):
             actual_num_packets += 1
 
@@ -69,7 +54,6 @@ class ExportPacketsTestCase(TestCase):
 
         Ensure that the packet list contains the correct packets
         """
-        filename = 'testdump'
         packet_list = []
         first_timestamp = '1588259869.969993977'
         second_timestamp = '1588259869.970000623'
@@ -77,7 +61,7 @@ class ExportPacketsTestCase(TestCase):
         fourth_timestamp = '1588259869.970759984'
         last_timestamp = '1588259869.971553914'
 
-        output_path = reverse_mapping.export_packets(filename, first_timestamp, last_timestamp)
+        output_path = reverse_mapping.export_packets(TEST_FILE, first_timestamp, last_timestamp)
         for packet in PcapReader(output_path):
             packet_list.append(packet)
 
@@ -106,8 +90,7 @@ class ExportPacketsTestCase(TestCase):
 
         Ensure correct exception is thrown when an invalid timestamp is supplied
         """
-        filename = 'testdump'
         start_timestamp = '-1'
-        end_timestamp = 5
+        end_timestamp = 'infinity'
 
-        self.assertRaises(ValueError, reverse_mapping.export_packets, filename, start_timestamp, end_timestamp)
+        self.assertRaises(ValueError, reverse_mapping.export_packets, TEST_FILE, start_timestamp, end_timestamp)
