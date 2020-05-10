@@ -6,21 +6,17 @@ from hyprfire_app.utils.testing import remove_test_files, TEST_FILE
 
 
 class GetDataTestCase(TestCase):
+    scapy_list = PcapReader(TEST_FILE).read_all()
 
+    """
+    setUp & tearDown
+
+    Ensure that any non-relevant test files are removed from the test directories before and after running tests
+    """
     def setUp(self):
-        """
-        setUp
-
-        Ensure any pre-test case work is done before moving on to a new test case
-        """
         remove_test_files()
 
     def tearDown(self):
-        """
-        tearDown
-
-        Ensure any post-test case work is done before moving on to a new test case
-        """
         remove_test_files()
 
     def test_correctly_sized_list(self):
@@ -29,12 +25,9 @@ class GetDataTestCase(TestCase):
 
         Ensure the list returned from get_packet_data has the same number of packets as the original pcap file
         """
+        pcap_data = get_packet_data(TEST_FILE)
 
-        with PcapReader(TEST_FILE) as reader:
-            pcap_data = get_packet_data(TEST_FILE)
-            test_file_num_packets = len(reader.read_all())
-
-            self.assertEqual(len(pcap_data), test_file_num_packets)
+        self.assertEqual(len(pcap_data), len(self.scapy_list))
 
     def test_compare_random_packet(self):
         """
@@ -46,9 +39,7 @@ class GetDataTestCase(TestCase):
         module_list = get_packet_data(TEST_FILE)
         packet_num = randint(0, len(module_list) - 1)
 
-        with PcapReader(TEST_FILE) as reader:
-            scapy_list = reader.read_all()
-            scapy_packet_ts = str(scapy_list[packet_num].time)
-            module_packet_ts = module_list[packet_num]['timestamp']
+        scapy_packet_ts = str(self.scapy_list[packet_num].time)
+        module_packet_ts = module_list[packet_num]['timestamp']
 
-            self.assertEqual(scapy_packet_ts, module_packet_ts)
+        self.assertEqual(scapy_packet_ts, module_packet_ts)
