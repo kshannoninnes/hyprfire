@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from .forms import AnalyseForm
-import os
+from pathlib import Path
 from .CacheHandler import ScriptProcessor
 
 monitored_dir = 'pcaps'
@@ -30,11 +30,11 @@ def index(request):
 
 
 def get_filenames():
-    file_list = os.listdir(monitored_dir)
+    file_list = Path(monitored_dir).glob('*')
     filenames = []
-    for file in file_list:
-        name = file.title().lower()
-        if name not in blacklist:
-            filenames.append(os.path.splitext(name)[0])
+    for path in file_list:
+        name = path.stem.lower()
+        if path.is_file() and name not in blacklist:
+            filenames.append(name)
 
     return filenames
