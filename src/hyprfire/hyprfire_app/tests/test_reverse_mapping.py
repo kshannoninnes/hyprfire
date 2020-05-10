@@ -3,7 +3,7 @@ from hyprfire_app.new_scripts import reverse_mapping
 
 from decimal import Decimal
 from scapy.all import PcapReader
-from .testing_utils import remove_test_files, TEST_FILE
+from hyprfire_app.utils.testing import remove_test_files, TEST_FILE
 
 # Create your tests here.
 
