@@ -2,37 +2,64 @@ from scapy.all import PcapReader
 from scapy.layers.inet import TCP, UDP, IP
 from socket import getservbyport
 
-from hyprfire_app.utils.misc import PCAP_DIR, EXPORTED_PCAP_DIR
+UNKNOWN = 'N/A'
 
 
-def get_data(filename):
+def get_packet_data(file_path):
+    """
+    get_packet_data
+
+    Collect specific data on all packets in a pcap file
+
+    Parameters
+    file_path: full path to a pcap file
+
+    Return
+    A list of dictionaries containing each packet's timestamp, category, and source/destination ip addresses and ports
+    """
     packet_data_list = []
-    count = 0
 
-    with PcapReader(str(PCAP_DIR / filename)) as reader:
+    with PcapReader(file_path) as reader:
         for packet in reader:
-            count += 1
-            packet_data_list.append(_get_protocol(packet))
+            packet_data = {
+                'timestamp': _get_timestamp(packet),
+                'category': _get_category(packet),
+                'ip_data': _get_ip_data(packet),
+                'transport_data': _get_transport_data(packet)
+            }
+
+            packet_data_list.append(packet_data)
 
     return packet_data_list
 
 
-def _get_protocol(packet):
-    packet_display_data = {
-        'timestamp': _get_timestamp(packet),
-        'category': _get_type(packet),
-        'ip_data': _get_ip_data(packet),
-        'transport_data': _get_transport_data(packet)
-    }
-
-    return packet_display_data
-
-
 def _get_timestamp(packet):
+    """
+    _get_timestamp(packet)
+
+    Extract the epoch timestamp from a packet
+
+    Parameters
+    packet: the packet to return a timestamp for
+
+    Return
+    A string representation of the epoch timestamp for the packet
+    """
     return str(packet.time)
 
 
-def _get_type(packet):
+def _get_category(packet):
+    """
+    _get_category
+
+    Extract the category of a packet
+
+    Parameters
+    packet: the packet to return a category for
+
+    Return
+    A string representation of the packet's category
+    """
     category = 'OTHER'
     if IP in packet:
         proto_num = packet[IP].proto
@@ -42,10 +69,20 @@ def _get_type(packet):
 
 
 def _get_ip_data(packet):
+    """
+    _get_ip_data
 
+    Get the source and destination ip addresses for a packet
+
+    Parameters
+    packet: the packet to return the ip addresses for
+
+    Return
+    A dictionary containing the source and destination ip addresses
+    """
     ip_data = {
-        'src': 'N/A',
-        'dst': 'N/A'
+        'src': UNKNOWN,
+        'dst': UNKNOWN
     }
 
     if IP in packet:
@@ -56,10 +93,20 @@ def _get_ip_data(packet):
 
 
 def _get_transport_data(packet):
+    """
+    _get_transport_data
 
+    Get the source and destination ports for a packet
+
+    Parameters
+    packet: the packet to return the ports for
+
+    Return
+    A dictionary containing the source and destination ports
+    """
     transport_data = {
-        'src_port': 'N/A',
-        'dst_port': 'N/A'
+        'src_port': UNKNOWN,
+        'dst_port': UNKNOWN
     }
 
     if TCP in packet or UDP in packet:
@@ -70,9 +117,26 @@ def _get_transport_data(packet):
 
 
 def _resolve_port(port_num):
+    """
+    _resolve_port
+
+    Resolve a port number to a name, if possible.
+
+    Parameters
+    port_num: an integer representing a port number
+
+    Return
+    A string representation of the port number with the associated port name.
+
+    Note: getservbyport raises an OSError if the port number doesn't have a
+    corresponding port name in the sockets library. Unfortunately, this results
+    in having to use a try/except block as a form of "execution flow". This is
+    really messy, but there's not much I can do to fix this as long as I use
+    this function.
+    """
     try:
         port_name = f'{port_num} ({getservbyport(port_num)})'
     except OSError:
-        port_name = str(port_num)
+        port_name = f'{port_num} ({UNKNOWN})'
 
     return port_name
