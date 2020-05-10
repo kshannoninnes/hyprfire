@@ -1,13 +1,13 @@
 '''
-File: n2dconverter.py
+File: packetdata_converter.py
 Author: Quang Le
 Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
 '''
 import operator
 from hyprfire_app.new_scripts.packetdata import PacketData
 from hyprfire_app.new_scripts.dumpfile import Dumpfile
-import hyprfire_app.new_scripts.benfordsAnalysis as ba
-import hyprfire_app.new_scripts.zipfAnalysis as za
+import hyprfire_app.new_scripts.benfords_analysis as ba
+import hyprfire_app.new_scripts.zipf_analysis as za
 import multiprocessing as mp
 import hyprfire_app.new_scripts.superthreading as st
 import queue
