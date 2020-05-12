@@ -1,8 +1,13 @@
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 
 from .forms import AnalyseForm
 from pathlib import Path
 from .CacheHandler import ScriptProcessor
+
+from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
+from hyprfire.settings import BASE_DIR
+import json
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -27,6 +32,20 @@ def index(request):
         form = AnalyseForm()
 
     return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames})
+
+
+def download_pcap(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        file_path = Path(BASE_DIR) / 'pcaps' / data['file']
+
+        # Add timestamp validation to below function, then try/catch block with appropriate HttpResponse
+        output_path = packet_range_exporter.export_packets_in_range(str(file_path), data['start'], data['end'])
+        file = open(output_path, 'rb')
+
+        return FileResponse(file)
+    else:
+        return HttpResponse(status=405)
 
 
 def get_filenames():
