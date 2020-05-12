@@ -1,3 +1,5 @@
+from json.decoder import JSONDecodeError
+
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 
@@ -9,7 +11,7 @@ from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 from hyprfire.settings import BASE_DIR
 import json
 
-from hyprfire_app.new_scripts.exceptions import TimestampError, PacketsNotFoundError
+from hyprfire_app.new_scripts.exceptions import PacketRangeExportError
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -42,29 +44,34 @@ def download_pcap_snippet(request):
         return HttpResponse(status=405)
 
     try:
-        data = json.loads(request.body)
-    except json.decoder.JSONDecodeError:
-        return HttpResponse(status=400, reason='Could not decode JSON.')
-
-    if len(data) != 3:
-        return HttpResponse(status=400, reason='Invalid parameters.')
-
-    try:
-        file_path = Path(BASE_DIR) / 'pcaps' / data['file']
+        data = load_json(request.body)
+        file_path = Path(BASE_DIR) / 'pcaps' / data['filename']
         output_path = packet_range_exporter.export_packets_in_range(str(file_path), data['start'], data['end'])
         file = open(output_path, 'rb')
 
         return FileResponse(file)
 
-    except FileNotFoundError:
+    # ESSENTIAL: Log the errors to make sure problems are traceable
+    except PacketRangeExportError as e:
+        return HttpResponse(status=400, reason=e)
+    except ValueError as e:
+        return HttpResponse(status=400, reason=e)
+    except FileNotFoundError as e:
         return HttpResponse(status=404, reason='File Not Found.')
-    except TimestampError:
-        return HttpResponse(status=400, reason='Invalid timestamp.')
-    except PacketsNotFoundError:
-        return HttpResponse(status=400, reason='No packets found in range.')
-    except Exception:
-        # ESSENTIAL: Log the error to make sure problems are traceable
+    except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
+
+
+def load_json(request_body):
+    try:
+        data = json.loads(request_body)
+    except JSONDecodeError:
+        raise ValueError('Could not decode JSON.')
+
+    if len(data) != 3:
+        raise ValueError('Invalid parameters.')
+
+    return data
 
 
 def get_filenames():

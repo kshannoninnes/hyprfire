@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from scapy.all import PcapReader, PcapWriter
 from hyprfire_app.utils.misc import floats_equal, EXPORTED_PCAP_DIR
-from hyprfire_app.new_scripts.exceptions import TimestampError, PacketsNotFoundError
+from hyprfire_app.new_scripts.exceptions import PacketRangeExportError
 import subprocess
 
 
@@ -31,11 +31,14 @@ def export_packets_in_range(file_path, start_timestamp, end_timestamp):
     if not path.is_file():
         raise FileNotFoundError()
 
+    if not _validate_timestamps(start_timestamp, end_timestamp):
+        raise PacketRangeExportError('Invalid timestamp range')
+
     try:
         start_timestamp = Decimal(start_timestamp)
         end_timestamp = Decimal(end_timestamp)
     except InvalidOperation:
-        raise TimestampError('Invalid timestamp')
+        raise PacketRangeExportError('Invalid timestamp format')
 
     filename = path.stem
 
@@ -70,22 +73,19 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
     packet_list = []
     match_found = False
 
-    if _validate_timestamps(start_timestamp, end_timestamp):
-        with PcapReader(filename) as reader:
-            for packet in reader:
-                if floats_equal(start_timestamp, packet.time):
-                    match_found = True
-                if match_found:
-                    packet_list.append(packet)
-                if floats_equal(end_timestamp, packet.time):
-                    break
+    with PcapReader(filename) as reader:
+        for packet in reader:
+            if floats_equal(start_timestamp, packet.time):
+                match_found = True
+            if match_found:
+                packet_list.append(packet)
+            if floats_equal(end_timestamp, packet.time):
+                break
 
-            if len(packet_list) == 0:
-                raise PacketsNotFoundError(f'No packets found between {start_timestamp} and {end_timestamp}')
+        if len(packet_list) == 0:
+            raise PacketRangeExportError('No packets found in range')
 
-        return packet_list
-    else:
-        raise TimestampError(f'Invalid time range - Start: {start_timestamp}, End: {end_timestamp}')
+    return packet_list
 
 
 def _slice_with_editcap(input_file, start_timestamp, end_timestamp, output_file):
