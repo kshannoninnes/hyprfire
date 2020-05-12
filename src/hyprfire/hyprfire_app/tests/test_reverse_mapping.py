@@ -40,9 +40,9 @@ class ExportPacketsTestCase(TestCase):
         starting_packet = randint(0, len(self.scapy_list) - 1 - expected_count)
         test_packets = self.scapy_list[starting_packet:starting_packet + expected_count]
 
-        output_file = reverse_mapping.export_packets(TEST_FILE,
-                                                     test_packets[0].time,
-                                                     test_packets[expected_count - 1].time)
+        output_file = reverse_mapping.export_packets_in_range(TEST_FILE,
+                                                              test_packets[0].time,
+                                                              test_packets[expected_count - 1].time)
 
         actual_count = len(PcapReader(output_file).read_all())
 
@@ -61,7 +61,7 @@ class ExportPacketsTestCase(TestCase):
         starting_packet = randint(0, len(self.scapy_list) - 1 - num_packets)
         test_packets = self.scapy_list[starting_packet:starting_packet+5]
 
-        output_file = reverse_mapping.export_packets(TEST_FILE, test_packets[0].time, test_packets[4].time)
+        output_file = reverse_mapping.export_packets_in_range(TEST_FILE, test_packets[0].time, test_packets[4].time)
         for packet in PcapReader(output_file):
             packet_list.append(packet)
 
@@ -78,7 +78,7 @@ class ExportPacketsTestCase(TestCase):
         start_timestamp = Decimal(1588259870.211190166)
         end_timestamp = Decimal(1588259871.211190166)
 
-        self.assertRaises(IOError, reverse_mapping.export_packets, filename, start_timestamp, end_timestamp)
+        self.assertRaises(IOError, reverse_mapping.export_packets_in_range, filename, start_timestamp, end_timestamp)
 
     def test_negative_timestamp(self):
         """
@@ -89,7 +89,7 @@ class ExportPacketsTestCase(TestCase):
         start_timestamp = Decimal("-1")
         end_timestamp = Decimal("inf")
 
-        self.assertRaises(ValueError, reverse_mapping.export_packets, TEST_FILE, start_timestamp, end_timestamp)
+        self.assertRaises(ValueError, reverse_mapping.export_packets_in_range, TEST_FILE, start_timestamp, end_timestamp)
 
     def test_infinite_timestamp(self):
         """
@@ -100,4 +100,4 @@ class ExportPacketsTestCase(TestCase):
         start_timestamp = Decimal("inf")
         end_timestamp = Decimal("inf") + 1
 
-        self.assertRaises(ValueError, reverse_mapping.export_packets, TEST_FILE, start_timestamp, end_timestamp)
+        self.assertRaises(ValueError, reverse_mapping.export_packets_in_range, TEST_FILE, start_timestamp, end_timestamp)
