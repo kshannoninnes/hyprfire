@@ -1,5 +1,5 @@
 from django.test import TestCase
-from hyprfire_app.new_scripts import reverse_mapping
+from hyprfire_app.new_scripts.data_collection import reverse_mapping
 
 from decimal import Decimal
 from random import randint
