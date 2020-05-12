@@ -2,12 +2,8 @@ from pathlib import Path
 from decimal import Decimal
 from datetime import datetime, timedelta
 from scapy.all import PcapReader, PcapWriter
+from hyprfire_app.utils.misc import floats_equal, PCAP_DIR, EXPORTED_PCAP_DIR
 import subprocess
-
-# Constants
-root_dir = Path(__file__).parent.parent.parent
-input_dir = Path(root_dir / 'pcaps')
-output_dir = Path(input_dir / 'exported_pcaps')
 
 
 def _collect_packets(filename, start_timestamp, end_timestamp):
@@ -36,19 +32,20 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
             # (for comparison purposes)
             packet_timestamp = Decimal(str(packet.time))
 
-            if _timestamps_equal(start_timestamp, packet_timestamp):
+            if floats_equal(start_timestamp, packet_timestamp):
                 matching_started = True
 
             if matching_started:
                 packet_list.append(packet)
 
-            if _timestamps_equal(end_timestamp, packet_timestamp):
+            if floats_equal(end_timestamp, packet_timestamp):
                 break
 
     return packet_list
 
 
-def _slice_with_editcap(filename, start, end):
+# TODO Move path stuff out to base function
+def _slice_with_editcap(input_file, start, end, output_file):
     """
     _slice_with_editcap
 
@@ -72,13 +69,9 @@ def _slice_with_editcap(filename, start, end):
     if abs(start - end) < 1:
         ec_end += timedelta(seconds=1)
 
-    ec_output_file = output_dir / f'{filename}-editcapped.pcap'
-    input_file = input_dir / filename
-    editcap_command = f'editcap -A "{ec_start}" -B "{ec_end}" "{input_file}" "{ec_output_file}"'
+    editcap_command = f'editcap -A "{ec_start}" -B "{ec_end}" "{input_file}" "{output_file}"'
 
     subprocess.call(editcap_command)
-
-    return str(ec_output_file)
 
 
 def _write_packets_to_file(path, packets):
@@ -91,7 +84,7 @@ def _write_packets_to_file(path, packets):
     path: the file to write the packets to
     packets: a list of packets to write to file
     """
-    writer = PcapWriter(path, append=True, sync=True)
+    writer = PcapWriter(path, append=False, sync=True)
 
     for packet in packets:
         writer.write(packet)
@@ -114,20 +107,14 @@ def _validate_timestamps(start, end):
     return end > start > 0
 
 
-# TODO Move to a utils module (compare floats)
-def _timestamps_equal(first, second):
-    eps = 0.000001
-    return abs(first - second) < eps
-
-
-def export_packets(filename, start_timestamp, end_timestamp):
+def export_packets(file_path, start_timestamp, end_timestamp):
     """
     export_packets
 
     Public interface for exporting packets to a file
 
     Parameters
-    filename: file to export packets from
+    file_path: string path to an existing pcap file
     timestamp: a unique seconds-based epoch timestamp to identify the starting packet
     num_packets: number of packets to export, including the initial packet matching the timestamp
 
@@ -138,19 +125,22 @@ def export_packets(filename, start_timestamp, end_timestamp):
     ValueError if the timestamps are invalid
     IOError if there's an issue reading the file
     """
-    dec_start = Decimal(start_timestamp)
-    dec_end = Decimal(end_timestamp)
+    dec_start = start_timestamp
+    dec_end = end_timestamp
+    filename = Path(file_path).stem
 
     if _validate_timestamps(dec_start, dec_end):
-        smaller_file = _slice_with_editcap(filename, dec_start, dec_end)
-        packet_list = _collect_packets(smaller_file, dec_start, dec_end)
 
-        output_file = str(output_dir / str(filename + '-filtered.pcap'))
-        _write_packets_to_file(output_file, packet_list)
+        temp_output_file = str(EXPORTED_PCAP_DIR / f'{filename}-editcapped.pcap')
+        _slice_with_editcap(file_path, dec_start, dec_end, temp_output_file)
+        packet_list = _collect_packets(temp_output_file, dec_start, dec_end)
 
-        redundant_file = Path(smaller_file)
+        final_output_file = str(EXPORTED_PCAP_DIR / f'{filename}-filtered.pcap')
+        _write_packets_to_file(final_output_file, packet_list)
+
+        redundant_file = Path(temp_output_file)
         redundant_file.unlink()
 
-        return output_file
+        return final_output_file
     else:
         raise ValueError('Invalid time range: start_timestamp must be after the unix epoch and before end_timestamp')
