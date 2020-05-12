@@ -1,7 +1,9 @@
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from datetime import datetime
 from scapy.all import PcapReader, PcapWriter
 from hyprfire_app.utils.misc import floats_equal, EXPORTED_PCAP_DIR
+from hyprfire_app.new_scripts.exceptions import TimestampError, PacketsNotFoundError
 import subprocess
 
 
@@ -23,23 +25,31 @@ def export_packets_in_range(file_path, start_timestamp, end_timestamp):
     ValueError:     if the timestamps are invalid
     IOError:        if there's an issue reading the file
     """
-    filename = Path(file_path).stem
 
-    if _validate_timestamps(start_timestamp, end_timestamp):
+    path = Path(file_path)
 
-        temp_output_file = str(EXPORTED_PCAP_DIR / f'{filename}-editcapped.pcap')
-        _slice_with_editcap(file_path, start_timestamp, end_timestamp, temp_output_file)
-        packet_list = _collect_packets(temp_output_file, start_timestamp, end_timestamp)
+    if not path.is_file():
+        raise FileNotFoundError()
 
-        final_output_file = str(EXPORTED_PCAP_DIR / f'{filename}-filtered.pcap')
-        _write_packets_to_file(final_output_file, packet_list)
+    try:
+        start_timestamp = Decimal(start_timestamp)
+        end_timestamp = Decimal(end_timestamp)
+    except InvalidOperation:
+        raise TimestampError('Invalid timestamp')
 
-        redundant_file = Path(temp_output_file)
-        redundant_file.unlink()
+    filename = path.stem
 
-        return final_output_file
-    else:
-        raise ValueError('Invalid time range: start_timestamp must be after the unix epoch and before end_timestamp')
+    temp_output_file = str(EXPORTED_PCAP_DIR / f'{filename}-editcapped.pcap')
+    _slice_with_editcap(file_path, start_timestamp, end_timestamp, temp_output_file)
+    packet_list = _collect_packets(temp_output_file, start_timestamp, end_timestamp)
+
+    final_output_file = str(EXPORTED_PCAP_DIR / f'{filename}-filtered.pcap')
+    _write_packets_to_file(final_output_file, packet_list)
+
+    redundant_file = Path(temp_output_file)
+    redundant_file.unlink()
+
+    return final_output_file
 
 
 def _collect_packets(filename, start_timestamp, end_timestamp):
@@ -58,21 +68,24 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
     """
 
     packet_list = []
-    matching_started = False
+    match_found = False
 
-    with PcapReader(filename) as reader:
-        for packet in reader:
+    if _validate_timestamps(start_timestamp, end_timestamp):
+        with PcapReader(filename) as reader:
+            for packet in reader:
+                if floats_equal(start_timestamp, packet.time):
+                    match_found = True
+                if match_found:
+                    packet_list.append(packet)
+                if floats_equal(end_timestamp, packet.time):
+                    break
 
-            if floats_equal(start_timestamp, packet.time):
-                matching_started = True
+            if len(packet_list) == 0:
+                raise PacketsNotFoundError(f'No packets found between {start_timestamp} and {end_timestamp}')
 
-            if matching_started:
-                packet_list.append(packet)
-
-            if floats_equal(end_timestamp, packet.time):
-                break
-
-    return packet_list
+        return packet_list
+    else:
+        raise TimestampError(f'Invalid time range - Start: {start_timestamp}, End: {end_timestamp}')
 
 
 def _slice_with_editcap(input_file, start_timestamp, end_timestamp, output_file):
