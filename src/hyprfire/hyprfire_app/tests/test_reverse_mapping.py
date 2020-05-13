@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from hyprfire_app.new_scripts.exceptions import PacketRangeExportError
+from hyprfire_app.exceptions import PacketRangeExportError
 from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 
 from decimal import Decimal
