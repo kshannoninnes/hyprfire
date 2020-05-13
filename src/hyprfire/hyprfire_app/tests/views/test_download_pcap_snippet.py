@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.test import TestCase
 
 from hyprfire_app import views
+from hyprfire_app.exceptions import JSONError
 
 
 def post(client, data):
@@ -38,6 +39,13 @@ class DownloadPcapSnippetTests(TestCase):
 
         self.assertEqual(response.status_code, 405)
         self.assertEqual(str(response.reason_phrase), 'Method Not Allowed')
+
+    def test_json_error(self):
+        self.data = 'invalid_json'
+
+        response = post(self.client, self.data)
+
+        self.assertEqual(response.status_code, 400)
 
     def test_nonexistent_file(self):
         self.data['filename'] = 'invalidfile'
