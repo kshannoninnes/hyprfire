@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from scapy.all import PcapReader, PcapWriter
 from hyprfire_app.utils.misc import floats_equal, EXPORTED_PCAP_DIR
-from hyprfire_app.new_scripts.exceptions import PacketRangeExportError
+from hyprfire_app.exceptions import PacketRangeExportError
 import subprocess
 
 
@@ -80,9 +80,6 @@ def _collect_packets(filename, start_timestamp, end_timestamp):
             if floats_equal(end_timestamp, packet.time):
                 break
 
-        if len(packet_list) == 0:
-            raise PacketRangeExportError('No packets found in range')
-
     return packet_list
 
 
@@ -141,13 +138,13 @@ def _validate_timestamps(start_timestamp, end_timestamp):
     end_timestamp: a unique seconds-based epoch timestamp to identify the last packet
     """
 
+    if start_timestamp == Decimal("inf") or end_timestamp == Decimal("inf"):
+        raise PacketRangeExportError('Timestamps cannot be infinite')
+
     if start_timestamp < 0:
         raise PacketRangeExportError('Start timestamp must be on or after the unix epoch ("0")')
 
     if start_timestamp > end_timestamp:
         raise PacketRangeExportError('End timestamp must be greater than start timestamp')
-
-    if end_timestamp == Decimal("inf"):
-        raise PacketRangeExportError('Timestamps cannot be infinite')
 
 
