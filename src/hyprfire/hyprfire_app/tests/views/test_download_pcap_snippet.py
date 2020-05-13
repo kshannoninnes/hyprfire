@@ -19,6 +19,8 @@ class DownloadPcapSnippetTests(TestCase):
             'end': 1588259869.845959007
             }
 
+    """ SUCCESS TEST CASES """
+
     def test_zero_start(self):
         self.data['start'] = 0
         response = post(self.client, self.data)
@@ -27,12 +29,28 @@ class DownloadPcapSnippetTests(TestCase):
         self.assertEqual(response['Content-Disposition'],
                          f'attachment; filename="{self.data["filename"]}-filtered.pcap"')
 
-    def test_invalid_filename(self):
+    """ FAIL TEST CASES """
+
+    def test_nonexistent_file(self):
         self.data['filename'] = 'invalidfile'
         response = post(self.client, self.data)
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(str(response.reason_phrase), 'File Not Found.')
+
+    def test_wrong_number_params(self):
+        del self.data['end']
+        response = post(self.client, self.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(str(response.reason_phrase), 'Invalid parameters.')
+
+    def test_timestamp_wrong_type(self):
+        self.data['start'] = 'Hello World'
+        response = post(self.client, self.data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(str(response.reason_phrase), 'Invalid timestamp. Are you sure it\'s a valid number?')
 
     def test_negative_start(self):
         self.data['start'] = -1
@@ -41,7 +59,7 @@ class DownloadPcapSnippetTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(str(response.reason_phrase), 'Start timestamp must be on or after the unix epoch ("0")')
 
-    def test_negative_end(self):
+    def test_early_end(self):
         self.data['end'] = -1
         response = post(self.client, self.data)
 

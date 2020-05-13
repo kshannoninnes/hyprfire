@@ -32,11 +32,11 @@ def export_packets_in_range(file_path, start_timestamp, end_timestamp):
         raise FileNotFoundError()
 
     try:
-        _validate_timestamps(start_timestamp, end_timestamp)
         start_timestamp = Decimal(start_timestamp)
         end_timestamp = Decimal(end_timestamp)
+        _validate_timestamps(start_timestamp, end_timestamp)
     except InvalidOperation:
-        raise PacketRangeExportError('Invalid timestamp format')
+        raise PacketRangeExportError('Invalid timestamp. Are you sure it\'s a valid number?')
 
     filename = path.stem
 

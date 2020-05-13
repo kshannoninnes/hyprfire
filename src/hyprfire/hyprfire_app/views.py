@@ -47,8 +47,8 @@ def download_pcap_snippet(request):
     try:
         data = load_json(request.body)
         file_path = str(Path(BASE_DIR) / 'pcaps' / data['filename'])
-        start = Decimal(data['start'])
-        end = Decimal(data['end'])
+        start = data['start']
+        end = data['end']
 
         output_path = packet_range_exporter.export_packets_in_range(file_path, start, end)
         file = open(output_path, 'rb')
