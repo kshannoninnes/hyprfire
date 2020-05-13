@@ -37,6 +37,21 @@ def index(request):
 
 
 def download_pcap_snippet(request):
+    """
+    download_pcap_snippet
+
+    Endpoint: /download/
+
+    Download a snippet of pcaps from a specific file
+
+    Parameters
+    request: An HTTP request provided by Django
+
+    Request Parameters
+    filename: the file to collect a snippet from
+    start: a unique seconds-based epoch timestamp to identify the first packet
+    end: a unique seconds-based epoch timestamp to identify the last packet
+    """
 
     if request.method != 'POST':
         return HttpResponse(status=405)
@@ -54,7 +69,7 @@ def download_pcap_snippet(request):
 
         return FileResponse(file, as_attachment=True)
 
-    # ESSENTIAL: Log the errors to make sure problems are traceable
+    # TODO Log the errors to make sure problems are traceable
     except PacketRangeExportError as e:
         return HttpResponse(status=400, reason=e)
     except JSONError as e:
