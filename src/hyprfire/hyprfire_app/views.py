@@ -1,6 +1,3 @@
-from decimal import Decimal
-from json.decoder import JSONDecodeError
-
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 
@@ -10,9 +7,9 @@ from hyprfire_app.CacheHandler import ScriptProcessor
 
 from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 from hyprfire.settings import BASE_DIR
-import json
 
-from hyprfire_app.exceptions import PacketRangeExportError, JsonError
+from hyprfire_app.exceptions import PacketRangeExportError, JSONError
+from hyprfire_app.utils.json import validate_json_length, load_json
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -46,6 +43,8 @@ def download_pcap_snippet(request):
 
     try:
         data = load_json(request.body)
+        validate_json_length(data, 3)
+
         file_path = str(Path(BASE_DIR) / 'pcaps' / data['filename'])
         start = data['start']
         end = data['end']
@@ -58,24 +57,12 @@ def download_pcap_snippet(request):
     # ESSENTIAL: Log the errors to make sure problems are traceable
     except PacketRangeExportError as e:
         return HttpResponse(status=400, reason=e)
-    except JsonError as e:
+    except JSONError as e:
         return HttpResponse(status=400, reason=e)
     except FileNotFoundError as e:
         return HttpResponse(status=404, reason='File Not Found.')
     except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
-
-
-def load_json(request_body):
-    try:
-        data = json.loads(request_body)
-    except JSONDecodeError:
-        raise JsonError('Could not decode JSON.')
-
-    if len(data) != 3:
-        raise JsonError('Invalid parameters.')
-
-    return data
 
 
 def get_filenames():
