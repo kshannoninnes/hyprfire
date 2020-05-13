@@ -12,7 +12,7 @@ from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 from hyprfire.settings import BASE_DIR
 import json
 
-from hyprfire_app.exceptions import PacketRangeExportError
+from hyprfire_app.exceptions import PacketRangeExportError, JsonError
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -56,10 +56,9 @@ def download_pcap_snippet(request):
         return FileResponse(file, as_attachment=True)
 
     # ESSENTIAL: Log the errors to make sure problems are traceable
-    # TODO try to remove the ValueError possibility
     except PacketRangeExportError as e:
         return HttpResponse(status=400, reason=e)
-    except ValueError as e:
+    except JsonError as e:
         return HttpResponse(status=400, reason=e)
     except FileNotFoundError as e:
         return HttpResponse(status=404, reason='File Not Found.')
@@ -71,10 +70,10 @@ def load_json(request_body):
     try:
         data = json.loads(request_body)
     except JSONDecodeError:
-        raise ValueError('Could not decode JSON.')
+        raise JsonError('Could not decode JSON.')
 
     if len(data) != 3:
-        raise ValueError('Invalid parameters.')
+        raise JsonError('Invalid parameters.')
 
     return data
 
