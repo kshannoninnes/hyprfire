@@ -1,5 +1,7 @@
 from django.test import TestCase
-from hyprfire_app.new_scripts.packet_manipulator import reverse_mapping
+
+from hyprfire_app.new_scripts.exceptions import PacketRangeExportError
+from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 
 from decimal import Decimal
 from random import randint
@@ -40,9 +42,9 @@ class ExportPacketsTestCase(TestCase):
         starting_packet = randint(0, len(self.scapy_list) - 1 - expected_count)
         test_packets = self.scapy_list[starting_packet:starting_packet + expected_count]
 
-        output_file = reverse_mapping.export_packets_in_range(TEST_FILE,
-                                                              test_packets[0].time,
-                                                              test_packets[expected_count - 1].time)
+        output_file = packet_range_exporter.export_packets_in_range(TEST_FILE,
+                                                                    test_packets[0].time,
+                                                                    test_packets[expected_count - 1].time)
 
         actual_count = len(PcapReader(output_file).read_all())
 
@@ -61,7 +63,9 @@ class ExportPacketsTestCase(TestCase):
         starting_packet = randint(0, len(self.scapy_list) - 1 - num_packets)
         test_packets = self.scapy_list[starting_packet:starting_packet+5]
 
-        output_file = reverse_mapping.export_packets_in_range(TEST_FILE, test_packets[0].time, test_packets[4].time)
+        output_file = packet_range_exporter.export_packets_in_range(TEST_FILE,
+                                                                    test_packets[0].time,
+                                                                    test_packets[4].time)
         for packet in PcapReader(output_file):
             packet_list.append(packet)
 
@@ -78,26 +82,32 @@ class ExportPacketsTestCase(TestCase):
         start_timestamp = Decimal(1588259870.211190166)
         end_timestamp = Decimal(1588259871.211190166)
 
-        self.assertRaises(IOError, reverse_mapping.export_packets_in_range, filename, start_timestamp, end_timestamp)
+        self.assertRaises(IOError,
+                          packet_range_exporter.export_packets_in_range,
+                          filename, start_timestamp, end_timestamp)
 
     def test_negative_timestamp(self):
         """
         test_negative_timestamp
 
-        Negative timestamp should raise a ValueError
+        Negative timestamp should raise a PacketRangeExportError
         """
         start_timestamp = Decimal("-1")
-        end_timestamp = Decimal("inf")
+        end_timestamp = Decimal("-1")
 
-        self.assertRaises(ValueError, reverse_mapping.export_packets_in_range, TEST_FILE, start_timestamp, end_timestamp)
+        self.assertRaises(PacketRangeExportError,
+                          packet_range_exporter.export_packets_in_range,
+                          TEST_FILE, start_timestamp, end_timestamp)
 
     def test_infinite_timestamp(self):
         """
         test_infinite_timestamp
 
-        Infinite timestamp should raise a ValueError
+        Infinite timestamp should raise a PacketRangeExportError
         """
         start_timestamp = Decimal("inf")
         end_timestamp = Decimal("inf") + 1
 
-        self.assertRaises(ValueError, reverse_mapping.export_packets_in_range, TEST_FILE, start_timestamp, end_timestamp)
+        self.assertRaises(PacketRangeExportError,
+                          packet_range_exporter.export_packets_in_range,
+                          TEST_FILE, start_timestamp, end_timestamp)

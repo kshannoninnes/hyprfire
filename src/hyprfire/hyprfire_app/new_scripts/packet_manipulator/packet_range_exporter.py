@@ -31,10 +31,8 @@ def export_packets_in_range(file_path, start_timestamp, end_timestamp):
     if not path.is_file():
         raise FileNotFoundError()
 
-    if not _validate_timestamps(start_timestamp, end_timestamp):
-        raise PacketRangeExportError('Invalid timestamp range')
-
     try:
+        _validate_timestamps(start_timestamp, end_timestamp)
         start_timestamp = Decimal(start_timestamp)
         end_timestamp = Decimal(end_timestamp)
     except InvalidOperation:
@@ -135,14 +133,21 @@ def _validate_timestamps(start_timestamp, end_timestamp):
     """
     _validate_timestamps
 
-    A valid timestamp is a decimal greater than 0.0 (the epoch)
+    A valid timestamp pair would follow the format:
+    0 < start_timestamp < end_timestamp < infinity
 
     Parameters
     start_timestamp: a unique seconds-based epoch timestamp to identify the first packet
     end_timestamp: a unique seconds-based epoch timestamp to identify the last packet
-
-    Return
-    boolean indicating timestamp validity
     """
 
-    return end_timestamp > start_timestamp > 0
+    if start_timestamp < 0:
+        raise PacketRangeExportError('Start timestamp must be on or after the unix epoch ("0")')
+
+    if start_timestamp > end_timestamp:
+        raise PacketRangeExportError('End timestamp must be greater than start timestamp')
+
+    if end_timestamp == Decimal("inf"):
+        raise PacketRangeExportError('Timestamps cannot be infinite')
+
+
