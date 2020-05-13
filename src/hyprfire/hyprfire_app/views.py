@@ -1,3 +1,4 @@
+from decimal import Decimal
 from json.decoder import JSONDecodeError
 
 from django.http import FileResponse, HttpResponse
@@ -11,7 +12,7 @@ from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 from hyprfire.settings import BASE_DIR
 import json
 
-from hyprfire_app.new_scripts.exceptions import PacketRangeExportError
+from hyprfire_app.exceptions import PacketRangeExportError
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -45,13 +46,17 @@ def download_pcap_snippet(request):
 
     try:
         data = load_json(request.body)
-        file_path = Path(BASE_DIR) / 'pcaps' / data['filename']
-        output_path = packet_range_exporter.export_packets_in_range(str(file_path), data['start'], data['end'])
+        file_path = str(Path(BASE_DIR) / 'pcaps' / data['filename'])
+        start = Decimal(data['start'])
+        end = Decimal(data['end'])
+
+        output_path = packet_range_exporter.export_packets_in_range(file_path, start, end)
         file = open(output_path, 'rb')
 
-        return FileResponse(file)
+        return FileResponse(file, as_attachment=True)
 
     # ESSENTIAL: Log the errors to make sure problems are traceable
+    # TODO try to remove the ValueError possibility
     except PacketRangeExportError as e:
         return HttpResponse(status=400, reason=e)
     except ValueError as e:
