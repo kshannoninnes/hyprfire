@@ -33,7 +33,7 @@ class MyTestCase(unittest.TestCase):
     #test using a file that isn't a pcap file
     def test_pcapconverter_wrongfile(self):
         dirpath = os.path.dirname(os.path.realpath(__file__))
-        testpath = os.path.join(dirpath, "../new_scripts/packetdata.py")
+        testpath = os.path.join(dirpath, "../new_scripts/../../new_scripts/packetdata.py")
         with self.assertRaises(ConverterException) as cm:
             pcapConverter(testpath)
         e = cm.exception
