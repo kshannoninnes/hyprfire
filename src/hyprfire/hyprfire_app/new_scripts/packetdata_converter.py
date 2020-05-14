@@ -4,6 +4,8 @@ Author: Quang Le
 Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
 '''
 import operator
+import time
+
 from hyprfire_app.new_scripts.packetdata import PacketData
 from hyprfire_app.new_scripts.dumpfile import Dumpfile
 import hyprfire_app.new_scripts.benfords_analysis as ba
@@ -17,12 +19,12 @@ Class name: CSVData
 This class is used to store each row of the csv as an object
 '''
 class CSVData:
-    def __init__(self, timestamp, uvalue, start_epoch, end_epoch, filename):
+    def __init__(self, timestamp, uvalue, start_epoch, end_epoch):
         self.timestamp = timestamp
         self.uvalue = uvalue
         self.start_epoch = start_epoch
         self.end_epoch = end_epoch
-        self.filename = filename
+
 
 
 '''
@@ -36,7 +38,7 @@ Input:
     is_time: boolean, True if time analysis is selected
     filename: name of original pcap file
 '''
-def thread_process(in_q, out_q, is_benfords, is_time, mp_value, filename):
+def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
     while True:
         try:
             window = in_q.get(block=False)
@@ -47,11 +49,11 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value, filename):
                     epochs = [i[1] for i in window]
                     int_arr_times = ba.get_interarrival_times(times)
                     benf_bucks = ba.get_benfords_buckets(int_arr_times, 1)
-                    u_value = ba.get_benford_u_value(benf_bucks, 1)
+                    u_value = ba.get_benfords_u_value(benf_bucks, 1)
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end, filename)
+                    csv = CSVData(time_val, u_value, start, end)
                     out_q.put(csv)
                 else:
                     # calculates using benfords and length analysis
@@ -59,11 +61,11 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value, filename):
                     times = [i[0] for i in window]
                     epochs = [i[2] for i in window]
                     benf_bucks = ba.get_benfords_buckets(lens, 1)
-                    u_value = ba.get_benford_u_value(benf_bucks, 1)
+                    u_value = ba.get_benfords_u_value(benf_bucks, 1)
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end, filename)
+                    csv = CSVData(time_val, u_value, start, end)
                     out_q.put(csv)
             else:
                 if is_time:
@@ -76,7 +78,7 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value, filename):
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end, filename)
+                    csv = CSVData(time_val, u_value, start, end)
                     out_q.put(csv)
                 else:
                     # calculates using zipf and length analysis
@@ -88,7 +90,7 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value, filename):
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end, filename)
+                    csv = CSVData(time_val, u_value, start, end)
                     out_q.put(csv)
         except queue.Empty:
             if mp_value.value == 1:
@@ -114,6 +116,21 @@ def get_packets_window(packets, winsize):
         except LookupError:
             print("Index Error Exception Raised, list index out of range")
 
+'''
+Function: dump_queue_to_list
+Description: empties contents of a queue into a list and returns it
+'''
+def dump_queue_to_list(out_q):
+    output = []
+    while True:
+        csv = out_q.get()
+        if csv is None:
+            break
+        else:
+            output.append(csv)
+    time.sleep(.5)
+    return output
+
 
 '''
 Function: convert_to_csv
@@ -127,7 +144,7 @@ Inputs:
 Output:
     sorted_list: a sorted list of CSVData objects
 '''
-def convert_to_csv(dumpfile, ana_type, winsize, timelen):
+def convert_to_csv(packet_data, ana_type, winsize, timelen):
     # Checks the arguments passed are valid
     if ana_type == 'b':
         is_benfords = True
@@ -143,9 +160,8 @@ def convert_to_csv(dumpfile, ana_type, winsize, timelen):
     else:
         raise ValueError(timelen)
 
-    if isinstance(dumpfile, Dumpfile):
-        filename = dumpfile.filename
-        packets = dumpfile.packets
+    if isinstance(packet_data, list):
+        packets = packet_data
     else:
         raise TypeError
 
@@ -164,7 +180,7 @@ def convert_to_csv(dumpfile, ana_type, winsize, timelen):
     # Generating threads
     for i in range(0, cores):
         thread_list.append(st.ThreadWorker(thread_process))
-    q_sender = (in_q, out_q, is_benfords, is_time, mp_value, filename)
+    q_sender = (in_q, out_q, is_benfords, is_time, mp_value)
     for thread in thread_list:
         thread.run(q_sender)
 
@@ -180,15 +196,9 @@ def convert_to_csv(dumpfile, ana_type, winsize, timelen):
 
     with mp_value.get_lock():
         mp_value.value = 1
-    csv_list = []
 
-    # Accumulates the CSVData objects and place them into a list
-    try:
-        while True:
-            csv_list.append(out_q.get(block=False))
-            # print "blop"
-    except Exception:
-        pass
+    out_q.put(None)
+    csv_list = dump_queue_to_list(out_q)
 
     # Starts thread kill
     in_q.cancel_join_thread()

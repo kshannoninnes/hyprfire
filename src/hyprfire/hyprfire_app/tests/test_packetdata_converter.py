@@ -12,8 +12,8 @@ import unittest
 class TestUnit(unittest.TestCase):
 
     def setUp(self):
-        self.pcapfile = 'test_files/testdump'
-        self.pcapdata = pcapConverter(self.pcapfile)
+        pcapfile = 'test_files/testfile.pcap.gz'
+        self.pcapdata = pcapConverter(pcapfile)
 
     def test_invalid_analysis_value(self):
         self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'a', 1000, 't')
@@ -21,7 +21,7 @@ class TestUnit(unittest.TestCase):
     def test_invalid_timelen_value(self):
         self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'b', 1000, 0)
 
-    def test_invalid_dumpfile(self):
+    def test_invalid_packetdata(self):
         data = "Invalid"
         self.assertRaises(TypeError, packetdata_converter.convert_to_csv, data, 'b', 1000, 't')
 
