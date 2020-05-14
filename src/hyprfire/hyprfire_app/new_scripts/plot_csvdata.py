@@ -1,27 +1,49 @@
 """
 File: plot_csvdata.py
 Author: Quang Le
-Purpose: use plotly to turn csvdata into a graph
+Purpose: use plotly library to convert list of csv data into a graph
 """
 
 from plotly.offline import plot
 import plotly.graph_objects as go
-from hyprfire_app.new_scripts.packetdata_converter import CSVData
 
 
 def get_csv_values(csvdata_list):
+    """
+
+    Description: Iterate over the list of csv values and extract them into a list of number arrays
+
+    Parameter:
+        csvdata_list (list): list of csv values
+
+    Return:
+        values (list): list of number arrays
+
+    """
     values = []
     for row in csvdata_list:
-        x = row.timestamp
-        y = row.uvalue
-        start = row.start_epoch
-        end = row.end_epoch
+        new = row.split(',')
+        x = float(new[0])
+        y = float(new[1])
+        start = float(new[2])
+        end = float(new[3])
         a = (x, y, start, end)
         values.append(a)
     return values
 
 
 def get_plot(csvdata_list):
+    """
+
+    Description: takes in a list of csv values and convert it into a graph in a HTML div string format
+
+    Parameter:
+        csvdata_list (list): list of csv values
+
+    Return:
+        html_graph (str): a HTML div string which represents a graph of csvdata_list
+
+    """
     if not isinstance(csvdata_list, list):
         print("Argument needs to be of a list type")
         raise TypeError(csvdata_list)

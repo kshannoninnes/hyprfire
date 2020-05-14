@@ -1,9 +1,11 @@
-'''
+"""
 File: packetdata_converter.py
 Author: Quang Le
 Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
-'''
-import operator
+"""
+
+
+from operator import itemgetter
 import time
 
 from hyprfire_app.new_scripts.packetdata import PacketData
@@ -14,31 +16,22 @@ import multiprocessing as mp
 import hyprfire_app.new_scripts.superthreading as st
 import queue
 
-'''
-Class name: CSVData
-This class is used to store each row of the csv as an object
-'''
-class CSVData:
-    def __init__(self, timestamp, uvalue, start_epoch, end_epoch):
-        self.timestamp = timestamp
-        self.uvalue = uvalue
-        self.start_epoch = start_epoch
-        self.end_epoch = end_epoch
 
-
-
-'''
-Function: thread_process
-Descriptions: This is where benfords or zipf algorithms are used to calculate the values needed for CSVData
-Input: 
-    in_q: queue of variables from each PacketData object 
-    out_q: queue of CSVData objects 
-    mp_value: multiprocessing value
-    is_benfords: boolean, True if benfords analysis is selected
-    is_time: boolean, True if time analysis is selected
-    filename: name of original pcap file
-'''
 def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
+    """
+
+    Descriptions: This is where the selected analysis types are used on variables from the in_q to calculate values
+    for the csv data
+
+    Parameters:
+        in_q (multiprocessing.Queue): task queue of variables from each PacketData object
+        out_q (multiprocessing.Queue): queue of an array of numbers
+        mp_value: multiprocessing value
+        is_benfords (boolean): True if benfords analysis is selected, otherwise False
+        is_time (boolean): True if time analysis is selected, otherwise False
+
+    """
+
     while True:
         try:
             window = in_q.get(block=False)
@@ -53,7 +46,7 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end)
+                    csv = (time_val, u_value, start, end)
                     out_q.put(csv)
                 else:
                     # calculates using benfords and length analysis
@@ -65,7 +58,7 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end)
+                    csv = (time_val, u_value, start, end)
                     out_q.put(csv)
             else:
                 if is_time:
@@ -78,7 +71,7 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end)
+                    csv = (time_val, u_value, start, end)
                     out_q.put(csv)
                 else:
                     # calculates using zipf and length analysis
@@ -90,7 +83,7 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
                     time_val = int((times[0] + times[len(times) - 1]) / 2)
                     start = epochs[0]
                     end = epochs[len(epochs) - 1]
-                    csv = CSVData(time_val, u_value, start, end)
+                    csv = (time_val, u_value, start, end)
                     out_q.put(csv)
         except queue.Empty:
             if mp_value.value == 1:
@@ -98,11 +91,20 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
             pass
 
 
-'''
-Function: get_packets_window
-Description: return a list of PacketData objects within a specific window size
-'''
 def get_packets_window(packets, winsize):
+    """
+
+    Description: iterate over a list of PacketData objects and return a window size of those objects
+
+    Parameters:
+        packets: list of PacketData objects
+        winsize: the specified window size
+
+    Returns:
+        packets_win (list): the windowsize of PacketData objects
+
+    """
+
     packets_win = []
     counter = 0
     for packet in packets:
@@ -116,11 +118,20 @@ def get_packets_window(packets, winsize):
         except LookupError:
             print("Index Error Exception Raised, list index out of range")
 
-'''
-Function: dump_queue_to_list
-Description: empties contents of a queue into a list and returns it
-'''
+
 def dump_queue_to_list(out_q):
+    """
+
+    Description: empties contents of a queue into a list and returns it
+
+    Parameter:
+        out_q: the queue to be emptied
+
+    Returns:
+        output: the list of items emptied from the queue
+
+    """
+
     output = []
     while True:
         csv = out_q.get()
@@ -128,23 +139,28 @@ def dump_queue_to_list(out_q):
             break
         else:
             output.append(csv)
-    time.sleep(.5)
+    time.sleep(.1)
     return output
 
 
-'''
-Function: convert_to_csv
-Description: Takes in a list of PacketData objects and the configuration options, runs through the selected algorithms 
-using multithreading and puts the results into CSVData objects, then it returns a sorted list of those objects 
-Inputs:
-    dumpfile: Dumpfile object which contains a list of PacketData objects and the filename
-    ana_type: the type of analysis selected by the user; 'b' for benfords or 'z' for zipf
-    winsize: the window size selected by the user
-    timelen: another type of analysis selected by the user; 't' for time or 'l' for length 
-Output:
-    sorted_list: a sorted list of CSVData objects
-'''
 def convert_to_csv(packet_data, ana_type, winsize, timelen):
+    """
+
+    Description: Takes in a list of PacketData objects and the configuration options, runs a window size of those
+    objects through the selected analysis type using multithreading and puts the results into a list of comma
+    separated values
+
+    Parameters:
+        packet_data (list): a list of PacketData objects
+        ana_type (char): the type of analysis selected by the user; 'b' for benfords or 'z' for zipf
+        winsize (int): the window size selected by the user
+        timelen (char): another type of analysis selected by the user; 't' for time or 'l' for length
+
+    Returns:
+        csv_str_list (list): a list of comma separated values
+
+    """
+
     # Checks the arguments passed are valid
     if ana_type == 'b':
         is_benfords = True
@@ -207,5 +223,10 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
         thread.end()
 
     # Sort csv_list and return to handler
-    sorted_list = sorted(csv_list, key=operator.attrgetter("timestamp"))
-    return sorted_list
+    csv_list.sort(key=itemgetter(0))
+
+    csv_str_list = []
+    for row in csv_list:
+        to_string = str(row[0]) + ',' + str(row[1]) + ',' + str(row[2]) + ',' + str(row[3]) + '\n'
+        csv_str_list.append(to_string)
+    return csv_str_list
