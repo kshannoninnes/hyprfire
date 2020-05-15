@@ -20,8 +20,8 @@ class DownloadPcapSnippetTests(TestCase):
         """
         self.data = {
             'filename': 'testdump',
-            'start': 1588259869.842212489,
-            'end': 1588259869.845959007
+            'start': '1588259869.842212489',
+            'end': '1588259869.845959007'
             }
 
     def test_zero_start(self):
