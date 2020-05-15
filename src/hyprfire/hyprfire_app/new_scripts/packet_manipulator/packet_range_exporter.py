@@ -106,7 +106,7 @@ def _slice_with_editcap(input_file, start_timestamp, end_timestamp, output_file)
 
     editcap_command = f'editcap -A "{formatted_start}" -B "{formatted_end}" "{input_file}" "{output_file}"'
 
-    subprocess.call(editcap_command)
+    subprocess.call(editcap_command, shell=True)
 
 
 def _write_packets_to_file(output_file, packet_list):

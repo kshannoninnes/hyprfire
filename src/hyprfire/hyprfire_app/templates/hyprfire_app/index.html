@@ -24,8 +24,9 @@
                 <div class="config_opt"> {{ form.window.label }}:{{ form.window }}</div>
                 <div class="config_opt"> {{ form.algorithm.label }}:{{ form.algorithm }}</div>
                 <div class="config_opt">{{ form.analysis.label }}: {{ form.analysis }}</div>
-                <input type="submit" class="w3-btn w3-block hf_btn w3-blue" value="Analyse">
+                <input type="submit" class="w3-btn w3-block hf_btn w3-blue" style="width: 45%" value="Analyse">
             </form>
+            <input type="submit" id="exportButton" class="w3-btn w3-block hf_btn w3-green" style="width: 45%; margin-left: 60%; position: absolute; display: inline-block" value="Export">
         </div>
 
        <h3 class="underlinexyz">Pre-Analysed Files</h3>
@@ -44,8 +45,43 @@
         {{ graph|safe }}
     </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>hehe
+    <script type="text/javascript">
+      var e = document.getElementById("id_filenames");
+      var fileName = e.options[e.selectedIndex].text;
+      var myDiv = document.getElementsByClassName('plotly-graph-div')[0];
+      var start_time = 0;
+      var end_time = 0;
+      myDiv.on('plotly_relayout',
+      function(data){  
+        start_time = data['xaxis.range[0]'];
+        end_time = data['xaxis.range[1]'];
+        console.log(data['xaxis.range[0]']);
+        console.log(data['xaxis.range[1]']);
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      });
+
+      $('#exportButton').click(function(event) {
+        event.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/download/",
+            data: JSON.stringify({ 
+                'filename': fileName,
+                'start': start_time,
+                'end': end_time,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }),
+            dataType: 'json',
+            success: function(result) {
+                alert('export successful');
+            },
+            error: function(result) {
+                alert('error');
+            }
+        });
+    });
+    </script>
     <script src="{% static 'hyprfire_app/main.js' %}"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
