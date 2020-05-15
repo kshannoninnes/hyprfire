@@ -1,7 +1,7 @@
 # packetdata.py: contains class information for a packet
 # Will be used in pcapconverter to represent each packet and be passed to n2dconverter
 # Author: Dean Quaife
-# Last edited: 2020/05/07
+# Last edited: 2020/05/15
 
 #represents a packet
 class PacketData:
