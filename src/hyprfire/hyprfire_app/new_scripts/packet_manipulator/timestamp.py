@@ -3,6 +3,9 @@ from datetime import datetime
 from hyprfire_app.exceptions import TimestampException
 from math import isinf
 
+# This timestamp represents the start of the year 3000
+MAX_TIMESTAMP = 32503680000
+
 
 def convert_to_editcap_format(timestamp):
     try:
@@ -24,5 +27,5 @@ def validate_timestamp(timestamp):
     if isinf(timestamp):
         raise TimestampException('Timestamp cannot be infinite')
 
-    if timestamp >= 32503680000:
+    if timestamp >= MAX_TIMESTAMP:
         raise TimestampException('Timestamp must be before the year 3000')
