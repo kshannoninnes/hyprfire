@@ -62,7 +62,6 @@ def get_plot(csvdata_list):
     fig.update_layout(title="Anomaly graph",
                       xaxis_title="Time Value (microseconds)",
                       yaxis_title="U Value")
-    fig.show()
     html_graph = plot(fig, output_type='div')
     return html_graph
 
