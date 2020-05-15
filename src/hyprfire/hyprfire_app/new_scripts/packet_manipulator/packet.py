@@ -1,39 +1,10 @@
-from scapy.all import PcapReader
-from scapy.layers.inet import TCP, UDP, IP
 from socket import getservbyport
+from scapy.layers.inet import IP, UDP, TCP
 
 UNKNOWN = 'N/A'
 
 
-def get_packet_data(file_path):
-    """
-    get_packet_data
-
-    Collect specific data on all packets in a pcap file
-
-    Parameters
-    file_path: full path to a pcap file
-
-    Return
-    A list of dictionaries containing each packet's timestamp, category, and source/destination ip addresses and ports
-    """
-    packet_data_list = []
-
-    with PcapReader(file_path) as reader:
-        for packet in reader:
-            packet_data = {
-                'timestamp': _get_timestamp(packet),
-                'category': _get_category(packet),
-                'ip_data': _get_ip_data(packet),
-                'transport_data': _get_transport_data(packet)
-            }
-
-            packet_data_list.append(packet_data)
-
-    return packet_data_list
-
-
-def _get_timestamp(packet):
+def get_timestamp(packet):
     """
     _get_timestamp(packet)
 
@@ -48,7 +19,7 @@ def _get_timestamp(packet):
     return str(packet.time)
 
 
-def _get_category(packet):
+def get_category(packet):
     """
     _get_category
 
@@ -68,7 +39,7 @@ def _get_category(packet):
     return category.upper()
 
 
-def _get_ip_data(packet):
+def get_ip_data(packet):
     """
     _get_ip_data
 
@@ -92,7 +63,7 @@ def _get_ip_data(packet):
     return ip_data
 
 
-def _get_transport_data(packet):
+def get_transport_data(packet):
     """
     _get_transport_data
 

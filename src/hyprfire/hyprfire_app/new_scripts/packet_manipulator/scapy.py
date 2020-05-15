@@ -1,5 +1,7 @@
 from scapy.utils import PcapWriter
 
+from hyprfire_app.new_scripts.packet_manipulator.packet import get_timestamp, get_category, get_ip_data, \
+    get_transport_data
 from hyprfire_app.utils.misc import floats_equal
 
 
@@ -47,3 +49,30 @@ def write_packets_to_file(output_file, packet_list):
 
     for packet in packet_list:
         writer.write(packet)
+
+
+def get_packet_data(packet_list):
+    """
+    get_packet_data
+
+    Collect specific data on all packets in a pcap file
+
+    Parameters
+    file_path: full path to a pcap file
+
+    Return
+    A list of dictionaries containing each packet's timestamp, category, and source/destination ip addresses and ports
+    """
+    packet_data_list = []
+
+    for packet in packet_list:
+        packet_data = {
+            'timestamp': get_timestamp(packet),
+            'category': get_category(packet),
+            'ip_data': get_ip_data(packet),
+            'transport_data': get_transport_data(packet)
+        }
+
+        packet_data_list.append(packet_data)
+
+    return packet_data_list

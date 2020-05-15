@@ -1,16 +1,21 @@
-from django.http import FileResponse, HttpResponse, JsonResponse
+from decimal import Decimal
+
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from hyprfire_app.forms import AnalyseForm
 from pathlib import Path
 from hyprfire_app.CacheHandler import ScriptProcessor
 
-from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
-from hyprfire_app.new_scripts.packet_manipulator import packet_data_collector
 from hyprfire.settings import BASE_DIR
 
-from hyprfire_app.exceptions import PacketRangeExportError, JSONError
+from hyprfire_app.exceptions import JSONError
+from hyprfire_app.new_scripts.packet_manipulator.editcap import create_packet_list
+from hyprfire_app.new_scripts.packet_manipulator.scapy import collect_packets, write_packets_to_file, get_packet_data
+from hyprfire_app.new_scripts.packet_manipulator.timestamp import validate_timestamp
 from hyprfire_app.utils.json import validate_json_length, load_json
+
+from tempfile import TemporaryFile
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -61,22 +66,31 @@ def download_pcap_snippet(request):
         data = load_json(request.body)
         validate_json_length(data, 3)
 
-        file_path = str(Path(BASE_DIR) / 'pcaps' / data['filename'])
-        start = data['start']
-        end = data['end']
+        file_path = Path(BASE_DIR) / 'pcaps' / data['filename']
+        start_timestamp = Decimal(data['start'])
+        end_timestamp = Decimal(data['end'])
 
-        output_path = packet_range_exporter.export_packets_in_range(file_path, start, end)
-        file = open(output_path, 'rb')
+        validate_timestamp(start_timestamp)
+        validate_timestamp(end_timestamp)
+        if not file_path.is_file():
+            raise FileNotFoundError('File Not Found.')
 
-        return FileResponse(file, as_attachment=True)
+        editcap_list = create_packet_list(file_path, start_timestamp, end_timestamp)
+        packet_list = collect_packets(editcap_list, start_timestamp, end_timestamp)
+
+        with TemporaryFile() as file:
+            write_packets_to_file(file, packet_list)
+            file.seek(0)
+            response = HttpResponse(file)
+            response['Content-Disposition'] = f'attachment; filename="{file_path.stem}-filtered.pcap"'
+
+            return response
 
     # TODO Log the errors to make sure problems are traceable
-    except PacketRangeExportError as e:
-        return HttpResponse(status=400, reason=e)
     except JSONError as e:
         return HttpResponse(status=400, reason=e)
     except FileNotFoundError as e:
-        return HttpResponse(status=404, reason='File Not Found.')
+        return HttpResponse(status=404, reason=e)
     except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
 
@@ -89,20 +103,24 @@ def collect_packet_data(request):
         data = load_json(request.body)
         validate_json_length(data, 3)
 
-        file_path = str(Path(BASE_DIR) / 'pcaps' / data['filename'])
-        start = data['start']
-        end = data['end']
+        file_path = Path(BASE_DIR) / 'pcaps' / data['filename']
+        start_timestamp = Decimal(data['start'])
+        end_timestamp = Decimal(data['end'])
 
-        output_path = packet_range_exporter.export_packets_in_range(file_path, start, end)
-        packet_data = {'data': packet_data_collector.get_packet_data(output_path)}
+        validate_timestamp(start_timestamp)
+        validate_timestamp(end_timestamp)
+        if not file_path.is_file():
+            raise FileNotFoundError('File Not Found.')
+
+        editcap_list = create_packet_list(file_path, start_timestamp, end_timestamp)
+        scapy_list = collect_packets(editcap_list, start_timestamp, end_timestamp)
+        packet_data = {'data': get_packet_data(scapy_list)}
 
         return JsonResponse(data=packet_data)
-    except PacketRangeExportError as e:
-        return HttpResponse(status=400, reason=e)
     except JSONError as e:
         return HttpResponse(status=400, reason=e)
     except FileNotFoundError as e:
-        return HttpResponse(status=404, reason='File Not Found.')
+        return HttpResponse(status=404, reason=e)
     except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
 
