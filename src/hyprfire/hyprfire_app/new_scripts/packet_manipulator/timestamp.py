@@ -3,11 +3,22 @@ from datetime import datetime
 from hyprfire_app.exceptions import TimestampException
 from math import isinf
 
-# This timestamp represents the start of the year 3000
+# This timestamp represents 3000-01-01 00:00:00
 MAX_TIMESTAMP = 32503680000
 
 
 def convert_to_editcap_format(timestamp):
+    """
+    convert_to_editcap_format
+
+    Convert a timestamp into a format suitable for editcap
+
+    Parameters
+    timestamp: an integer representing an epoch timestamp
+
+    Return
+    A datetime representation of the timestamp in the format YYYY-MM-DD hh:mm:ss
+    """
     try:
         start_timestamp = int(timestamp)
         validate_timestamp(start_timestamp)
@@ -16,11 +27,17 @@ def convert_to_editcap_format(timestamp):
         return formatted_start
     except ValueError:
         raise TimestampException('Timestamp must be a number')
-    except OverflowError:
-        raise TimestampException('Timestamp cannot be larger than a 64 bit integer')
 
 
 def validate_timestamp(timestamp):
+    """
+    validate_timestamp
+
+    A timestamp is valid if it represents a date between 1970-01-01 00:00:00 and 3000-01-01 00:00:00
+
+    Parameters
+    timestamp: an integer representing an epoch timestamp
+    """
     if timestamp < 0:
         raise TimestampException('Timestamp cannot be less than zero')
 
