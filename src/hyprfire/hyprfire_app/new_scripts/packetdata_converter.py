@@ -8,8 +8,6 @@ Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
 from operator import itemgetter
 import time
 
-from hyprfire_app.new_scripts.packetdata import PacketData
-from hyprfire_app.new_scripts.dumpfile import Dumpfile
 import hyprfire_app.new_scripts.benfords_analysis as ba
 import hyprfire_app.new_scripts.zipf_analysis as za
 import multiprocessing as mp
