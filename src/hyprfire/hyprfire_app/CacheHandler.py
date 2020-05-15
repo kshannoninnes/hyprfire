@@ -3,12 +3,38 @@
 
 import os
 from .scripts import plotting as plot
+from .new_scripts import pcapconverter, n2dconverter
+from .models import Data
 
 
-def ScriptProcessor(file_name, algorithm_type, windowsize):
+def CacheHandler(file_name, algorith_type, windowsize, analysis):
+
+    result = Data.objects.filter(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
+
+    if len(result) != 0:
+        print("Item already exists in the database.... pulling cached data")
+        csv_data = Data.objects.get(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
+        # csv_data = json_to_list(csv_data)
+        print(csv_data.data)
+
+    else:
+        csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
+        plot_data = list_to_array(csv_data)
+        database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
+                                       analysis=analysis, data=plot_data)
+        database.save()
+
+
+    #response = plot.get_plot(csv_data)
+
+    return
+
+
+def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
     """
      ScriptProcessor
-     Compiles all of Stefan Prandl's old scripts to turn a single pcap file into a csv of either benford or zipf
+     Uses the new scripts that were derived from Stefan's old Script. Uses memory based handling instead of reading
+     and creating new files
 
      Parameters
      filename: the base pcap file (found in the hyprfire/pcaps directory)
@@ -19,70 +45,44 @@ def ScriptProcessor(file_name, algorithm_type, windowsize):
      HTML/JavaScript to display a plotly generated graph based on the data from the pcap
      """
 
-    pcaptoN2D = os.path.abspath("hyprfire_app/old_scripts/PcapToN2DConverter.py")
-    newbasics = os.path.abspath("hyprfire_app/old_scripts/NewBasics3.py")
-
     # Checks if arguments being passed through is valid
-    if arguments_valid(file_name, algorithm_type, windowsize):
+    if arguments_valid(file_name, algorithm_type, windowsize, analysis):
 
-        # This section is temporary, new scripts will be replacing this messy section
-
-        os_command = 'bash -c "tcpdump -nnr ' + file_name + ' >> ' + file_name + '.tcpd"'
-        print(os_command)
-        os.system(os_command)
-
-        pcapconvertcommand = 'bash -c "python3 ' + pcaptoN2D + ' ' + file_name + '.tcpd"'
-        print(pcapconvertcommand)
-        os.system(pcapconvertcommand)
-
-        mv_tcpd = 'bash -c "rm ' + file_name + '.tcpd"'
-        print(mv_tcpd)
-        os.system(mv_tcpd)
-
-        # Checks what type of alrgorithm to use
+        dumpfile = pcapconverter.pcapConverter(file_name)
 
         if algorithm_type == 'Benford':
 
-            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + file_name + '.tcpd.n2d +b +t"'
-            print(newbasiccommand)
-            file_type = 'benf_time'
-            os.system(newbasiccommand)
+            algorithm = 'b'
 
         elif algorithm_type == 'Zipf':
 
-            newbasiccommand = 'bash -c "python3 ' + newbasics + ' ' + '--win ' + windowsize + ' ' + file_name + '.tcpd.n2d +z +t"'
-            print(newbasiccommand)
-            file_type = 'zipf_time'
-            os.system(newbasiccommand)
+            algorithm = 'z'
 
         else:
-            print("Enter a proper configuration item, please")
+            raise ValueError("Incorrect Algorithm Type")
 
-        # This is just moving the csv file to a temporary file for now, will be removed when new scripts come in
+        if analysis == 'Length':
 
-        mv_n2d = 'bash -c "rm ' + file_name + '.tcpd.n2d"'
-        print(mv_n2d)
-        os.system(mv_n2d)
+            analysis_type = 'l'
 
-        csv_file = file_name + '.tcpd.n2d' + '_' + file_type + '.csv'
+        elif analysis == 'Time':
 
-        # Get the plotly graph to return to the views.py
-        response = plot.get_plot(csv_file)
+            analysis_type = 't'
 
-        temp = os.path.abspath("temp")
-        mv_csv = 'bash -c "mv ' + csv_file + ' ' + temp + '"'
-        print(mv_csv)
-        os.system(mv_csv)
+        else:
+            raise ValueError("Incorrect Analysis type")
+
+        csv_data = n2dconverter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
 
         print("SCRIPT PROCESSOR is DONE!")
 
-        return response
+        return csv_data
 
     else:
-        raise ValueError("Error in Processing Arguments: filenames, algorithm, windowsize")
+        raise ValueError("Error in Processing Arguments: filenames, algorithm, windowsize or analysis type")
 
 
-def arguments_valid(name, algorithm, size):
+def arguments_valid(name, algorithm, size, analysis):
     """
     Function Name: arguments_valid
     This function checks if the configuration items sent from the front end are valid
@@ -93,7 +93,7 @@ def arguments_valid(name, algorithm, size):
     :return: True if all checks passes, False if at least one fails
     """
 
-    if check_filename(name) and check_config(algorithm) and check_size(size):
+    if check_filename(name) and check_config(algorithm) and check_size(size) and check_analysis(analysis):
         check = True
     else:
         check = False
@@ -154,3 +154,37 @@ def check_size(size):
         results = True
 
     return results
+
+
+def check_analysis(analysis):
+    """
+    Function Name: check_analysis
+    Checks the analysis variable that was passed through, it is checking if it is length vs time based.
+
+    :param analysis: a string that identifies a configuration option (time/length)
+    :return: response, a boolean type variable.
+    """
+    if analysis == 'Time':
+        response = True
+    elif analysis == 'Length':
+        response = True
+    else:
+        response = False
+
+    return response
+
+
+def list_to_array(csvlist):
+
+    array = []
+    for items in csvlist:
+        timestamp = str(items.timestamp)
+        uvalue = str(items.uvalue)
+        start_epoch = str(items.start_epoch)
+        end_epoch = str(items.end_epoch)
+
+        string = 'timestamp=' + timestamp + ',uvalue=' + uvalue + ',start_epoch=' + start_epoch + ',end_epoch=' + end_epoch + '\n'
+
+        array.append(string)
+
+    return array

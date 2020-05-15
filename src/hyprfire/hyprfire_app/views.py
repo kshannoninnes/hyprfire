@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 from .forms import AnalyseForm
-import os
-from .CacheHandler import ScriptProcessor
+from pathlib import Path
+from .CacheHandler import CacheHandler
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -18,8 +18,9 @@ def index(request):
             filename = form.cleaned_data['filenames']
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
+            analysis = form.cleaned_data['analysis']
 
-            response = ScriptProcessor(filename, algorithm, window)
+            response = CacheHandler(filename, algorithm, window, analysis)
 
             return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
 
@@ -30,11 +31,11 @@ def index(request):
 
 
 def get_filenames():
-    file_list = os.listdir(monitored_dir)
+    file_list = Path(monitored_dir).glob('*')
     filenames = []
-    for file in file_list:
-        name = file.title().lower()
-        if name not in blacklist:
-            filenames.append(os.path.splitext(name)[0])
+    for path in file_list:
+        name = path.stem.lower()
+        if path.is_file() and name not in blacklist:
+            filenames.append(name)
 
     return filenames
