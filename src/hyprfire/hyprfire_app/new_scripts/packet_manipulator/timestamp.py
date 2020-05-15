@@ -6,8 +6,8 @@ from math import isinf
 
 def convert_to_editcap_format(timestamp):
     try:
-        validate_timestamp(timestamp)
         start_timestamp = int(timestamp)
+        validate_timestamp(start_timestamp)
         formatted_start = datetime.fromtimestamp(start_timestamp)
 
         return formatted_start
