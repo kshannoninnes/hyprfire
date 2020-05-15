@@ -4,20 +4,17 @@ from hyprfire_app.exceptions import TimestampException
 from math import isinf
 
 
-def convert_to_editcap_format(start, end):
-    # CAN THROW SOMETHING EXCEPTION?!
-    start_timestamp = int(start)
-    end_timestamp = int(end)
+def convert_to_editcap_format(timestamp):
+    try:
+        validate_timestamp(timestamp)
+        start_timestamp = int(timestamp)
+        formatted_start = datetime.fromtimestamp(start_timestamp)
 
-    # editcap can only capture packets with a 1s gap (eg. 16:47:24 - 16:47:24 will result in an empty file)
-    if start_timestamp == end_timestamp:
-        end_timestamp += 1
-
-    # editcap requires timestamps in the format of "YYYY-MM-DD hh:mm:ss"
-    formatted_start = datetime.fromtimestamp(start_timestamp)
-    formatted_end = datetime.fromtimestamp(end_timestamp)
-
-    return formatted_start, formatted_end
+        return formatted_start
+    except ValueError:
+        raise TimestampException('Timestamp must be a number')
+    except OverflowError:
+        raise TimestampException('Timestamp cannot be larger than a 64 bit integer')
 
 
 def validate_timestamp(timestamp):
@@ -26,3 +23,6 @@ def validate_timestamp(timestamp):
 
     if isinf(timestamp):
         raise TimestampException('Timestamp cannot be infinite')
+
+    if timestamp >= 32503680000:
+        raise TimestampException('Timestamp must be before the year 3000')

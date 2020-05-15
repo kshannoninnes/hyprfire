@@ -1,4 +1,5 @@
 import subprocess
+from datetime import timedelta
 from pathlib import Path
 
 from scapy.all import PcapReader
@@ -29,7 +30,11 @@ def create_packet_list(input_file, start_second, end_second):
     validate_timestamp(end_second)
 
     temp_file = 'temp-editcapped-file.pcap'
-    start, end = convert_to_editcap_format(start_second, end_second)
+    start = convert_to_editcap_format(start_second)
+    end = convert_to_editcap_format(end_second)
+
+    if start == end:
+        end += timedelta(seconds=1)
 
     editcap_command = f'editcap -A "{start}" -B "{end}" "{input_file}" "{temp_file}"'
     subprocess.call(editcap_command)
