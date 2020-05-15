@@ -12,7 +12,7 @@ import unittest
 class TestUnit(unittest.TestCase):
 
     def setUp(self):
-        pcapfile = 'test_files/testfile.pcap.gz'
+        pcapfile = '../test_files/testfile.pcap.gz'
         self.pcapdata = pcapConverter(pcapfile)
 
     def test_invalid_analysis_value(self):
