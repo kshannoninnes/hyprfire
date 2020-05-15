@@ -21,6 +21,10 @@ class MyTestCase(unittest.TestCase):
         data = "Invalid"
         self.assertRaises(TypeError, plot_csvdata.get_plot, data)
 
-
+    def test_customdata(self):
+        graph = plot_csvdata.get_plot(self.csvdata)
+        expected = '"customdata": [[1422423.4, 1565756.5], [1576457.6, 1664468.7], [1674534.6, 1735324.7], ' \
+                   '[1783643.9, 1845545.6], [1845454.4, 1945454.8]]'
+        self.assertIn(expected, graph)
 
 
