@@ -1,5 +1,5 @@
 from django.test import TestCase
-from hyprfire_app.new_scripts.data_extractor import get_packet_data
+from hyprfire_app.new_scripts.packet_manipulator.packet_data_collector import get_packet_data
 from scapy.all import PcapReader
 from random import randint
 from hyprfire_app.utils.testing import remove_test_files, TEST_FILE
