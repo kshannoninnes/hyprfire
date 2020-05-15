@@ -4,28 +4,36 @@ import bz2
 
 
 # ===============================================================================
-# GetInterArrivalTimes
+# get_interarrival_times
 # Takes a list of arrival times, finds out what the interarrival times are.
 def get_interarrival_times(microsecondlist):
     current_time = 0
     time_diff_list = []
     try:
         current_time = microsecondlist[0]
-    except Exception:
+    except ValueError:
         current_time = microsecondlist.next()
 
     for time in microsecondlist:
-        time_diff_list.append(time - current_time)
+        time_diff = time - current_time
+        if time_diff >= 0:
+            time_diff_list.append(time_diff)
+        else:
+            raise ValueError(time_diff, "Time difference can't be negative")
         current_time = time
 
     return time_diff_list
 
 
 # ================================================================================
-# GetBenfordsBuckets
+# get_benfords_buckets
 # Takes a list of numbers, and a digit index, spits out the benford's prob of the indexth digit
 def get_benfords_buckets(number_list, index):
-    real_index = index - 1
+    if index >= 1:
+        real_index = index - 1
+    else:
+        print("Invalid index: must be a number greater than or equal to 1")
+        raise ValueError
     bucket_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     probability_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     total_valid_entries = 0
@@ -48,9 +56,9 @@ def get_benfords_buckets(number_list, index):
 
 
 # ================================================================================
-# GetBetterBenfordSeries
+# get_benfords_series
 # Takes an index, returns the relevant Benfords Series
-def get_benford_series(index):
+def get_benfords_series(index):
     if index == 1:
         return [0.301, 0.176, 0.125, 0.097, 0.079, 0.067, 0.058, 0.051, 0.046]
     elif index == 2:
@@ -62,9 +70,11 @@ def get_benford_series(index):
 
 
 # =================================================================================
-# GetBenfordsU
+# get_benfords_u_value
 # Does the Watson variant of the Cramer von Mises test against the Benfords Series.
-def get_benford_u_value(probability_list, benfords_index):
+def get_benfords_u_value(probability_list, benfords_index):
+    if benfords_index <= 0:
+        raise ValueError(benfords_index, "Invalid Index: it has to be a number higher than or equal to one")
     n = 10
     if benfords_index == 1:
         n = 9
@@ -78,7 +88,7 @@ def get_benford_u_value(probability_list, benfords_index):
 
 
 # =================================================================================
-# AccumulateTo
+# accumulate_to
 # Accumulates to an index of the list
 def accumulate_to(in_list, index):
     total = 0
@@ -88,16 +98,16 @@ def accumulate_to(in_list, index):
 
 
 # =================================================================================
-# GetWatsonZed
+# get_watson_z_value
 # gets the Z value for a certain index and benfords index
 def get_watson_z_value(benfords_index, list_index, in_list):
-    benford_list = get_benford_series(benfords_index)
+    benford_list = get_benfords_series(benfords_index)
     z_value = accumulate_to(in_list, list_index) - accumulate_to(benford_list, list_index)
     return z_value
 
 
 # =================================================================================
-# GetWatsonZedBar
+# get_watson_z_bar
 # gets the Z-bar value for a benfords list and a list of probability
 def get_watson_z_bar(benfords_index, in_list):
     total_elements = 10
@@ -111,7 +121,7 @@ def get_watson_z_bar(benfords_index, in_list):
 
 
 # =================================================================================
-# GetWatsonWeight
+# get_watson_weight
 # gets the t value (weight) for any given list index and benford index
 def get_watson_weight(list_index, in_list):
     weight = 0
