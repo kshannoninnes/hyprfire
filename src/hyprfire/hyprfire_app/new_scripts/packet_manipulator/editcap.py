@@ -7,7 +7,7 @@ from hyprfire_app.exceptions import EditcapException
 from hyprfire_app.new_scripts.packet_manipulator.timestamp import convert_to_editcap_format, validate_timestamp
 
 
-def slice_with_editcap(input_file, start_second, end_second):
+def create_packet_list(input_file, start_second, end_second):
     """
     slice_with_editcap
 
@@ -34,10 +34,21 @@ def slice_with_editcap(input_file, start_second, end_second):
     editcap_command = f'editcap -A "{start}" -B "{end}" "{input_file}" "{temp_file}"'
     subprocess.call(editcap_command)
 
-    return _create_list_from(temp_file)
+    return _create_list_from_file(temp_file)
 
 
-def _create_list_from(file):
+def _create_list_from_file(file):
+    """
+    _create_list_from
+
+    Create a packet list from a pcap file
+
+    Parameters
+    file: the pcap file to listify
+
+    Return
+    A list containing all the packets in file
+    """
     with PcapReader(file) as reader:
         packet_list = reader.read_all()
     Path(file).unlink()
