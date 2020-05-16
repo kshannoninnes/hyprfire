@@ -63,6 +63,8 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
     # Checks if arguments being passed through is valid
     if arguments_valid(file_name, algorithm_type, windowsize, analysis):
 
+        print("Starting Sprint Processor")
+
         dumpfile = pcapconverter.pcapConverter(file_name)
 
         if algorithm_type == 'Benford':
@@ -88,11 +90,10 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
             raise ValueError("Incorrect Analysis type")
 
         csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
-
+        print(csv_data)
         print("SCRIPT PROCESSOR is DONE!")
 
         response = plot_csvdata.get_plot(csv_data)
-
         return response # csv_data is the real return value for this method. Commenting out so we can skip the databasing for now.
 
     else:
