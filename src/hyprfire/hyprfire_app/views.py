@@ -1,15 +1,13 @@
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
-
 from hyprfire_app.forms import AnalyseForm
 from pathlib import Path
-from hyprfire_app.CacheHandler import ScriptProcessor
-
 from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 from hyprfire.settings import BASE_DIR
-
 from hyprfire_app.exceptions import PacketRangeExportError, JSONError
 from hyprfire_app.utils.json import validate_json_length, load_json
+from .CacheHandler import CacheHandler, ScriptProcessor
+
 
 monitored_dir = 'pcaps'
 blacklist = [
@@ -25,8 +23,10 @@ def index(request):
             filename = form.cleaned_data['filenames']
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
+            analysis = form.cleaned_data['analysis']
 
-            response = ScriptProcessor(filename, algorithm, window)
+            #response = CacheHandler(filename, algorithm, window, analysis)
+            response = ScriptProcessor(filename, algorithm, window, analysis)
 
             return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
 
