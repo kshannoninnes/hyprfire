@@ -1,42 +1,31 @@
 from decimal import Decimal
 
-from django.urls import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from hyprfire_app import views
+from hyprfire_app.utils import json
 
 
 def post(client, data):
-    return client.post(path=reverse(views.download_pcap_snippet), data=data, content_type='application/json')
+    return client.post(path=reverse(views.collect_packet_data), data=data, content_type='application/json')
 
 
-class DownloadPcapSnippetTests(TestCase):
+class CollectPacketDataTestCase(TestCase):
 
     def setUp(self):
-        """
-        setUp
-
-        Ensure we have a valid data set before each test
-        """
         self.data = {
             'filename': 'testdump',
-            'start': '1588259869.842212489',
-            'end': '1588259869.845959007'
-            }
+            'start': '1588259850.741137926',
+            'end': '1588259850.747131652'
+        }
 
-    def test_correct(self):
-        """
-        test_zero_start
-
-        A timestamp value of zero is considered valid
-        """
+    def test_correct_data(self):
         response = post(self.client, self.data)
+        data = json.load_json(response.content)['data']
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['Content-Disposition'],
-                         f'attachment; filename="{self.data["filename"]}-filtered.pcap"')
-
-    """ FAIL TEST CASES """
+        self.assertEqual(len(data), 5)
 
     def test_bad_request(self):
         """
@@ -74,4 +63,3 @@ class DownloadPcapSnippetTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(str(response.reason_phrase), 'File Not Found.')
-

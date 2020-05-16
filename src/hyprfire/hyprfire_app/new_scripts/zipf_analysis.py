@@ -2,7 +2,7 @@ import math
 
 
 # =================================================================================
-# GetZipfBuckets
+# get_zipf_buckets
 # Takes in a list of numbers, returns the top ten buckets
 def get_zipf_buckets(values_list):
     bucket = {}
@@ -21,7 +21,7 @@ def get_zipf_buckets(values_list):
 
 
 # =================================================================================
-# GenZipfSeries
+# get_zipf_series
 # Takes in a number, returns the supposed top ten
 def get_zipf_series(number):
     top_list = [number]
@@ -31,7 +31,7 @@ def get_zipf_series(number):
 
 
 # =================================================================================
-# GetZipfU
+# get_zipf_u_value
 # Does the Watson variant of the Cramer von Mises test against the Zipf Series.
 def get_zipf_u_value(probability_list):
     n = 10
@@ -44,7 +44,7 @@ def get_zipf_u_value(probability_list):
 
 
 # =================================================================================
-# AccumulateTo
+# accumulate_to
 # Accumulates to an index of the list
 def accumulate_to(in_list, index):
     total = 0
@@ -54,7 +54,7 @@ def accumulate_to(in_list, index):
 
 
 # =================================================================================
-# GetWatsonZed
+# get_watson_z_value
 # gets the Z value for a certain index and zipf index
 def get_watson_z_value(list_index, in_list):
     zipf_list = get_zipf_series(in_list[0])
@@ -63,7 +63,7 @@ def get_watson_z_value(list_index, in_list):
 
 
 # =================================================================================
-# GetWatsonZedBar
+# get_watson_z_bar
 # gets the Z-bar value for a benfords list and a list of probability
 def get_watson_z_bar(in_list):
     total_elements = 10
@@ -75,16 +75,19 @@ def get_watson_z_bar(in_list):
 
 
 # =================================================================================
-# GetWatsonWeight
+# get_watson_weight
 # gets the t value (weight) for any given list index and zipf index
 def get_watson_weight(list_index, in_list):
     weight = 0
 
-    if list_index == (len(in_list) - 1):
-        weight = in_list[list_index] + in_list[0]
-        weight = weight / 2
-    else:
-        weight = in_list[list_index] + in_list[list_index + 1]
-        weight = weight / 2
+    try:
+        if list_index == (len(in_list) - 1):
+            weight = in_list[list_index] + in_list[0]
+            weight = weight / 2
+        else:
+            weight = in_list[list_index] + in_list[list_index + 1]
+            weight = weight / 2
+    except IndexError:
+        raise IndexError
     return weight
 # =================================================================================
