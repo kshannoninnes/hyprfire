@@ -3,17 +3,18 @@ from decimal import Decimal
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
-from hyprfire.settings import BASE_DIR
 from hyprfire_app.forms import AnalyseForm
-from hyprfire_app.CacheHandler import ScriptProcessor
-
-from hyprfire_app.exceptions import JSONError
-from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
 from hyprfire_app.new_scripts.kalon.packet_filter import PacketFilter
 from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file, get_pcap_files_from
 from hyprfire_app.new_scripts.kalon.timestamp import validate_timestamp
 from hyprfire_app.new_scripts.kalon.validation import validate_file_path
+from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
+
+from hyprfire.settings import BASE_DIR
+from hyprfire_app.exceptions import JSONError
 from hyprfire_app.utils.json import validate_json_length, load_json
+from .CacheHandler import ScriptProcessor
+
 
 from tempfile import TemporaryFile
 
@@ -30,8 +31,9 @@ def index(request):
             filename = form.cleaned_data['filenames']
             window = form.cleaned_data['window']
             algorithm = form.cleaned_data['algorithm']
+            analysis = form.cleaned_data['analysis']
 
-            response = ScriptProcessor(filename, algorithm, window)
+            response = ScriptProcessor(filename, algorithm, window, analysis)
 
             return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
 
