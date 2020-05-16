@@ -10,7 +10,13 @@ from hyprfire_app.new_scripts.kalon import timestamp
 class TimestampTest(TestCase):
 
     @patch('hyprfire_app.new_scripts.kalon.timestamp.validate_timestamp')
-    def test_correct_timestamp(self, mock_validate_timestamp):
+    def test_correct_timestamp_returns_correct_format(self, mock_validate_timestamp):
+        """
+        test_correct_timestamp
+
+        convert_to_editcap_format should call validate_function once with the provided timestamp
+        then return that value
+        """
         ts = 100
         expected_output = datetime.fromtimestamp(ts)
         actual_output = timestamp.convert_to_editcap_format(ts)
@@ -18,7 +24,7 @@ class TimestampTest(TestCase):
         mock_validate_timestamp.assert_called_once_with(100)
         self.assertEqual(expected_output, actual_output)
 
-    def test_incorrect_timestamp(self):
+    def test_incorrect_timestamp_raises_exception(self):
         """
         test_incorrect_timestamp
 
@@ -29,7 +35,7 @@ class TimestampTest(TestCase):
 
         self.assertRaises(TimestampException, timestamp.convert_to_editcap_format, ts)
 
-    def test_timestamps_equal(self):
+    def test_equal_timestamps_true(self):
         """
         test_timestamps_equal
 
@@ -41,7 +47,7 @@ class TimestampTest(TestCase):
 
         self.assertTrue(timestamp.timestamps_equal(first_ts, second_ts))
 
-    def test_timestamps_not_equal(self):
+    def test_unequal_timestamps_false(self):
         """
         test_timestamps_not_equal
 
