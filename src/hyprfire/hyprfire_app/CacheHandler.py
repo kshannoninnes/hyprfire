@@ -63,6 +63,8 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
     # Checks if arguments being passed through is valid
     if arguments_valid(file_name, algorithm_type, windowsize, analysis):
 
+        print("Starting ScriptProcessor")
+
         dumpfile = pcapconverter.pcapConverter(file_name)
 
         if algorithm_type == 'Benford':
@@ -90,6 +92,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
         csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
 
         print("SCRIPT PROCESSOR is DONE!")
+        print(csv_data)
 
         response = plot_csvdata.get_plot(csv_data)
 
