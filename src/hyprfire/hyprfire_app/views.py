@@ -6,7 +6,7 @@ from hyprfire_app.new_scripts.packet_manipulator import packet_range_exporter
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import PacketRangeExportError, JSONError
 from hyprfire_app.utils.json import validate_json_length, load_json
-from .CacheHandler import CacheHandler
+from .CacheHandler import CacheHandler, ScriptProcessor
 
 
 monitored_dir = 'pcaps'
@@ -25,7 +25,8 @@ def index(request):
             algorithm = form.cleaned_data['algorithm']
             analysis = form.cleaned_data['analysis']
 
-            response = CacheHandler(filename, algorithm, window, analysis)
+            #response = CacheHandler(filename, algorithm, window, analysis)
+            response = ScriptProcessor(filename, algorithm, window, analysis)
 
             return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
 
