@@ -2,32 +2,47 @@
 # The file must be able to handle the configuration items that have been sent from the analyze request.
 
 import os
-from .scripts import plotting as plot
-from .new_scripts import pcapconverter, n2dconverter
+from .new_scripts import pcapconverter, packetdata_converter, plot_csvdata
 from .models import Data
 
 
 def CacheHandler(file_name, algorith_type, windowsize, analysis):
+    """
+    CacheHandler
+    This function does the "caching" section of the application. It does a quick check in the database if there is an
+    item that has the exact: filename, algorithm_type, windowsize and analysis.
+    If it does it will then grab it from the data instead.
 
+    Else it will run the ScriptProcessor, then save the data to the database at the end.
+
+    :param file_name: the filepath/name of the pcap file to search for/process
+    :param algorith_type: either Benford or Zipf
+    :param windowsize: an integer on
+    :param analysis:
+    :return:
+    """
+
+    # Gets a queryset from the database on how many Data of the same filename, algorithm, windowsize and analysis
     result = Data.objects.filter(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
 
     if len(result) != 0:
+        # If it is more than 0 then it exists in the database, and just pull the data from there.
         print("Item already exists in the database.... pulling cached data")
         csv_data = Data.objects.get(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
-        # csv_data = json_to_list(csv_data)
-        print(csv_data.data)
+        csv_data = csv_data.data
 
     else:
         csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
-        plot_data = list_to_array(csv_data)
+
+        # Create a new Object (ORM)
         database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
-                                       analysis=analysis, data=plot_data)
+                                       analysis=analysis, data=csv_data)
+        # Save it to the database
         database.save()
 
+    response = plot_csvdata.get_plot(csv_data)
 
-    #response = plot.get_plot(csv_data)
-
-    return
+    return response
 
 
 def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
@@ -72,7 +87,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
         else:
             raise ValueError("Incorrect Analysis type")
 
-        csv_data = n2dconverter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
+        csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
 
         print("SCRIPT PROCESSOR is DONE!")
 
@@ -143,15 +158,14 @@ def check_size(size):
     Checks the size of the Window for analysis, currently it is checking if it is either 1000 or 2000, (subject to change)
 
     :param size: a string that is converted to an integer
-    :return: True if size is either 1000 or 2000, False otherwise
+    :return: True if size is greater than 0, a value error if it is not
     """
     int_size = int(size)
-    results = False
 
-    if int_size == 1000:
+    if int_size > 0:
         results = True
-    elif int_size == 2000:
-        results = True
+    else:
+        raise ValueError("Cannot have a window size less than or equal to 0")
 
     return results
 
@@ -173,18 +187,3 @@ def check_analysis(analysis):
 
     return response
 
-
-def list_to_array(csvlist):
-
-    array = []
-    for items in csvlist:
-        timestamp = str(items.timestamp)
-        uvalue = str(items.uvalue)
-        start_epoch = str(items.start_epoch)
-        end_epoch = str(items.end_epoch)
-
-        string = 'timestamp=' + timestamp + ',uvalue=' + uvalue + ',start_epoch=' + start_epoch + ',end_epoch=' + end_epoch + '\n'
-
-        array.append(string)
-
-    return array
