@@ -1,51 +1,54 @@
+from datetime import datetime
+from unittest.mock import patch
+
 from django.test import TestCase
 
 from hyprfire_app.exceptions import TimestampException
-from hyprfire_app.new_scripts.packet_manipulator import timestamp
+from hyprfire_app.new_scripts.kalon import timestamp
 
 
 class TimestampTest(TestCase):
 
-    # noinspection PyMethodMayBeStatic
-    def test_zero_timestamp(self):
-        """
-        test_zero_timestamp
+    @patch('hyprfire_app.new_scripts.kalon.timestamp.validate_timestamp')
+    def test_correct_timestamp(self, mock_validate_timestamp):
+        ts = 100
+        expected_output = datetime.fromtimestamp(ts)
+        actual_output = timestamp.convert_to_editcap_format(ts)
 
-        A zero timestamp shouldn't throw any exceptions
-        """
-        timestamp.validate_timestamp(0)
+        mock_validate_timestamp.assert_called_once_with(100)
+        self.assertEqual(expected_output, actual_output)
 
-    def test_invalid_timestamp_format(self):
+    def test_incorrect_timestamp(self):
         """
-        test_invalid_timestamp_format
+        test_incorrect_timestamp
 
-        A timestamp with an incorrect format (eg. a string) should raise a TimestampException
+        An invalid timestamp should raise a TimestampException. If another exception is raised,
+        something broke with the validate_timestamp call in convert_to_editcap_format
         """
-        self.assertRaises(TimestampException, timestamp.convert_to_editcap_format, 'hello')
+        ts = 'hello'
 
-    def test_too_large_timestamp(self):
+        self.assertRaises(TimestampException, timestamp.convert_to_editcap_format, ts)
+
+    def test_timestamps_equal(self):
         """
-        test_too_large_timestamp
+        test_timestamps_equal
 
-        A timestamp that that is larger than 64 bit integer maximum should throw a TimestampException
+        Two timestamps should be considered equal if they are the same to 9 decimal places
         """
-        # This integer is the epoch timestamp for 3000-01-01 00:00:00
-        max_int = 32503680000
+        # Different at 10th dp
+        first_ts = 2.0000000001
+        second_ts = 2.0000000003
 
-        self.assertRaises(TimestampException, timestamp.convert_to_editcap_format, max_int)
+        self.assertTrue(timestamp.timestamps_equal(first_ts, second_ts))
 
-    def test_infinite_timestamp(self):
+    def test_timestamps_not_equal(self):
         """
-        test_infinite_timestamp
+        test_timestamps_not_equal
 
-        An infinite timestamp should raise a TimestampException
+        Two timestamps should not be considered equal if they are different to the 9th decimal place
         """
-        self.assertRaises(TimestampException, timestamp.validate_timestamp, float("inf"))
+        # Different at 9th dp
+        first_ts = 2.000000001
+        second_ts = 2.000000003
 
-    def test_negative_start(self):
-        """
-        test_negative_start
-
-        A negative start time should raise a TimestampException
-        """
-        self.assertRaises(TimestampException, timestamp.validate_timestamp, -1)
+        self.assertFalse(timestamp.timestamps_equal(first_ts, second_ts))
