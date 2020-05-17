@@ -69,17 +69,8 @@
       });
 
       $('#exportButton').click(function(event) {
-        event.preventDefault();
-        $.ajax({
-            type: "GET",
-            url: '/download/'+fileName+'/'+start+'/'+end,
-            success: function(result) {
-                alert('export successful');
-            },
-            error: function(result) {
-                alert('error');
-            }
-        });
+        curUrl = window.location;
+        window.location = curUrl.protocol + '//' + curUrl.host + '/' + `download/${fileName}/${start}/${end}/`
     });
     </script>
     <script src="{% static 'hyprfire_app/main.js' %}"></script>
