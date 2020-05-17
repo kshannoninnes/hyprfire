@@ -92,9 +92,8 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
         csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
 
         print("SCRIPT PROCESSOR is DONE!")
-        print(csv_data)
 
-        return csv_data # csv_data is the real return value for this method. Commenting out so we can skip the databasing for now.
+        return csv_data
 
     else:
         raise ValueError("Error in Processing Arguments: filenames, algorithm, windowsize or analysis type")

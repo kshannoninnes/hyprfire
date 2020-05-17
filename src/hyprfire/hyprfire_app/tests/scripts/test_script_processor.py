@@ -7,35 +7,45 @@ Multiple functions will try different scenarios, causing the Script Processor to
 from django.test import TestCase
 from hyprfire_app import CacheHandler as ch
 import os
+from hyprfire_app.models import Data
+
+filename = os.path.abspath('hyprfire_app/tests/test_files/testdump')
 
 
-class ScriptProcessorTestCase(TestCase):
+class CacheHandlerTestCase(TestCase):
 
-    def test_valid_arguments(self):
+    def test_valid_arguments_none_cache(self):
         """
-        This test function will run ScriptProcessor with everything valid.
-        If there is a file inside the ../../temp/ directory named: "testdump.tcpd.n2d_benf_time.csv
-        This test function will return True.
+        This test function will run and test a none cached data
+        It will check if the a string will be returned at the end with no error.
 
         The test file will be: testdump
 
-        :return: True if a csv file is then created.
+        :return: True if a plotly, html graph has been created.
+        """
+        valid1 = ch.CacheHandler(filename, 'Benford', '1000', 'Time')
+        valid2 = ch.CacheHandler(filename, 'Zipf', '2000', 'Length')
+
+        self.assertIsInstance(valid1, str)
+        self.assertIsInstance(valid2, str)
+
+    def test_valid_arguments_cached(self):
+        """
+        This test function will run and test cached data. It will not go through Script Processor but instead
+        go through the cached data.
+
+        It will create a model, thats going to duplicate the inside of the data
+
+        :return: True if a string is returned.
         """
 
-        filename = os.path.abspath('../hyprfire/pcaps/testdump')
+        data = Data.objects.create(filename=filename, algorithm='Zipf', window_size=1000, analysis='Time', data="{}")
+        data.save()
 
-        result_file = os.path.abspath("../hyprfire/temp/testdump.tcpd.n2d_benf_time.csv")
+        valid1 = ch.CacheHandler(filename, 'Zipf', '1000', 'Time')
 
-        ch.ScriptProcessor(filename, 'Benford', '1000')
+        # self.AssertIsInstance(valid1, str)
 
-        if os.path.exists(result_file):
-            print("csv test file found")
-            answer = True
-        else:
-            print("csv test file not found")
-            answer = False
-
-        return answer
 
     def test_invalid_filename(self):
         """
@@ -44,68 +54,49 @@ class ScriptProcessorTestCase(TestCase):
 
         If a value error is not returned then the test has failed
 
-        The test file will be: dump2941benfedit-fail (does not exist)
+        The test file will be: fake_testdump
 
         :return: True if test passes
         """
+        fake_filename = os.path.abspath('hyprfire_app/tests/test_files/fake_testdump')
 
-        filename = os.path.abspath('../hyprfire/pcaps/dump2941benfedit-fail')
-
-        answer = False
-
-        try:
-            ch.ScriptProcessor(filename, 'Benford', '1000')
-
-        except ValueError:
-            print("Value Error Throw works! Invalid filename was caught!")
-            answer = True
-
-        return answer
-
+        with self.assertRaises(ValueError):
+            ch.CacheHandler(fake_filename, 'Benford', '1000', 'Time')
 
     def test_invalid_windowsize(self):
         """
         This test function will test how the Script Processor will handle invalid windowsize input
         Currently the Script Processor will check if its valid or not and return a ValueError if its invalid
 
-        The test file will be: dump2941benfedit
+        The test file will be: testdump
         The Test passes if a Value Error is caught
 
         :return: True if test passes, False otherwise
         """
 
-        filename = os.path.abspath('../hyprfire/pcaps/testdump')
-
-        answer = False
-
-        try:
-            ch.ScriptProcessor(filename, 'Benford', '500')
-
-        except ValueError:
-            print("Value Error Throw works for invalid window size")
-            answer = True
-
-        return answer
+        with self.assertRaises(ValueError):
+            ch.CacheHandler(filename, 'Zipf', '-1', 'Length')
 
     def test_invalid_algortihm(self):
         """
         This test function will test how the Script Processor will handle invalid algorithm input
         Currently the Script Processor will check for Benford and Zipf and return a ValueError if it is none of those
 
-        The test file will be: dump2941benfedit
+        The test file will be: testdump
         Test will pass if a ValueError is caught.
 
         :return: True if Test Passes and False otherwise
         """
-        filename = os.path.abspath('../hyprfire/pcaps/testdump')
 
-        answer = False
+        with self.assertRaises(ValueError):
+            ch.CacheHandler(filename, 'Invalid', '2000', 'Time')
 
-        try:
-            ch.ScriptProcessor(filename, 'Invalid', '2000')
+    def test_invalid_analysis(self):
+        """
+        This function will test if a ValueError will be thrown if the analysis type inputted is invalid
+        analysis consists of only two option, 'Time' or 'Length' and should not accept anything else
 
-        except ValueError:
-            print("Value Error Throw works for invalid algorithm input")
-            answer = True
-
-        return answer
+        :return: True if a ValueError exception is thrown
+        """
+        with self.assertRaises(ValueError):
+            ch.CacheHandler(filename, 'Benford', '1000', 'Invalid')
