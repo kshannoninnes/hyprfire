@@ -1,50 +1,46 @@
 from django.test import TestCase, Client
+from hyprfire_app.utils import json
 
 
 def get_url(filename='testdump', start='1588259869.842212489', end='1588259869.845959007'):
-    return f'/download/{filename}/{start}/{end}/'
+    return f'/collect/{filename}/{start}/{end}/'
 
 
-class DownloadPcapSnippetTests(TestCase):
+class CollectPacketDataTestCase(TestCase):
 
     def setUp(self):
-        """
-        setUp
-
-        Ensure we have a valid data set before each test
-        """
         self.client = Client()
 
-    def test_correct_request_returns_file_download(self):
+    def test_correct_request_returns_valid_dict(self):
         """
-        test_correct
+        test_correct_request_returns_valid_dict
 
-        A valid request should return a file download
+        A correct get request should return an HttpResponse containing a dictionary with a list of packet details
         """
         response = self.client.get(get_url())
+        data = json.load_json(response.content)['packet_data_list']
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['Content-Disposition'],
-                         f'attachment; filename="testdump-filtered.pcap"')
+        self.assertEqual(len(data), 10)
 
-    def test_non_get_request_returns_405_response(self):
+    def test_incorrect_request_returns_405_response(self):
         """
-        test_non_get_request_returns_405_response
+        test_incorrect_request_returns_405_response
 
-        A request type of anything other than GET should return a 405 response
+        The endpoint should only accept GET requests
         """
         response = self.client.post(get_url())
 
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(response.reason_phrase, 'Method Not Allowed')
+        self.assertEqual(str(response.reason_phrase), 'Method Not Allowed')
 
-    def test_bad_filename_returns_404(self):
+    def test_nonexistent_file_returns_404_response(self):
         """
-        test_bad_filename_returns_404
+        test_nonexistent_file
 
-        A bad filename should return a 404 File Not Found response
+        A nonexistent file should return a 404 Not Found response
         """
-        response = self.client.get(get_url(filename='BADFILE'))
+        response = self.client.get(get_url(filename='invalidfile'))
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(str(response.reason_phrase), 'File Not Found.')
@@ -66,8 +62,7 @@ class DownloadPcapSnippetTests(TestCase):
 
         An invalid URL should return a 404 Not Found response
         """
-        response = self.client.get(f'/download/testdump/')
+        response = self.client.get(f'/collect/testdump/')
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.reason_phrase, 'Not Found')
-
