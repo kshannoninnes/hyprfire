@@ -4,6 +4,7 @@
 import os
 from .new_scripts import pcapconverter, packetdata_converter, plot_csvdata
 from .models import Data
+from django.http import HttpResponse
 
 
 def CacheHandler(file_name, algorith_type, windowsize, analysis):
@@ -32,13 +33,17 @@ def CacheHandler(file_name, algorith_type, windowsize, analysis):
         csv_data = csv_data.data
 
     else:
-        csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
 
-        # Create a new Object (ORM)
-        database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
-                                       analysis=analysis, data=csv_data)
-        # Save it to the database
-        database.save()
+        try:
+            csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
+
+            # Create a new Object (ORM)
+            database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
+                                           analysis=analysis, data=csv_data)
+            # Save it to the database
+            database.save()
+        except FileNotFoundError:
+            return HttpResponse(status=404)
 
     response = plot_csvdata.get_plot(csv_data)
 

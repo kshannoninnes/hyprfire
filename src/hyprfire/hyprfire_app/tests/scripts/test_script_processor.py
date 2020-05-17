@@ -23,6 +23,7 @@ class CacheHandlerTestCase(TestCase):
 
         :return: True if a plotly, html graph has been created.
         """
+
         valid1 = ch.CacheHandler(filename, 'Benford', '1000', 'Time')
         valid2 = ch.CacheHandler(filename, 'Zipf', '2000', 'Length')
 
@@ -44,7 +45,7 @@ class CacheHandlerTestCase(TestCase):
 
         valid1 = ch.CacheHandler(filename, 'Zipf', '1000', 'Time')
 
-        # self.AssertIsInstance(valid1, str)
+        self.assertIsInstance(valid1, str)
 
 
     def test_invalid_filename(self):
