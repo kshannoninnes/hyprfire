@@ -12,7 +12,7 @@ from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataColle
 
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import JSONError, TimestampException
-from .CacheHandler import ScriptProcessor
+from .CacheHandler import CacheHandler
 
 
 from tempfile import TemporaryFile
@@ -32,7 +32,7 @@ def index(request):
             algorithm = form.cleaned_data['algorithm']
             analysis = form.cleaned_data['analysis']
 
-            response = ScriptProcessor(filename, algorithm, window, analysis)
+            response = CacheHandler(filename, algorithm, window, analysis)
 
             return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
 

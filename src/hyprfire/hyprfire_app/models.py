@@ -1,5 +1,5 @@
 from django.db import models
-#from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField
 
 
 class Data(models.Model):
@@ -20,4 +20,4 @@ class Data(models.Model):
     algorithm = models.TextField()
     window_size = models.IntegerField()
     analysis = models.TextField()
-    #data = ArrayField(models.TextField())
+    data = ArrayField(models.TextField())
