@@ -79,7 +79,7 @@ class PacketFilter:
         end = convert_to_editcap_format(end_sec)
 
         editcap_command = f'editcap -A "{start}" -B "{end}" "{self.file_path}" "{temp_file}"'
-        subprocess.call(editcap_command)
+        subprocess.call(editcap_command, shell=True)
 
         return temp_file
 
