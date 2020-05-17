@@ -14,11 +14,6 @@ class DownloadPcapSnippetTests(TestCase):
         Ensure we have a valid data set before each test
         """
         self.client = Client()
-        self.data = {
-            'filename': 'testdump',
-            'start': '1588259869.842212489',
-            'end': '1588259869.845959007'
-            }
 
     def test_correct_request_returns_file_download(self):
         """
@@ -30,7 +25,7 @@ class DownloadPcapSnippetTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Disposition'],
-                         f'attachment; filename="{self.data["filename"]}-filtered.pcap"')
+                         f'attachment; filename="testdump-filtered.pcap"')
 
     def test_non_get_request_returns_405_response(self):
         """
