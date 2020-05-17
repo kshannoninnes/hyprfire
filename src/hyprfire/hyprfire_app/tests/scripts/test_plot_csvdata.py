@@ -2,7 +2,6 @@ import unittest
 from hyprfire_app.new_scripts import plot_csvdata
 
 
-
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):

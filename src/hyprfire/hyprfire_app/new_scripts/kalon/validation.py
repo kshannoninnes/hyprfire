@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from math import isinf
 from pathlib import Path
 
@@ -36,13 +37,13 @@ def validate_timestamp(timestamp):
     timestamp: a number representing an epoch timestamp
 
     Return
-    The original timestamp if it is valid
+    The original timestamp typed as a decimal if it is valid
     """
 
     # Duh...
     try:
-        float(timestamp)
-    except ValueError:
+        timestamp = Decimal(timestamp)
+    except InvalidOperation:
         raise TimestampException('Timestamp must be a number')
 
     # Also Duh...
