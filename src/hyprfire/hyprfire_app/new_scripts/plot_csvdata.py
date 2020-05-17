@@ -25,8 +25,8 @@ def get_csv_values(csvdata_list):
         new = row.split(',')
         x = float(new[0])
         y = float(new[1])
-        start = float(new[2])
-        end = float(new[3])
+        start = str(new[2])
+        end = str(new[3])
         a = (x, y, start, end)
         values.append(a)
     return values
