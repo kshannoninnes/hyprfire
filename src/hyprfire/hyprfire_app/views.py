@@ -11,7 +11,7 @@ from hyprfire_app.new_scripts.kalon.validation import validate_file_path
 from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
 
 from hyprfire.settings import BASE_DIR
-from hyprfire_app.exceptions import JSONError
+from hyprfire_app.exceptions import JSONError, TimestampException
 from .CacheHandler import ScriptProcessor
 
 
@@ -66,8 +66,8 @@ def download_pcap_snippet(request, filename, start, end):
     try:
 
         file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
-        start_timestamp = validate_timestamp(Decimal(start))
-        end_timestamp = validate_timestamp(Decimal(end))
+        start_timestamp = Decimal(validate_timestamp(start))
+        end_timestamp = Decimal(validate_timestamp(end))
 
         pf = PacketFilter(file_path, start_timestamp, end_timestamp)
         packet_list = pf.get_filtered_list()
@@ -79,10 +79,12 @@ def download_pcap_snippet(request, filename, start, end):
         return FileResponse(file, as_attachment=True, filename=f'{filename}-filtered.pcap')
 
     # TODO Log the errors to make sure problems are traceable
+    except TimestampException as e:
+        return HttpResponse(status=400, reason=str(e))
     except JSONError as e:
-        return HttpResponse(status=400, reason=e)
+        return HttpResponse(status=400, reason=str(e))
     except FileNotFoundError as e:
-        return HttpResponse(status=404, reason=e)
+        return HttpResponse(status=404, reason=str(e))
     except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
 
@@ -110,8 +112,8 @@ def collect_packet_data(request, filename, start, end):
     try:
 
         file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
-        start_timestamp = validate_timestamp(Decimal(start))
-        end_timestamp = validate_timestamp(Decimal(end))
+        start_timestamp = Decimal(validate_timestamp(start))
+        end_timestamp = Decimal(validate_timestamp(end))
 
         pf = PacketFilter(file_path, start_timestamp, end_timestamp)
         packet_list = pf.get_filtered_list()
@@ -120,9 +122,11 @@ def collect_packet_data(request, filename, start, end):
 
         return JsonResponse(data={'packet_data_list': packet_details})
 
+    except TimestampException as e:
+        return HttpResponse(status=400, reason=str(e))
     except JSONError as e:
-        return HttpResponse(status=400, reason=e)
+        return HttpResponse(status=400, reason=str(e))
     except FileNotFoundError as e:
-        return HttpResponse(status=404, reason=e)
+        return HttpResponse(status=404, reason=str(e))
     except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
