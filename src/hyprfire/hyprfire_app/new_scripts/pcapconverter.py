@@ -24,7 +24,7 @@ def pcapConverter(filename):
     temp = "temp.pcap"
     command = f'editcap -c 10000 {filename} {temp}'
     try:
-        subprocess.run(command, check=True)
+        subprocess.run(command, check=True, shell=True)
     except subprocess.CalledProcessError as e:
         raise ConverterException(f"Editcap failure: is this file a capture file?")
     for x in Path('.').glob('temp*.pcap'):
