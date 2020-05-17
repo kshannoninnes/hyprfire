@@ -24,5 +24,7 @@ setup(
     ],
     include_package_data=True,
 )
-os.makedirs('logs', exist_ok=True)
-os.makedirs('pcaps', exist_ok=True)
+# oldmask = os.umask(000)
+# os.makedirs('logs', exist_ok=True, mode=0o775)
+# os.makedirs('pcaps', exist_ok=True, mode=0o775)
+# os.umask(oldmask)
