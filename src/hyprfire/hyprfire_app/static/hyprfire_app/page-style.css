@@ -1,23 +1,68 @@
-/* Split the screen in half */
+/* Split the screen in half
 .split {
   height: 100vh;
   position: fixed;
   top: 0;
   color: beige;
-}
-
-/* Control the left side */
+}/*
+/* Control the left side 
 .left {
   width: 18vw;
   left: 0;
   background-color: #262932;
 }
-
-/* Control the right side */
+*/
+/* Control the right side 
 .right {
   width: 82vw;
   right: 0;
   background-color: #343642;
+}
+*/
+
+#left_container_x {
+  height: 100vh;
+  left: 0;
+  color: beige;
+  position: absolute;
+  background-color: #262932;
+}
+
+#right_container {
+  height: 100vh;
+  position: absolute;
+  right: 0;
+  background-color: #343642;
+
+}
+
+#pcap_data {
+  background-color: #262932;
+  flex-direction: column;
+}
+
+#graph_container {
+  flex-direction: column;
+}
+
+.plotly-graph-div {
+  position: relative;
+}
+
+#packet_window {
+    background-color: grey;
+}
+
+#data_window {
+  background-color: #262932;
+}
+
+.gutter.gutter-vertical{
+    cursor: s-resize;
+}
+
+.gutter.gutter-horizontal{
+    cursor: e-resize;
 }
 
 .button-panel {
