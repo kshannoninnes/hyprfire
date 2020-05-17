@@ -65,7 +65,7 @@ def download_pcap_snippet(request):
 
     try:
         data = load_json(request.body)
-        validate_json_length(data, 4)
+        validate_json_length(data, 3)
 
         file_path = validate_file_path(f'{BASE_DIR}/pcaps/{data["filename"]}')
         start_timestamp = validate_timestamp(Decimal(data['start']))
