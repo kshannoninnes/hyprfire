@@ -4,7 +4,7 @@
 # extract information about each packet from the pcap file. ExtractData does the actual work.
 # Will raise a ConverterException if the filename doesn't exist or isn't a pcap file.
 # Author: Dean Quaife
-# Last edited: 2020/05/15
+# Last edited: 2020/05/17
 
 from scapy.all import PcapReader
 from src.hyprfire.hyprfire_app.new_scripts.packetdata import PacketData
@@ -50,8 +50,7 @@ def extractData(file):
 #returns number of microseconds since midnight on the day the packet arrived; matches Stefan's original script
 def sinceMidnight(epochTimestamp):
     date = datetime.datetime.fromtimestamp(epochTimestamp)
-    hours = date.hour
-    minutes = date.minute + 60 * hours
-    seconds = date.second + 60 * minutes
-    microseconds = date.microsecond + 1000000 * seconds
+    secondsMidnight = datetime.datetime(date.year, date.month, date.day).timestamp()
+    seconds = epochTimestamp - Decimal(secondsMidnight)
+    microseconds = 1000000 * seconds
     return microseconds
