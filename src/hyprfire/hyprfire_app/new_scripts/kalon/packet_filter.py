@@ -1,3 +1,4 @@
+import math
 import subprocess
 from pathlib import Path
 
@@ -25,7 +26,7 @@ class PacketFilter:
         start: an epoch timestamp identifying the first packet in the filtered list
         end: an epoch timestamp identifying the last packet in the filtered list
         """
-        self.file_path = validate_file_path(file_path)
+        self.file_path = validate_file_path(str(Path(file_path)))
         self.start_timestamp = validate_timestamp(start)
         self.end_timestamp = validate_timestamp(end)
 
@@ -67,14 +68,11 @@ class PacketFilter:
         Return
         The path to the temporary pcap file
         """
-        start_sec = int(self.start_timestamp)
-        end_sec = int(self.end_timestamp)
+        start_sec = int(math.floor(self.start_timestamp))
+        end_sec = int(math.ceil(self.end_timestamp))
 
         if start_sec > end_sec:
             raise EditcapException('Start time must be before end time')
-
-        if start_sec == end_sec:
-            end_sec += 1
 
         temp_file = 'temp-editcapped-file.pcap'
         start = convert_to_editcap_format(start_sec)
