@@ -62,16 +62,17 @@
       var end = 0;
       myDiv.on('plotly_selected',
       function(data){  
-        start = data.points[0].customdata[0];
-        end = data.points[data.points.length-1].customdata[1];
+        start = String(data.points[0].customdata[0]);
+        end = String(data.points[data.points.length-1].customdata[1]);
         console.log(data.points[0].customdata[0]);
         console.log(data.points[data.points.length-1].customdata[1]);
       });
 
       $('#exportButton').click(function(event) {
+        event.preventDefault();
         curUrl = window.location;
         window.location = curUrl.protocol + '//' + curUrl.host + '/' + `download/${fileName}/${start}/${end}/`
-    });
+      });
     </script>
     <script src="{% static 'hyprfire_app/main.js' %}"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
