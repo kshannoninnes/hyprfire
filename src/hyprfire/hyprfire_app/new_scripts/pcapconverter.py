@@ -6,30 +6,46 @@
 # Author: Dean Quaife
 # Last edited: 2020/05/15
 
-from scapy.all import PcapReader, Scapy_Exception
-from hyprfire_app.new_scripts.packetdata import PacketData
+from scapy.all import PcapReader
+from src.hyprfire.hyprfire_app.new_scripts.packetdata import PacketData
+from src.hyprfire.hyprfire_app.new_scripts.converterexception import ConverterException
+import datetime, subprocess, multiprocessing
+from pathlib import Path
 from decimal import Decimal
-from hyprfire_app.new_scripts.converterexception import ConverterException
-import datetime
 
-#main pcapconverter method; takes in a pcap filename and returns a PacketData list
+#main pcapconverter method; takes in a pcap filename, splits it using editcap and returns a PacketData list
 def pcapConverter(filename):
-    try:
-        dataList = []
-        for packet in PcapReader(filename):
-            dataList.append(extractData(packet))
-    except FileNotFoundError:
+    if not Path(filename).is_file():
         raise ConverterException("Filename does not exist")
-    except Scapy_Exception:
-        raise ConverterException("Filename is not a supported capture file")
+
+    cores = multiprocessing.cpu_count()
+    temppaths = []
+    dataList = []
+    temp = "temp.pcap"
+    command = f'editcap -c 10000 {filename} {temp}'
+    try:
+        subprocess.run(command, check=True)
+    except subprocess.CalledProcessError as e:
+        raise ConverterException(f"Editcap failure: is this file a capture file?")
+    for x in Path('.').glob('temp*.pcap'):
+        temppaths.append(str(x))
+    with multiprocessing.Pool(processes=cores)as pool:
+        res = pool.map(extractData, temppaths)
+    for list in sorted(res, key= lambda list: list[0].epochTimestamp):
+        dataList += list
+    for x in Path('.').glob('temp*.pcap'):
+        Path(x).unlink()
     return dataList
 
-#converts important data from each packet into a PacketData object
-def extractData(packet):
-    epochTimestamp = Decimal(str(packet.time))
-    timestamp = sinceMidnight(epochTimestamp)  # used to match timestamp to Stefan's original script
-    len = packet.wirelen
-    return PacketData(epochTimestamp, timestamp, len)
+#converts important data from each editcap file into a list of PacketData objects
+def extractData(file):
+    packets = []
+    for packet in PcapReader(file):
+        epochTimestamp = Decimal(str(packet.time))
+        timestamp = sinceMidnight(epochTimestamp)  # used to match timestamp to Stefan's original script
+        len = packet.wirelen
+        packets.append(PacketData(epochTimestamp, timestamp, len))
+    return packets
 
 #returns number of microseconds since midnight on the day the packet arrived; matches Stefan's original script
 def sinceMidnight(epochTimestamp):
