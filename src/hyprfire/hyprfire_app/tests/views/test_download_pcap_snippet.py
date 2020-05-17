@@ -1,13 +1,8 @@
-from decimal import Decimal
-
-from django.urls import reverse
-from django.test import TestCase
-
-from hyprfire_app import views
+from django.test import TestCase, Client
 
 
-def post(client, data):
-    return client.post(path=reverse(views.download_pcap_snippet), data=data, content_type='application/json')
+def get_url(filename='testdump', start='1588259869.842212489', end='1588259869.845959007'):
+    return f'/download/{filename}/{start}/{end}/'
 
 
 class DownloadPcapSnippetTests(TestCase):
@@ -18,60 +13,66 @@ class DownloadPcapSnippetTests(TestCase):
 
         Ensure we have a valid data set before each test
         """
+        self.client = Client()
         self.data = {
             'filename': 'testdump',
             'start': '1588259869.842212489',
             'end': '1588259869.845959007'
             }
 
-    def test_correct(self):
+    def test_correct_request_returns_file_download(self):
         """
-        test_zero_start
+        test_correct
 
-        A timestamp value of zero is considered valid
+        A valid request should return a file download
         """
-        response = post(self.client, self.data)
+        response = self.client.get(get_url())
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Disposition'],
                          f'attachment; filename="{self.data["filename"]}-filtered.pcap"')
 
-    """ FAIL TEST CASES """
-
-    def test_bad_request(self):
+    def test_non_get_request_returns_405_response(self):
         """
-        test_bad_request
+        test_non_get_request_returns_405_response
 
-        The endpoint should only accept POST requests
+        A request type of anything other than GET should return a 405 response
         """
-        response = self.client.get(path=reverse(views.download_pcap_snippet),
-                                   data=self.data,
-                                   content_type='application/json')
+        response = self.client.post(get_url())
 
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(str(response.reason_phrase), 'Method Not Allowed')
+        self.assertEqual(response.reason_phrase, 'Method Not Allowed')
 
-    def test_json_error(self):
+    def test_bad_filename_returns_404(self):
         """
-        test_json_error
+        test_bad_filename_returns_404
 
-        Invalid JSON should return a 400 Bad Request response
+        A bad filename should return a 404 File Not Found response
         """
-        self.data = 'invalid_json'
-
-        response = post(self.client, self.data)
-
-        self.assertEqual(response.status_code, 400)
-
-    def test_nonexistent_file(self):
-        """
-        test_nonexistent_file
-
-        A nonexistent file should return a 404 Not Found response
-        """
-        self.data['filename'] = 'invalidfile'
-        response = post(self.client, self.data)
+        response = self.client.get(get_url(filename='BADFILE'))
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(str(response.reason_phrase), 'File Not Found.')
+
+    def test_bad_timestamp_format_returns_400_response(self):
+        """
+        test_bad_timestamp_format_returns_400_response
+
+        A bad timestamp format should return a 400 Timestamp must be a number response
+        """
+        response = self.client.get(get_url(start='hello world'))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.reason_phrase, 'Timestamp must be a number')
+
+    def test_missing_url_parameter_returns_404_response(self):
+        """
+        test_missing_url_parameter_returns_404_response
+
+        An invalid URL should return a 404 Not Found response
+        """
+        response = self.client.get(f'/download/testdump/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.reason_phrase, 'Not Found')
 
