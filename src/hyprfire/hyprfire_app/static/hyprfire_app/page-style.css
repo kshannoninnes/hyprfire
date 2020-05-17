@@ -20,49 +20,65 @@
 }
 */
 
-#left_container_x {
-  height: 100vh;
-  left: 0;
-  color: beige;
+.split_left {
+  height: 100%;
   position: absolute;
-  background-color: #262932;
+  width: 50%;
+  left: 0;
+  background-color: #aaeeff;
+  z-index: 1;
 }
 
-#right_container {
-  height: 100vh;
+.split_right {
+  height: 100%;
+  width: 50%;
   position: absolute;
   right: 0;
+  background-color: lime;
+  z-index: 1;
+}
+
+.packet_data {
+  background-color: #666666;
+  position: absolute;
+  height: 50%;
+  width: 100%;
+  bottom: 0;
+  z-index: -1;
+}
+
+/* FINISHED ELEMENTS */
+
+/* Split the screen in half */
+.split {
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  color: beige;
+}
+/* Control the left side */
+.left {
+  width: 18%;
+  left: 0;
+  background-color: #262932;
+}
+
+/* Control the right side  */
+.right {
+  position: absolute;
+  width: 82%;
+  right: 0;
   background-color: #343642;
-
+  z-index: -2;
 }
 
-#pcap_data {
-  background-color: #262932;
-  flex-direction: column;
-}
-
-#graph_container {
-  flex-direction: column;
-}
-
-.plotly-graph-div {
+.graph {
+  background-color: #888833;
   position: relative;
-}
-
-#packet_window {
-    background-color: grey;
-}
-
-#data_window {
-  background-color: #262932;
-}
-
-.gutter.gutter-vertical{
-    cursor: s-resize;
-}
-
-.gutter.gutter-horizontal{
-    cursor: e-resize;
+  height: 50%;
+  width: 100%;
+  top: 0;
+  display: grid;
 }
 
 .button-panel {

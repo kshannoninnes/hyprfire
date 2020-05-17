@@ -15,7 +15,7 @@
 <body>
     <!-- This div will take up 12% of the left side of the screen. -->
     <!-- It is used to display a list of clickable filenames sent by the server -->
-    <div class="left_container_x" id="left_container_x">
+    <div class="split left" id="split left">
         <h3 class="underlinexyz">Analysis</h3>
         <div class="form_thing">
             <form method="POST">
@@ -26,7 +26,7 @@
                 <div class="config_opt">{{ form.analysis.label }}: {{ form.analysis }}</div>
                 <input type="submit" class="w3-btn w3-block hf_btn w3-blue" style="width: 45%" value="Analyse">
             </form>
-            <input type="submit" id="exportButton" class="w3-btn w3-block hf_btn w3-green" style="width: 45%; margin-left: 60%; position: absolute; display: inline-block" value="Export">
+            <input type="submit" id="exportButton" class="w3-btn w3-block hf_btn w3-green" style="width: 45%; margin-left: 55%; position: absolute; display: inline-block" value="Export">
         </div>
 
        <h3 class="underlinexyz">Pre-Analysed Files</h3>
@@ -39,50 +39,31 @@
        </div>
     </div>
 
-    <div id="right_container">
-      <div class="graph_container" id="graph_container">
+    <div class="split right">
+        <div class="graph">
           {{ graph|safe }}
-      </div>
-
-      <div class="pcap_data" id="pcap_data">
-        <div id="packet_window">
-
         </div>
+        <div class="packet_data">
+            <div class="split_left">
 
-        <div id="data_window">
+            </div>
+            <div class="split_right">
 
+            </div>
         </div>
-      </div>
     </div>
-
-     <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
-     <script type="text/javascript">
-      Split(['#left_container_x', '#right_container'], {
-        gutterSize: 0,
-        sizes: [18, 82],
-      });
-      Split(['#graph_container', '#pcap_data'], {
-        gutterSize: 0,
-        sizes: [50, 50],
-        direction: "vertical",
-      });
-      Split(['#packet_window', '#data_window'], {
-        gutterSize: 10,
-        sizes: [50, 50],
-      });
-     </script>
 
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="text/javascript">
       var e = document.getElementById("id_filenames");
       var fileName = e.options[e.selectedIndex].text;
       var myDiv = document.getElementsByClassName('plotly-graph-div')[0];
-      var start_time = 0;
-      var end_time = 0;
+      var start = 0;
+      var end = 0;
       myDiv.on('plotly_selected',
       function(data){  
-        start_time = data.points[0].customdata[0];
-        end_time = data.points[data.points.length-1].customdata[1];
+        start = data.points[0].customdata[0];
+        end = data.points[data.points.length-1].customdata[1];
         console.log(data.points[0].customdata[0]);
         console.log(data.points[data.points.length-1].customdata[1]);
       });
@@ -90,15 +71,8 @@
       $('#exportButton').click(function(event) {
         event.preventDefault();
         $.ajax({
-            type: "POST",
-            url: "/download/",
-            data: JSON.stringify({ 
-                'filename': fileName,
-                'start': start_time,
-                'end': end_time,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            }),
-            dataType: 'json',
+            type: "GET",
+            url: '/download/'+fileName+'/'+start+'/'+end,
             success: function(result) {
                 alert('export successful');
             },
