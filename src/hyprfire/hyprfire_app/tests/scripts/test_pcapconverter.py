@@ -1,7 +1,7 @@
 import unittest
-from src.hyprfire.hyprfire_app.new_scripts.converterexception import ConverterException
-from src.hyprfire.hyprfire_app.new_scripts.pcapconverter import pcapConverter
-from src.hyprfire.hyprfire.settings import BASE_DIR
+from hyprfire_app.new_scripts.converterexception import ConverterException
+from hyprfire_app.new_scripts.pcapconverter import pcapConverter
+from hyprfire.settings import BASE_DIR
 from pathlib import Path
 import time
 

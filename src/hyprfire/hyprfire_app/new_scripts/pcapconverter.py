@@ -7,8 +7,8 @@
 # Last edited: 2020/05/17
 
 from scapy.all import PcapReader
-from src.hyprfire.hyprfire_app.new_scripts.packetdata import PacketData
-from src.hyprfire.hyprfire_app.new_scripts.converterexception import ConverterException
+from hyprfire_app.new_scripts.packetdata import PacketData
+from hyprfire_app.new_scripts.converterexception import ConverterException
 import datetime, subprocess, multiprocessing
 from pathlib import Path
 from decimal import Decimal
