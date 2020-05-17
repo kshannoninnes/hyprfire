@@ -2,6 +2,7 @@
 File: test_packetdata_converter.py
 Author: Quang Le
 Purpose: unit tests for packetdata_converter.py
+TODO: test for number of values in packetdata
 """
 from pathlib import Path
 from hyprfire.settings import BASE_DIR
@@ -29,10 +30,33 @@ class TestUnit(unittest.TestCase):
     def test_invalid_winsize(self):
         self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'b', 0, 't')
 
-    def test_convert_success(self):
+    def test_convert_benfords_time(self):
         output = packetdata_converter.convert_to_csv(self.pcapdata, 'b', 1000, 't')
         expected = False
-        print(output)
+        if isinstance(output, list):
+            expected = True
+        self.assertTrue(expected)
+        self.assertEqual(len(output), 11)
+
+    def test_convert_benfords_length(self):
+        output = packetdata_converter.convert_to_csv(self.pcapdata, 'b', 1000, 'l')
+        expected = False
+        if isinstance(output, list):
+            expected = True
+        self.assertTrue(expected)
+        self.assertEqual(len(output), 11)
+
+    def test_convert_zipf_time(self):
+        output = packetdata_converter.convert_to_csv(self.pcapdata, 'z', 1000, 't')
+        expected = False
+        if isinstance(output, list):
+            expected = True
+        self.assertTrue(expected)
+        self.assertEqual(len(output), 11)
+
+    def test_convert_zipf_length(self):
+        output = packetdata_converter.convert_to_csv(self.pcapdata, 'z', 1000, 'l')
+        expected = False
         if isinstance(output, list):
             expected = True
         self.assertTrue(expected)

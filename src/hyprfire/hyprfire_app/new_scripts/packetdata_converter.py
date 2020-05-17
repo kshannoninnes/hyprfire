@@ -2,19 +2,21 @@
 File: packetdata_converter.py
 Author: Quang Le
 Purpose: porting Stefan's NewBasics3.py script to turn pcap data into csv data
+TODO: implement stable multiprocessing
 """
 
 
-from operator import itemgetter
-import time
-
 import hyprfire_app.new_scripts.benfords_analysis as ba
 import hyprfire_app.new_scripts.zipf_analysis as za
+'''MP
 import multiprocessing as mp
 import hyprfire_app.new_scripts.superthreading as st
 import queue
+from operator import itemgetter
+import time
+'''
 
-
+'''MP
 def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
     """
 
@@ -87,6 +89,74 @@ def thread_process(in_q, out_q, is_benfords, is_time, mp_value):
             if mp_value.value == 1:
                 break
             pass
+'''
+
+
+def thread_process(window, output, is_benfords, is_time):
+    if is_benfords:
+        if is_time:
+            # calculates using benfords and time analysis
+            times = []
+            epochs = []
+            for i in window:
+                times.append(i[0])
+                epochs.append(i[1])
+            int_arr_times = ba.get_interarrival_times(times)
+            benf_bucks = ba.get_benfords_buckets(int_arr_times, 1)
+            u_value = ba.get_benfords_u_value(benf_bucks, 1)
+            time_val = int((times[0] + times[len(times) - 1]) / 2)
+            start = epochs[0]
+            end = epochs[len(epochs) - 1]
+            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+            output.append(csv)
+        else:
+            # calculates using benfords and length analysis
+            times = []
+            lens = []
+            epochs = []
+            for i in window:
+                times.append(i[0])
+                lens.append(i[1])
+                epochs.append(i[2])
+            benf_bucks = ba.get_benfords_buckets(lens, 1)
+            u_value = ba.get_benfords_u_value(benf_bucks, 1)
+            time_val = int((times[0] + times[len(times) - 1]) / 2)
+            start = epochs[0]
+            end = epochs[len(epochs) - 1]
+            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+            output.append(csv)
+    else:
+        if is_time:
+            # calculates using zipf and time analysis
+            times = []
+            epochs = []
+            for i in window:
+                times.append(i[0])
+                epochs.append(i[1])
+            int_arr_times = ba.get_interarrival_times(times)
+            zipf_bucks = za.get_zipf_buckets(int_arr_times)
+            u_value = za.get_zipf_u_value(zipf_bucks)
+            time_val = int((times[0] + times[len(times) - 1]) / 2)
+            start = epochs[0]
+            end = epochs[len(epochs) - 1]
+            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+            output.append(csv)
+        else:
+            # calculates using zipf and length analysis
+            times = []
+            lens = []
+            epochs = []
+            for i in window:
+                times.append(i[0])
+                lens.append(i[1])
+                epochs.append(i[2])
+            zipf_bucks = za.get_zipf_buckets(lens)
+            u_value = za.get_zipf_u_value(zipf_bucks)
+            time_val = int((times[0] + times[len(times) - 1]) / 2)
+            start = epochs[0]
+            end = epochs[len(epochs) - 1]
+            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+            output.append(csv)
 
 
 def get_packets_window(packets, winsize):
@@ -117,6 +187,7 @@ def get_packets_window(packets, winsize):
             print("Index Error Exception Raised, list index out of range")
 
 
+'''MP
 def dump_queue_to_list(out_q):
     """
 
@@ -139,6 +210,7 @@ def dump_queue_to_list(out_q):
             output.append(csv)
     time.sleep(.1)
     return output
+'''
 
 
 def convert_to_csv(packet_data, ana_type, winsize, timelen):
@@ -182,6 +254,7 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
     if winsize < 1:
         raise ValueError
 
+    '''MP
     mp_value = mp.Value('i', 0)
     cores = mp.cpu_count()
     if cores > 8:
@@ -189,8 +262,9 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
 
     in_q = mp.Queue()
     out_q = mp.Queue()
-    thread_list = []
+    thread_list = []'''
 
+    out_str = []
     # Loads windowsize of packet data into the queue for processing
     for window in get_packets_window(packets, winsize):
         d = []
@@ -199,8 +273,10 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
         else:
             d = [(packetdata.timestamp, packetdata.len, packetdata.epochTimestamp) for packetdata in window]
         # print(len(d))
-        in_q.put(d)
+        #in_q.put(d)
+        thread_process(d, out_str, is_benfords, is_time)
 
+    '''MP
     # Generating threads
     for i in range(0, cores):
         thread_list.append(st.ThreadWorker(thread_process))
@@ -226,5 +302,6 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
     csv_str_list = []
     for row in csv_list:
         to_string = str(row[0]) + ',' + str(row[1]) + ',' + str(row[2]) + ',' + str(row[3]) + '\n'
-        csv_str_list.append(to_string)
-    return csv_str_list
+        csv_str_list.append(to_string)'''
+
+    return out_str
