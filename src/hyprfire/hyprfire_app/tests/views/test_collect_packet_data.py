@@ -1,65 +1,68 @@
-from decimal import Decimal
-
-from django.test import TestCase
-from django.urls import reverse
-
-from hyprfire_app import views
+from django.test import TestCase, Client
 from hyprfire_app.utils import json
 
 
-def post(client, data):
-    return client.post(path=reverse(views.collect_packet_data), data=data, content_type='application/json')
+def get_url(filename='testdump', start='1588259869.842212489', end='1588259869.845959007'):
+    return f'/collect/{filename}/{start}/{end}/'
 
 
 class CollectPacketDataTestCase(TestCase):
 
     def setUp(self):
-        self.data = {
-            'filename': 'testdump',
-            'start': '1588259850.741137926',
-            'end': '1588259850.747131652'
-        }
+        self.client = Client()
 
-    def test_correct_data(self):
-        response = post(self.client, self.data)
-        data = json.load_json(response.content)['data']
+    def test_correct_request_returns_valid_dict(self):
+        """
+        test_correct_request_returns_valid_dict
+
+        A correct get request should return an HttpResponse containing a dictionary with a list of packet details
+        """
+        response = self.client.get(get_url())
+        data = json.load_json(response.content)['packet_data_list']
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(data), 5)
+        self.assertEqual(len(data), 10)
 
-    def test_bad_request(self):
+    def test_incorrect_request_returns_405_response(self):
         """
-        test_bad_request
+        test_incorrect_request_returns_405_response
 
-        The endpoint should only accept POST requests
+        The endpoint should only accept GET requests
         """
-        response = self.client.get(path=reverse(views.download_pcap_snippet),
-                                   data=self.data,
-                                   content_type='application/json')
+        response = self.client.post(get_url())
 
         self.assertEqual(response.status_code, 405)
         self.assertEqual(str(response.reason_phrase), 'Method Not Allowed')
 
-    def test_json_error(self):
-        """
-        test_json_error
-
-        Invalid JSON should return a 400 Bad Request response
-        """
-        self.data = 'invalid_json'
-
-        response = post(self.client, self.data)
-
-        self.assertEqual(response.status_code, 400)
-
-    def test_nonexistent_file(self):
+    def test_nonexistent_file_returns_404_response(self):
         """
         test_nonexistent_file
 
         A nonexistent file should return a 404 Not Found response
         """
-        self.data['filename'] = 'invalidfile'
-        response = post(self.client, self.data)
+        response = self.client.get(get_url(filename='invalidfile'))
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(str(response.reason_phrase), 'File Not Found.')
+
+    def test_bad_timestamp_format_returns_400_response(self):
+        """
+        test_bad_timestamp_format_returns_400_response
+
+        A bad timestamp format should return a 400 Timestamp must be a number response
+        """
+        response = self.client.get(get_url(start='hello world'))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.reason_phrase, 'Timestamp must be a number')
+
+    def test_missing_url_parameter_returns_404_response(self):
+        """
+        test_missing_url_parameter_returns_404_response
+
+        An invalid URL should return a 404 Not Found response
+        """
+        response = self.client.get(f'/collect/testdump/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.reason_phrase, 'Not Found')

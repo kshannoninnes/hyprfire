@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render
 
 from hyprfire_app.forms import AnalyseForm
@@ -11,8 +11,7 @@ from hyprfire_app.new_scripts.kalon.validation import validate_file_path
 from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
 
 from hyprfire.settings import BASE_DIR
-from hyprfire_app.exceptions import JSONError
-from hyprfire_app.utils.json import validate_json_length, load_json
+from hyprfire_app.exceptions import JSONError, TimestampException
 from .CacheHandler import ScriptProcessor
 
 
@@ -43,7 +42,7 @@ def index(request):
     return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames})
 
 
-def download_pcap_snippet(request):
+def download_pcap_snippet(request, filename, start, end):
     """
     download_pcap_snippet
 
@@ -52,45 +51,45 @@ def download_pcap_snippet(request):
     Download a snippet of pcaps from a specific file
 
     Parameters
-    request: An HTTP request provided by Django containing json in the POST body
+    request: An HTTP GET request object provided by Django
+    filename: the file to filter packets from
+    start: an epoch-based unix timestamp identifying the first packet of the set
+    end: an epoch-based unix timestamp identifying the last packet of the set
 
-    JSON Parameters
-    filename: the file to collect a snippet from
-    start: a unique seconds-based epoch timestamp to identify the first packet
-    end: a unique seconds-based epoch timestamp to identify the last packet
+    Return
+    A pcap file download which contains all packets with timestamps between start and end
     """
 
-    if request.method != 'POST':
+    if request.method != 'GET':
         return HttpResponse(status=405)
 
     try:
-        data = load_json(request.body)
-        validate_json_length(data, 3)
 
-        file_path = validate_file_path(f'{BASE_DIR}/pcaps/{data["filename"]}')
-        start_timestamp = validate_timestamp(Decimal(data['start']))
-        end_timestamp = validate_timestamp(Decimal(data['end']))
+        file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
+        start_timestamp = Decimal(validate_timestamp(start))
+        end_timestamp = Decimal(validate_timestamp(end))
 
         pf = PacketFilter(file_path, start_timestamp, end_timestamp)
         packet_list = pf.get_filtered_list()
 
-        with TemporaryFile() as file:
-            write_packets_to_file(file, packet_list)
-            response = HttpResponse(file)
-            response['Content-Disposition'] = f'attachment; filename="{data["filename"]}-filtered.pcap"'
+        file = TemporaryFile()
+        write_packets_to_file(file, packet_list)
+        file.seek(0)
 
-            return response
+        return FileResponse(file, as_attachment=True, filename=f'{filename}-filtered.pcap')
 
     # TODO Log the errors to make sure problems are traceable
+    except TimestampException as e:
+        return HttpResponse(status=400, reason=str(e))
     except JSONError as e:
-        return HttpResponse(status=400, reason=e)
+        return HttpResponse(status=400, reason=str(e))
     except FileNotFoundError as e:
-        return HttpResponse(status=404, reason=e)
+        return HttpResponse(status=404, reason=str(e))
     except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
 
 
-def collect_packet_data(request):
+def collect_packet_data(request, filename, start, end):
     """
     collect_packet_data
 
@@ -99,34 +98,35 @@ def collect_packet_data(request):
     Collect specific packet details on all packets between two times
 
     Parameters
-    request: An HTTP request provided by Django containing json in the POST body
-
-    JSON Parameters
+    request: An HTTP GET request object provided by Django
     filename: the file to collect a packet details from
     start: a unique seconds-based epoch timestamp to identify the first packet
     end: a unique seconds-based epoch timestamp to identify the last packet
+
+    Return
+    JSON containing a list of packet data dicts
     """
-    if request.method != 'POST':
+    if request.method != 'GET':
         return HttpResponse(status=405)
 
     try:
-        data = load_json(request.body)
-        validate_json_length(data, 3)
 
-        file_path = validate_file_path(f'{BASE_DIR}/pcaps/{data["filename"]}')
-        start_timestamp = validate_timestamp(Decimal(data['start']))
-        end_timestamp = validate_timestamp(Decimal(data['end']))
+        file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
+        start_timestamp = Decimal(validate_timestamp(start))
+        end_timestamp = Decimal(validate_timestamp(end))
 
         pf = PacketFilter(file_path, start_timestamp, end_timestamp)
         packet_list = pf.get_filtered_list()
         dc = PacketDataCollector(packet_list)
         packet_details = dc.get_details()
 
-        return JsonResponse(data={'data': packet_details})
+        return JsonResponse(data={'packet_data_list': packet_details})
 
+    except TimestampException as e:
+        return HttpResponse(status=400, reason=str(e))
     except JSONError as e:
-        return HttpResponse(status=400, reason=e)
+        return HttpResponse(status=400, reason=str(e))
     except FileNotFoundError as e:
-        return HttpResponse(status=404, reason=e)
+        return HttpResponse(status=404, reason=str(e))
     except Exception as e:
         return HttpResponse(status=500, reason='Something went wrong.')
