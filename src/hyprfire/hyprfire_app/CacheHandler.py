@@ -94,9 +94,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
         print("SCRIPT PROCESSOR is DONE!")
         print(csv_data)
 
-        response = plot_csvdata.get_plot(csv_data)
-
-        return response # csv_data is the real return value for this method. Commenting out so we can skip the databasing for now.
+        return csv_data # csv_data is the real return value for this method. Commenting out so we can skip the databasing for now.
 
     else:
         raise ValueError("Error in Processing Arguments: filenames, algorithm, windowsize or analysis type")
