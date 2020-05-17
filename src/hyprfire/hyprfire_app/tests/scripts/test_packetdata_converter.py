@@ -3,7 +3,8 @@ File: test_packetdata_converter.py
 Author: Quang Le
 Purpose: unit tests for packetdata_converter.py
 """
-
+from pathlib import Path
+from hyprfire.settings import BASE_DIR
 from hyprfire_app.new_scripts.pcapconverter import pcapConverter
 from hyprfire_app.new_scripts import packetdata_converter
 import unittest
@@ -12,7 +13,7 @@ import unittest
 class TestUnit(unittest.TestCase):
 
     def setUp(self):
-        pcapfile = '../test_files/testfile.pcap.gz'
+        pcapfile = str(Path(BASE_DIR) / 'hyprfire_app' / 'tests' / 'test_files' / 'testdump')
         self.pcapdata = pcapConverter(pcapfile)
 
     def test_invalid_analysis_value(self):
@@ -31,6 +32,8 @@ class TestUnit(unittest.TestCase):
     def test_convert_success(self):
         output = packetdata_converter.convert_to_csv(self.pcapdata, 'b', 1000, 't')
         expected = False
+        print(output)
         if isinstance(output, list):
             expected = True
         self.assertTrue(expected)
+        self.assertEqual(len(output), 11)

@@ -55,7 +55,7 @@ def get_plot(csvdata_list):
     scatter = go.Scatter(x=x_values,
                          y=y_values,
                          customdata=epoch_values,
-                         mode='lines',
+                         mode='lines+markers',
                          opacity=0.8,
                          marker_color='blue')
     fig.add_trace(scatter)

@@ -191,13 +191,6 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
     out_q = mp.Queue()
     thread_list = []
 
-    # Generating threads
-    for i in range(0, cores):
-        thread_list.append(st.ThreadWorker(thread_process))
-    q_sender = (in_q, out_q, is_benfords, is_time, mp_value)
-    for thread in thread_list:
-        thread.run(q_sender)
-
     # Loads windowsize of packet data into the queue for processing
     for window in get_packets_window(packets, winsize):
         d = []
@@ -207,6 +200,13 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
             d = [(packetdata.timestamp, packetdata.len, packetdata.epochTimestamp) for packetdata in window]
         # print(len(d))
         in_q.put(d)
+
+    # Generating threads
+    for i in range(0, cores):
+        thread_list.append(st.ThreadWorker(thread_process))
+    q_sender = (in_q, out_q, is_benfords, is_time, mp_value)
+    for thread in thread_list:
+        thread.run(q_sender)
 
     with mp_value.get_lock():
         mp_value.value = 1
