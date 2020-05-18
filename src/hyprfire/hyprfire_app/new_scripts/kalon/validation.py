@@ -17,14 +17,15 @@ def validate_file_path(file_path):
     file_path: a string representation of a file path
 
     Return
-    The original file path if it is valid
+    The file path if it points to a valid file
     """
     path = Path(file_path)
+    name = path.stem.lower()
 
-    if not path.is_file():
+    if not path.is_file() and not name.startswith('.'):
         raise FileNotFoundError('File Not Found.')
 
-    return file_path
+    return str(path)
 
 
 def validate_timestamp(timestamp):
@@ -37,7 +38,7 @@ def validate_timestamp(timestamp):
     timestamp: a number representing an epoch timestamp
 
     Return
-    The original timestamp typed as a decimal if it is valid
+    A decimal representation of the original timestamp if it is valid
     """
 
     # Duh...
