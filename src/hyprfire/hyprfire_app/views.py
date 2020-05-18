@@ -10,7 +10,7 @@ from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file
 from hyprfire_app.new_scripts.kalon.file import get_filename_list
 from hyprfire_app.new_scripts.kalon.timestamp import validate_timestamp
 from hyprfire_app.new_scripts.kalon.validation import validate_file_path
-from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
+from hyprfire_app.new_scripts.kalon.packet_details_collector import PacketDetailsCollector
 
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import JSONError, TimestampException
@@ -121,7 +121,7 @@ def collect_packet_data(request, filename, start, end):
 
         pf = PacketFilter(file_path, start_timestamp, end_timestamp)
         packet_list = pf.get_filtered_list()
-        dc = PacketDataCollector(packet_list)
+        dc = PacketDetailsCollector(packet_list)
         packet_details = dc.get_details()
 
         return JsonResponse(data={'packet_data_list': packet_details})
