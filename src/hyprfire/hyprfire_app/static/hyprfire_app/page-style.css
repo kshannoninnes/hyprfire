@@ -23,23 +23,27 @@
 .split_left {
   height: 100%;
   position: absolute;
-  width: 50%;
+  width: 100%;
   left: 0;
-  background-color: #aaeeff;
+  background-color: #2C2F33;
   z-index: 1;
+
+  color: beige;
+  overflow: auto;
 }
 
-.split_right {
+
+/*.split_right {
   height: 100%;
-  width: 50%;
+  width: 30%;
   position: absolute;
   right: 0;
   background-color: lime;
   z-index: 1;
-}
+}*/
 
 .packet_data {
-  background-color: #666666;
+  background-color: #2C2F33;
   position: absolute;
   height: 50%;
   width: 100%;
@@ -47,6 +51,13 @@
   z-index: -1;
 }
 
+.table {
+  width: 100%;
+}
+
+.table_data {
+  text-align: center;
+}
 /* FINISHED ELEMENTS */
 
 /* Split the screen in half */
@@ -73,7 +84,7 @@
 }
 
 .graph {
-  background-color: #888833;
+  background-color: #2C2F33;
   position: relative;
   height: 50%;
   width: 100%;

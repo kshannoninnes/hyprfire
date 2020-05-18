@@ -45,10 +45,14 @@
         </div>
         <div class="packet_data">
             <div class="split_left">
-
-            </div>
-            <div class="split_right">
-
+                <table id="packet_data_table" class="table">
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Category</th>
+                      <th>Source</th>
+                      <th>Destination</th>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -66,6 +70,18 @@
         end = String(data.points[data.points.length-1].customdata[1]);
         console.log(data.points[0].customdata[0]);
         console.log(data.points[data.points.length-1].customdata[1]);
+        $.getJSON(`/collect/${fileName}/${start}/${end}/`, function(data) {
+          let packet_list = data["packet_data_list"];
+          $.each(packet_list, function(index, element) {
+            // let html = `Timestamp: ${element.timestamp}, Category: ${element.category}, Source: ${element.ip_data.src}:${element.transport_data.src_port}, Dest: ${element.ip_data.dst}:${element.transport_data.dst_port}`;
+            let timestamp = `<td class="table_data">${element.timestamp}</td>`;
+            let category = `<td class="table_data">${element.category}</td>`;
+            let source = `<td class="table_data">${element.ip_data.src}:${element.transport_data.src_port}</td>`;
+            let dest = `<td class="table_data">${element.ip_data.dst}:${element.transport_data.dst_port}</td>`;
+            $("#packet_data_table").append(`<tr>${timestamp} ${category} ${source} ${dest}</tr>`);
+
+          })
+        });
       });
 
       $('#exportButton').click(function(event) {
