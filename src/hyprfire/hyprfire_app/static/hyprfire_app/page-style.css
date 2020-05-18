@@ -1,23 +1,95 @@
-/* Split the screen in half */
+/* Split the screen in half
 .split {
   height: 100vh;
   position: fixed;
   top: 0;
   color: beige;
-}
-
-/* Control the left side */
+}/*
+/* Control the left side 
 .left {
   width: 18vw;
   left: 0;
   background-color: #262932;
 }
-
-/* Control the right side */
+*/
+/* Control the right side 
 .right {
   width: 82vw;
   right: 0;
   background-color: #343642;
+}
+*/
+
+.split_left {
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  background-color: #2C2F33;
+  z-index: 1;
+
+  color: beige;
+  overflow: auto;
+}
+
+
+/*.split_right {
+  height: 100%;
+  width: 30%;
+  position: absolute;
+  right: 0;
+  background-color: lime;
+  z-index: 1;
+}*/
+
+.packet_data {
+  background-color: #2C2F33;
+  position: absolute;
+  height: 50%;
+  width: 100%;
+  bottom: 0;
+  z-index: -1;
+}
+
+.table {
+  width: 100%;
+}
+
+.table_data {
+  text-align: center;
+}
+/* FINISHED ELEMENTS */
+
+/* Split the screen in half */
+.split {
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  color: beige;
+}
+/* Control the left side */
+.left {
+  width: 18%;
+  left: 0;
+  background-color: #262932;
+}
+
+/* Control the right side  */
+.right {
+  position: absolute;
+  width: 82%;
+  right: 0;
+  background-color: #343642;
+  z-index: -2;
+}
+
+.graph {
+  background-color: #2C2F33;
+  position: relative;
+  height: 50%;
+  width: 100%;
+  top: 0;
+  display: grid;
 }
 
 .button-panel {
