@@ -6,7 +6,8 @@ from pathvalidate import sanitize_filename
 
 from hyprfire_app.forms import AnalyseForm
 from hyprfire_app.new_scripts.kalon.packet_filter import PacketFilter
-from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file, get_filename_list
+from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file
+from hyprfire_app.new_scripts.kalon.file import get_filename_list
 from hyprfire_app.new_scripts.kalon.timestamp import validate_timestamp
 from hyprfire_app.new_scripts.kalon.validation import validate_file_path
 from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
