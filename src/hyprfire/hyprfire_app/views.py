@@ -2,10 +2,11 @@ from decimal import Decimal
 
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render
+from pathvalidate import sanitize_filename
 
 from hyprfire_app.forms import AnalyseForm
 from hyprfire_app.new_scripts.kalon.packet_filter import PacketFilter
-from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file, get_pcap_files_from
+from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file, get_filename_list
 from hyprfire_app.new_scripts.kalon.timestamp import validate_timestamp
 from hyprfire_app.new_scripts.kalon.validation import validate_file_path
 from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
@@ -23,7 +24,7 @@ blacklist = [
 
 
 def index(request):
-    filenames = get_pcap_files_from('pcaps')
+    filenames = get_filename_list('pcaps')
     if request.method == "POST":
         form = AnalyseForm(request.POST)
         if form.is_valid():
@@ -65,6 +66,7 @@ def download_pcap_snippet(request, filename, start, end):
 
     try:
 
+        filename = sanitize_filename(filename)
         file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
         start_timestamp = Decimal(validate_timestamp(start))
         end_timestamp = Decimal(validate_timestamp(end))
@@ -111,6 +113,7 @@ def collect_packet_data(request, filename, start, end):
 
     try:
 
+        filename = sanitize_filename(filename)
         file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
         start_timestamp = Decimal(validate_timestamp(start))
         end_timestamp = Decimal(validate_timestamp(end))
