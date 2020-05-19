@@ -1,7 +1,7 @@
 from unittest import TestCase
-from hyprfire_app.exceptions import ConverterException
-from hyprfire_app.new_scripts import pcapconverter
-from hyprfire.settings import BASE_DIR
+from src.hyprfire.hyprfire_app.exceptions import ConverterException
+from src.hyprfire.hyprfire_app.new_scripts import pcapconverter
+from src.hyprfire.hyprfire.settings import BASE_DIR
 from pathlib import Path
 from decimal import Decimal
 
@@ -57,7 +57,7 @@ class TestPcapConverter(TestCase):
     Note that Decimal creates some strange rounding issues, so the number passed into sinceMidnight is
     actually 1588259850.7007715702056884765625, so result is tested accordingly """
     def test_sinceMidnight(self):
-        val = Decimal(1588259850.700771485)
+        val = Decimal('1588259850.700771485')
         result = pcapconverter.sinceMidnight(val)
 
-        self.assertEqual(83850700771.5702056884765625, result)
+        self.assertEqual(Decimal('83850700771.485'), result)
