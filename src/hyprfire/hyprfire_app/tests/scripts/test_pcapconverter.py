@@ -1,5 +1,5 @@
 from unittest import TestCase
-from hyprfire_app.new_scripts.converterexception import ConverterException
+from hyprfire_app.exceptions import ConverterException
 from hyprfire_app.new_scripts import pcapconverter
 from hyprfire.settings import BASE_DIR
 from pathlib import Path
