@@ -1,7 +1,7 @@
 from unittest import TestCase
-from src.hyprfire.hyprfire_app.exceptions import ConverterException
-from src.hyprfire.hyprfire_app.new_scripts import pcapconverter
-from src.hyprfire.hyprfire.settings import BASE_DIR
+from hyprfire_app.exceptions import ConverterException
+from hyprfire_app.new_scripts import pcapconverter
+from hyprfire.settings import BASE_DIR
 from pathlib import Path
 from decimal import Decimal
 
