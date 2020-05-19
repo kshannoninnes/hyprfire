@@ -24,19 +24,10 @@
                 <div class="config_opt"> {{ form.window.label }}:{{ form.window }}</div>
                 <div class="config_opt"> {{ form.algorithm.label }}:{{ form.algorithm }}</div>
                 <div class="config_opt">{{ form.analysis.label }}: {{ form.analysis }}</div>
-                <input type="submit" class="w3-btn w3-block hf_btn w3-blue" style="width: 45%" value="Analyse">
+                <input type="submit" class="w3-btn w3-block hf_btn w3-blue" style="width: 48%; margin-left: 1%" value="Analyse">
             </form>
-            <input type="submit" id="exportButton" class="w3-btn w3-block hf_btn w3-green" style="width: 45%; margin-left: 55%; position: absolute; display: inline-block" value="Export">
+            <input type="submit" id="exportButton" class="w3-btn w3-block hf_btn w3-green" style="width: 48%; margin-left: 51%; position: absolute; display: inline-block" value="Export">
         </div>
-
-       <h3 class="underlinexyz">Pre-Analysed Files</h3>
-       <div class="list_analysed">
-           <ul class="w3-ul" id="file_list">
-               {% for file in filenames %}
-                   <li> {{ file }} </li>
-               {% endfor %}
-           </ul>
-       </div>
     </div>
 
     <div class="split right">
@@ -47,10 +38,10 @@
             <div class="split_left">
                 <table id="packet_data_table" class="table">
                     <tr>
-                      <th>Timestamp</th>
-                      <th>Category</th>
-                      <th>Source</th>
-                      <th>Destination</th>
+                      <th class="table_header">Timestamp</th>
+                      <th class="table_header">Category</th>
+                      <th class="table_header">Source</th>
+                      <th class="table_header">Destination</th>
                     </tr>
                 </table>
             </div>
@@ -65,7 +56,8 @@
       var start = 0;
       var end = 0;
       myDiv.on('plotly_selected',
-      function(data){  
+      function(data){ 
+        //getting the start and end times of the points user selects
         start = String(data.points[0].customdata[0]);
         end = String(data.points[data.points.length-1].customdata[1]);
         console.log(data.points[0].customdata[0]);
@@ -73,7 +65,6 @@
         $.getJSON(`/collect/${fileName}/${start}/${end}/`, function(data) {
           let packet_list = data["packet_data_list"];
           $.each(packet_list, function(index, element) {
-            // let html = `Timestamp: ${element.timestamp}, Category: ${element.category}, Source: ${element.ip_data.src}:${element.transport_data.src_port}, Dest: ${element.ip_data.dst}:${element.transport_data.dst_port}`;
             let timestamp = `<td class="table_data">${element.timestamp}</td>`;
             let category = `<td class="table_data">${element.category}</td>`;
             let source = `<td class="table_data">${element.ip_data.src}:${element.transport_data.src_port}</td>`;

@@ -2,13 +2,16 @@ from decimal import Decimal
 
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render
+from pathvalidate import sanitize_filename
+
+from hyprfire_app.filtering.packet_filter import PacketFilter
+from hyprfire_app.filtering.packet_details_collector import PacketDetailsCollector
 
 from hyprfire_app.forms import AnalyseForm
-from hyprfire_app.new_scripts.kalon.packet_filter import PacketFilter
-from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file, get_pcap_files_from
-from hyprfire_app.new_scripts.kalon.timestamp import validate_timestamp
-from hyprfire_app.new_scripts.kalon.validation import validate_file_path
-from hyprfire_app.new_scripts.kalon.packet_data_collector import PacketDataCollector
+from hyprfire_app.utils.pcap import write_packets_to_file
+from hyprfire_app.utils.file import get_filename_list
+from hyprfire_app.utils.timestamp import validate_timestamp
+from hyprfire_app.utils.validation import validate_file_path
 
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import JSONError, TimestampException
@@ -23,7 +26,7 @@ blacklist = [
 
 
 def index(request):
-    filenames = get_pcap_files_from('pcaps')
+    filenames = get_filename_list(f'{BASE_DIR}/pcaps/')
     if request.method == "POST":
 
         try:
@@ -71,6 +74,7 @@ def download_pcap_snippet(request, filename, start, end):
 
     try:
 
+        filename = sanitize_filename(filename)
         file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
         start_timestamp = Decimal(validate_timestamp(start))
         end_timestamp = Decimal(validate_timestamp(end))
@@ -117,13 +121,14 @@ def collect_packet_data(request, filename, start, end):
 
     try:
 
+        filename = sanitize_filename(filename)
         file_path = validate_file_path(f'{BASE_DIR}/pcaps/{filename}')
         start_timestamp = Decimal(validate_timestamp(start))
         end_timestamp = Decimal(validate_timestamp(end))
 
         pf = PacketFilter(file_path, start_timestamp, end_timestamp)
         packet_list = pf.get_filtered_list()
-        dc = PacketDataCollector(packet_list)
+        dc = PacketDetailsCollector(packet_list)
         packet_details = dc.get_details()
 
         return JsonResponse(data={'packet_data_list': packet_details})

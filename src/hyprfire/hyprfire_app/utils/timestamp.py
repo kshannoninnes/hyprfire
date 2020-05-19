@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from hyprfire_app.new_scripts.kalon.validation import validate_timestamp
+from hyprfire_app.utils.validation import validate_timestamp
 
 
 def convert_to_editcap_format(timestamp):
