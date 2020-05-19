@@ -22,6 +22,3 @@ subprocess.call([python_path, "manage.py", "makemigrations"])
 
 # Run manage.py migrate
 subprocess.call([python_path, "manage.py", "migrate"])
-
-# Run Server
-# subprocess.call([python_path, "manage.py", "runserver"])
