@@ -1,6 +1,9 @@
+"""
+File: benfords_analysis.py
+Author: Quang Le
+Purpose: contains functions for benfords analysis, based on Stefan's benfordsAnalysis.py
+"""
 import math
-import re
-import bz2
 
 
 # ===============================================================================
