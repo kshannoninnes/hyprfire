@@ -24,7 +24,8 @@ class FileTest(TestCase):
         hidden_file_name = '.hidden'
         hidden_file = Path(self.test_dir / hidden_file_name)
 
-        hidden_file.touch()
+        if not hidden_file.exists():
+            hidden_file.touch()
         self.assertNotIn(hidden_file_name, get_filename_list(self.test_dir))
         hidden_file.unlink()
 
@@ -37,7 +38,8 @@ class FileTest(TestCase):
         dir_name = 'test_dir'
         directory = Path(self.test_dir / dir_name)
 
-        directory.mkdir()
+        if not directory.exists():
+            directory.mkdir()
         self.assertNotIn(dir_name, get_filename_list(self.test_dir))
         directory.rmdir()
 
@@ -49,17 +51,18 @@ class FileTest(TestCase):
         """
         file_list = []
         quick_test_dir = Path(self.test_dir) / 'quick_test'
-        quick_test_dir.mkdir()
+        if not quick_test_dir.exists():
+            quick_test_dir.mkdir()
 
         for _ in range(0, 3):
-            file_name = ''.join(random.choice(string.ascii_lowercase) for i in range(5))
+            file_name = ''.join(random.choice(string.ascii_lowercase) for _ in range(5))
             new_file = quick_test_dir / file_name
-            new_file.touch()
+            if not new_file.exists():
+                new_file.touch()
             file_list.append(file_name)
 
         [self.assertIn(x, file_list) for x in get_filename_list(quick_test_dir)]
 
         for file in quick_test_dir.glob('*'):
             file.unlink()
-
         quick_test_dir.rmdir()
