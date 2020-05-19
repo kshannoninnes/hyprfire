@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from hyprfire_app.exceptions import TimestampException
-from hyprfire_app.new_scripts.kalon import timestamp
+from hyprfire_app.utils import timestamp
 
 
 class TimestampTest(TestCase):
