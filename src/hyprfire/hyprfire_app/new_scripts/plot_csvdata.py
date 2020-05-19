@@ -23,7 +23,7 @@ def get_csv_values(csvdata_list):
         values (list): list of number arrays
 
     """
-
+    logger.info("Getting values from csvdata_list")
     values = []
     try:
         for row in csvdata_list:
@@ -53,18 +53,16 @@ def get_plot(csvdata_list):
         html_graph (str): a HTML div string which represents a graph of csvdata_list
 
     """
-
+    logger.info("Starting plot_csvdata...")
     #checks csvdata_list is valid
     if isinstance(csvdata_list, list):
         if len(csvdata_list) == 0:
             raise ValueError("List supplied is empty")
-            logger.error("Invalid csvdata_list")
     else:
         raise TypeError("Argument needs to be of a list type")
-        logger.error("Invalid csvdata_list")
 
-    logger.info("Plotting csvdata_list..")
     csv_values = get_csv_values(csvdata_list)
+    logger.info("Plotting csv values..")
     x_values = [row[0] for row in csv_values]
     y_values = [row[1] for row in csv_values]
     epoch_values = [(row[2], row[3]) for row in csv_values]

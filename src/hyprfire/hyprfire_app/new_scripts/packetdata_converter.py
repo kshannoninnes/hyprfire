@@ -139,34 +139,26 @@ def check_arguments(packet_data, ana_type, winsize, timelen):
     if isinstance(ana_type, str):
         if ana_type not in valid_ana_types:
             raise ValueError("Invalid ana_type value: must be 'b' or 'z'")
-            logger.error("Invalid ana_type value")
     else:
         raise TypeError("Invalid argument type: ana_type must be a string")
-        logger.error("Invalid argument type: ana_type must be a string")
 
     if isinstance(timelen, str):
         if timelen not in valid_timelen:
             raise ValueError("Invalid timelen value: must be 't' or 'l'")
-            logger.error("Invalid timelen value")
     else:
         raise TypeError("Invalid argument type: timelen must be a string")
-        logger.error("Invalid argument type: timelen must be a string")
 
     if isinstance(winsize, int):
         if winsize <= 0:
             raise ValueError("Invalid winsize value: must be > 0")
-            logger.error("Invalid winsize")
     else:
         raise TypeError("Invalid argument type: winsize must be an int")
-        logger.error("Invalid winsize")
 
     if isinstance(packet_data, list):
         if len(packet_data) == 0:
             raise ValueError("Invalid packet_data value: list is empty")
-            logger.error("Invalid packet_data")
     else:
         raise TypeError("Invalid argument type: packet_data must be a list")
-        logger.error("Invalid packet_data")
 
 
 def convert_to_csv(packet_data, ana_type, winsize, timelen):
@@ -187,7 +179,7 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
     """
 
     # Checks the arguments passed are valid
-    logger.info('Checking validity of arguments')
+    logger.info('Starting packetdata_converter')
     check_arguments(packet_data, ana_type, winsize, timelen)
     logger.info('Arguments passed into packetdata_converter are valid')
 
