@@ -13,6 +13,11 @@ class TestPacketDetailsCollector(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """
+        setUpClass
+
+        Collecting packets and their details only needs to happen once per test suite
+        """
         super(TestPacketDetailsCollector, cls).setUpClass()
         cls.packets = []
 
@@ -26,6 +31,11 @@ class TestPacketDetailsCollector(TestCase):
         cls.packet_details = PacketDetailsCollector(cls.packets).get_details()
 
     def setUp(self):
+        """
+        setUp
+
+        Choose a random packet to test before each test case
+        """
         packet_num = random.choice(range(0, len(self.packets) - 1))
         self.expected_packet = self.packets[packet_num]
         self.actual_packet = self.packet_details[packet_num]
