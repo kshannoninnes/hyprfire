@@ -1,7 +1,7 @@
-import subprocess, os
+import subprocess
 
 # Install non-python libraries
-subprocess.call("apt-get install python python-setuptools python3.8 virtualenv python3-pip libpq-dev python3-dev python3.8-dev postgresql-contrib wireshark gcc", shell=True)
+subprocess.call("sudo apt-get install python python-setuptools python3.8 virtualenv python3-pip libpq-dev python3-dev python3.8-dev postgresql-contrib wireshark gcc", shell=True)
 
 # Create User
 subprocess.call("sudo -u postgres psql postgres -c \"ALTER USER postgres WITH PASSWORD 'adminPostgres'\"", shell=True)
@@ -22,6 +22,3 @@ subprocess.call([python_path, "manage.py", "makemigrations"])
 
 # Run manage.py migrate
 subprocess.call([python_path, "manage.py", "migrate"])
-
-# Run Server
-subprocess.call([python_path, "manage.py", "runserver"])
