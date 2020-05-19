@@ -12,8 +12,8 @@ Last edited: 2020/05/19
 """
 
 from scapy.all import PcapReader
-from hyprfire_app.new_scripts.packetdata import PacketData
-from hyprfire_app.exceptions import ConverterException
+from src.hyprfire.hyprfire_app.new_scripts.packetdata import PacketData
+from src.hyprfire.hyprfire_app.exceptions import ConverterException
 import datetime, subprocess, multiprocessing
 from pathlib import Path
 from decimal import Decimal

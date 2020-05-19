@@ -1,6 +1,6 @@
 import string
 from pathlib import Path
-from random import random
+import random
 
 from django.test import TestCase
 
