@@ -34,16 +34,15 @@ def CacheHandler(file_name, algorith_type, windowsize, analysis):
 
     else:
 
-        try:
-            csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
 
-            # Create a new Object (ORM)
-            database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
-                                           analysis=analysis, data=csv_data)
-            # Save it to the database
-            database.save()
-        except FileNotFoundError:
-            return HttpResponse(status=404)
+        csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
+
+        # Create a new Object (ORM)
+        database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
+                                       analysis=analysis, data=csv_data)
+        # Save it to the database
+        database.save()
+
 
     response = plot_csvdata.get_plot(csv_data)
 
@@ -80,9 +79,6 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
 
             algorithm = 'z'
 
-        else:
-            raise ValueError("Incorrect Algorithm Type")
-
         if analysis == 'Length':
 
             analysis_type = 'l'
@@ -90,9 +86,6 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
         elif analysis == 'Time':
 
             analysis_type = 't'
-
-        else:
-            raise ValueError("Incorrect Analysis type")
 
         csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
 
@@ -136,7 +129,7 @@ def check_filename(name):
 
     if results == False:
 
-        raise ValueError("Incorrect File name!")
+        raise FileNotFoundError("Cannot Find the file!")
 
     return results
 

@@ -61,7 +61,7 @@ class CacheHandlerTestCase(TestCase):
         """
         fake_filename = os.path.abspath('hyprfire_app/tests/test_files/fake_testdump')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(FileNotFoundError):
             ch.CacheHandler(fake_filename, 'Benford', '1000', 'Time')
 
     def test_invalid_windowsize(self):
