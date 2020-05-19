@@ -4,12 +4,12 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from hyprfire_app.exceptions import TimestampException
-from hyprfire_app.new_scripts.kalon import timestamp
+from hyprfire_app.utils import timestamp
 
 
 class TimestampTest(TestCase):
 
-    @patch('hyprfire_app.new_scripts.kalon.timestamp.validate_timestamp')
+    @patch('hyprfire_app.utils.timestamp.validate_timestamp')
     def test_correct_timestamp_returns_correct_format(self, mock_validate_timestamp):
         """
         test_correct_timestamp

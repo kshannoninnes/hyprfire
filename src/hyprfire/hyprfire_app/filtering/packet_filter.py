@@ -3,12 +3,11 @@ import subprocess
 from pathlib import Path
 
 from hyprfire_app.exceptions import EditcapException
-from hyprfire_app.new_scripts.kalon.timestamp import convert_to_editcap_format, timestamps_equal
-from hyprfire_app.new_scripts.kalon.validation import validate_file_path, validate_timestamp
-import hyprfire_app.new_scripts.kalon.pcap as ph
+from hyprfire_app.utils.timestamp import convert_to_editcap_format, timestamps_equal
+from hyprfire_app.utils.validation import validate_file_path, validate_timestamp
+import hyprfire_app.utils.pcap as ph
 
 
-# TODO Write tests
 class PacketFilter:
     """
     PacketFilter
