@@ -51,7 +51,7 @@ class TestPacketFilter(TestCase):
         if not empty_file.exists():
             empty_file.touch()
 
-        empty_list = PacketFilter(str(empty_file)).get_filtered_list()
+        empty_list = PacketFilter(str(empty_file), 0, 2).get_filtered_list()
         empty_file.unlink()
 
         self.assertEqual(len(empty_list), 0)
