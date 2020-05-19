@@ -2,7 +2,6 @@
 File: test_packetdata_converter.py
 Author: Quang Le
 Purpose: unit tests for packetdata_converter.py
-TODO: test for number of values in packetdata
 """
 from pathlib import Path
 from hyprfire.settings import BASE_DIR
@@ -18,46 +17,43 @@ class TestUnit(unittest.TestCase):
         self.pcapdata = pcapConverter(pcapfile)
 
     def test_invalid_analysis_value(self):
-        self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'a', 1000, 't')
+        self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'None', 1000, 't')
+        self.assertRaises(TypeError, packetdata_converter.convert_to_csv, self.pcapdata, 0, 1000, 't')
 
     def test_invalid_timelen_value(self):
-        self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'b', 1000, 0)
+        self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'b', 1000, 'None')
+        self.assertRaises(TypeError, packetdata_converter.convert_to_csv, self.pcapdata, 'b', 1000, 0)
 
     def test_invalid_packetdata(self):
-        data = "Invalid"
-        self.assertRaises(TypeError, packetdata_converter.convert_to_csv, data, 'b', 1000, 't')
+        invalid = "Invalid"
+        empty = []
+        self.assertRaises(ValueError, packetdata_converter.convert_to_csv, empty, 'b', 1000, 't')
+        self.assertRaises(TypeError, packetdata_converter.convert_to_csv, invalid, 'b', 1000, 't')
 
     def test_invalid_winsize(self):
         self.assertRaises(ValueError, packetdata_converter.convert_to_csv, self.pcapdata, 'b', 0, 't')
+        self.assertRaises(TypeError, packetdata_converter.convert_to_csv, self.pcapdata, 'b', 'None', 't')
 
     def test_convert_benfords_time(self):
         output = packetdata_converter.convert_to_csv(self.pcapdata, 'b', 1000, 't')
-        expected = False
-        if isinstance(output, list):
-            expected = True
-        self.assertTrue(expected)
-        self.assertEqual(len(output), 11)
+        expected_len = 11
+        self.assertTrue(isinstance(output, list))
+        self.assertEqual(len(output), expected_len)
 
     def test_convert_benfords_length(self):
         output = packetdata_converter.convert_to_csv(self.pcapdata, 'b', 1000, 'l')
-        expected = False
-        if isinstance(output, list):
-            expected = True
-        self.assertTrue(expected)
-        self.assertEqual(len(output), 11)
+        expected_len = 11
+        self.assertTrue(isinstance(output, list))
+        self.assertEqual(len(output), expected_len)
 
     def test_convert_zipf_time(self):
         output = packetdata_converter.convert_to_csv(self.pcapdata, 'z', 1000, 't')
-        expected = False
-        if isinstance(output, list):
-            expected = True
-        self.assertTrue(expected)
-        self.assertEqual(len(output), 11)
+        expected_len = 11
+        self.assertTrue(isinstance(output, list))
+        self.assertEqual(len(output), expected_len)
 
     def test_convert_zipf_length(self):
         output = packetdata_converter.convert_to_csv(self.pcapdata, 'z', 1000, 'l')
-        expected = False
-        if isinstance(output, list):
-            expected = True
-        self.assertTrue(expected)
-        self.assertEqual(len(output), 11)
+        expected_len = 11
+        self.assertTrue(isinstance(output, list))
+        self.assertEqual(len(output), expected_len)
