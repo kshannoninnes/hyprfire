@@ -3,10 +3,14 @@ File: packetdata_converter.py
 Author: Quang Le
 Purpose: Convert list of PacketData objects from pcapconverter.py into csv values that will be used in plot_csvdata.py
 to produce an anomaly graph. Based on Stefan's original NewBasics3.py script
+TODO: implement stable multiprocessing
 """
 
 import hyprfire_app.new_scripts.benfords_analysis as ba
 import hyprfire_app.new_scripts.zipf_analysis as za
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def thread_process(window, output, is_benfords, is_time):
@@ -22,70 +26,74 @@ def thread_process(window, output, is_benfords, is_time):
             is_time (boolean): True if time analysis is selected, otherwise False
 
         """
-    if is_benfords:
-        if is_time:
-            # calculates using benfords and time analysis
-            times = []
-            epochs = []
-            for i in window:
-                times.append(i[0])
-                epochs.append(i[1])
-            int_arr_times = ba.get_interarrival_times(times)
-            benf_bucks = ba.get_benfords_buckets(int_arr_times, 1)
-            u_value = ba.get_benfords_u_value(benf_bucks, 1)
-            time_val = int((times[0] + times[len(times) - 1]) / 2)
-            start = epochs[0]
-            end = epochs[len(epochs) - 1]
-            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
-            output.append(csv)
+    try:
+        if is_benfords:
+            if is_time:
+                # calculates using benfords and time analysis
+                times = []
+                epochs = []
+                for i in window:
+                    times.append(i[0])
+                    epochs.append(i[1])
+                int_arr_times = ba.get_interarrival_times(times)
+                benf_bucks = ba.get_benfords_buckets(int_arr_times, 1)
+                u_value = ba.get_benfords_u_value(benf_bucks, 1)
+                time_val = int((times[0] + times[len(times) - 1]) / 2)
+                start = epochs[0]
+                end = epochs[len(epochs) - 1]
+                csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+                output.append(csv)
+            else:
+                # calculates using benfords and length analysis
+                times = []
+                lens = []
+                epochs = []
+                for i in window:
+                    times.append(i[0])
+                    lens.append(i[1])
+                    epochs.append(i[2])
+                benf_bucks = ba.get_benfords_buckets(lens, 1)
+                u_value = ba.get_benfords_u_value(benf_bucks, 1)
+                time_val = int((times[0] + times[len(times) - 1]) / 2)
+                start = epochs[0]
+                end = epochs[len(epochs) - 1]
+                csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+                output.append(csv)
         else:
-            # calculates using benfords and length analysis
-            times = []
-            lens = []
-            epochs = []
-            for i in window:
-                times.append(i[0])
-                lens.append(i[1])
-                epochs.append(i[2])
-            benf_bucks = ba.get_benfords_buckets(lens, 1)
-            u_value = ba.get_benfords_u_value(benf_bucks, 1)
-            time_val = int((times[0] + times[len(times) - 1]) / 2)
-            start = epochs[0]
-            end = epochs[len(epochs) - 1]
-            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
-            output.append(csv)
-    else:
-        if is_time:
-            # calculates using zipf and time analysis
-            times = []
-            epochs = []
-            for i in window:
-                times.append(i[0])
-                epochs.append(i[1])
-            int_arr_times = ba.get_interarrival_times(times)
-            zipf_bucks = za.get_zipf_buckets(int_arr_times)
-            u_value = za.get_zipf_u_value(zipf_bucks)
-            time_val = int((times[0] + times[len(times) - 1]) / 2)
-            start = epochs[0]
-            end = epochs[len(epochs) - 1]
-            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
-            output.append(csv)
-        else:
-            # calculates using zipf and length analysis
-            times = []
-            lens = []
-            epochs = []
-            for i in window:
-                times.append(i[0])
-                lens.append(i[1])
-                epochs.append(i[2])
-            zipf_bucks = za.get_zipf_buckets(lens)
-            u_value = za.get_zipf_u_value(zipf_bucks)
-            time_val = int((times[0] + times[len(times) - 1]) / 2)
-            start = epochs[0]
-            end = epochs[len(epochs) - 1]
-            csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
-            output.append(csv)
+            if is_time:
+                # calculates using zipf and time analysis
+                times = []
+                epochs = []
+                for i in window:
+                    times.append(i[0])
+                    epochs.append(i[1])
+                int_arr_times = ba.get_interarrival_times(times)
+                zipf_bucks = za.get_zipf_buckets(int_arr_times)
+                u_value = za.get_zipf_u_value(zipf_bucks)
+                time_val = int((times[0] + times[len(times) - 1]) / 2)
+                start = epochs[0]
+                end = epochs[len(epochs) - 1]
+                csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+                output.append(csv)
+            else:
+                # calculates using zipf and length analysis
+                times = []
+                lens = []
+                epochs = []
+                for i in window:
+                    times.append(i[0])
+                    lens.append(i[1])
+                    epochs.append(i[2])
+                zipf_bucks = za.get_zipf_buckets(lens)
+                u_value = za.get_zipf_u_value(zipf_bucks)
+                time_val = int((times[0] + times[len(times) - 1]) / 2)
+                start = epochs[0]
+                end = epochs[len(epochs) - 1]
+                csv = str(time_val) + ',' + str(u_value) + ',' + str(start) + ',' + str(end) + '\n'
+                output.append(csv)
+    except IndexError:
+        raise IndexError("Index is out of range")
+        logger.error("IndexError")
 
 
 def get_packets_window(packets, winsize):
@@ -131,26 +139,34 @@ def check_arguments(packet_data, ana_type, winsize, timelen):
     if isinstance(ana_type, str):
         if ana_type not in valid_ana_types:
             raise ValueError("Invalid ana_type value: must be 'b' or 'z'")
+            logger.error("Invalid ana_type value")
     else:
         raise TypeError("Invalid argument type: ana_type must be a string")
+        logger.error("Invalid argument type: ana_type must be a string")
 
     if isinstance(timelen, str):
         if timelen not in valid_timelen:
             raise ValueError("Invalid timelen value: must be 't' or 'l'")
+            logger.error("Invalid timelen value")
     else:
         raise TypeError("Invalid argument type: timelen must be a string")
+        logger.error("Invalid argument type: timelen must be a string")
 
     if isinstance(winsize, int):
         if winsize <= 0:
             raise ValueError("Invalid winsize value: must be > 0")
+            logger.error("Invalid winsize")
     else:
         raise TypeError("Invalid argument type: winsize must be an int")
+        logger.error("Invalid winsize")
 
     if isinstance(packet_data, list):
         if len(packet_data) == 0:
             raise ValueError("Invalid packet_data value: list is empty")
+            logger.error("Invalid packet_data")
     else:
         raise TypeError("Invalid argument type: packet_data must be a list")
+        logger.error("Invalid packet_data")
 
 
 def convert_to_csv(packet_data, ana_type, winsize, timelen):
@@ -171,7 +187,9 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
     """
 
     # Checks the arguments passed are valid
+    logger.info('Checking validity of arguments')
     check_arguments(packet_data, ana_type, winsize, timelen)
+    logger.info('Arguments passed into packetdata_converter are valid')
 
     if ana_type == 'b':
         is_benfords = True
@@ -184,7 +202,9 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
         is_time = False
 
     out_str = []
+
     # Pass windowsize of packet data into thread_process for processing
+    logger.info("Starting calculation of csv values")
     for window in get_packets_window(packet_data, winsize):
         d = []
         if is_time:
@@ -192,5 +212,6 @@ def convert_to_csv(packet_data, ana_type, winsize, timelen):
         else:
             d = [(packetdata.timestamp, packetdata.len, packetdata.epochTimestamp) for packetdata in window]
         thread_process(d, out_str, is_benfords, is_time)
+    logger.info("Finished calculation of csv values and returning list of csv strings")
 
     return out_str

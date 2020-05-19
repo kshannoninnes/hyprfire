@@ -6,6 +6,9 @@ Purpose: use plotly library to convert list of csv data into a graph
 
 from plotly.offline import plot
 import plotly.graph_objects as go
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_csv_values(csvdata_list):
@@ -33,6 +36,7 @@ def get_csv_values(csvdata_list):
             values.append(a)
     except IndexError:
         raise IndexError("Index is out of range")
+        logger.error("IndexError")
     return values
 
 
@@ -54,9 +58,12 @@ def get_plot(csvdata_list):
     if isinstance(csvdata_list, list):
         if len(csvdata_list) == 0:
             raise ValueError("List supplied is empty")
+            logger.error("Invalid csvdata_list")
     else:
         raise TypeError("Argument needs to be of a list type")
+        logger.error("Invalid csvdata_list")
 
+    logger.info("Plotting csvdata_list..")
     csv_values = get_csv_values(csvdata_list)
     x_values = [row[0] for row in csv_values]
     y_values = [row[1] for row in csv_values]
@@ -73,6 +80,7 @@ def get_plot(csvdata_list):
                       xaxis_title="Time Value (microseconds)",
                       yaxis_title="U Value")
     html_graph = plot(fig, output_type='div')
+    logger.info("Returning html div string for graph")
     return html_graph
 
 

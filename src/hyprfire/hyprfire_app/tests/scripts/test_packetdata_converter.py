@@ -1,9 +1,7 @@
-#!/bin/sh
 """
 File: test_packetdata_converter.py
 Author: Quang Le
 Purpose: unit tests for packetdata_converter.py
-TODO: test for number of values in packetdata
 """
 from pathlib import Path
 from hyprfire.settings import BASE_DIR
