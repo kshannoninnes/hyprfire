@@ -1,4 +1,4 @@
-from scapy.contrib.mount import Path
+from pathlib import Path
 
 
 def get_filename_list(path):

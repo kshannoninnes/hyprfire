@@ -5,7 +5,7 @@ from django.test import TestCase
 from scapy.all import PcapReader
 
 from hyprfire.settings import BASE_DIR
-from hyprfire_app.new_scripts.kalon.packet_filter import PacketFilter
+from hyprfire_app.filtering.packet_filter import PacketFilter
 
 
 class TestPacketFilter(TestCase):

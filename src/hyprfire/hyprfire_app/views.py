@@ -4,13 +4,14 @@ from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render
 from pathvalidate import sanitize_filename
 
+from hyprfire_app.filtering.packet_filter import PacketFilter
+from hyprfire_app.filtering.packet_details_collector import PacketDetailsCollector
+
 from hyprfire_app.forms import AnalyseForm
-from hyprfire_app.new_scripts.kalon.packet_filter import PacketFilter
-from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file
-from hyprfire_app.new_scripts.kalon.file import get_filename_list
-from hyprfire_app.new_scripts.kalon.timestamp import validate_timestamp
-from hyprfire_app.new_scripts.kalon.validation import validate_file_path
-from hyprfire_app.new_scripts.kalon.packet_details_collector import PacketDetailsCollector
+from hyprfire_app.utils.pcap import write_packets_to_file
+from hyprfire_app.utils.file import get_filename_list
+from hyprfire_app.utils.timestamp import validate_timestamp
+from hyprfire_app.utils.validation import validate_file_path
 
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import JSONError, TimestampException
@@ -25,7 +26,7 @@ blacklist = [
 
 
 def index(request):
-    filenames = get_filename_list('pcaps')
+    filenames = get_filename_list(f'{BASE_DIR}/pcaps/')
     if request.method == "POST":
         form = AnalyseForm(request.POST)
         if form.is_valid():

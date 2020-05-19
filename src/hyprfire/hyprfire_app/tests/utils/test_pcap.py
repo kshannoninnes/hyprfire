@@ -4,7 +4,7 @@ from django.test import TestCase
 from scapy.all import PcapReader, PcapWriter
 
 from hyprfire.settings import BASE_DIR
-from hyprfire_app.new_scripts.kalon.pcap import write_packets_to_file, read_packets_from_file, get_filename_list
+from hyprfire_app.utils.pcap import write_packets_to_file, read_packets_from_file
 
 
 class PcapTest(TestCase):

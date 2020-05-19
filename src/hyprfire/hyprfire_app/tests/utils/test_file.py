@@ -5,7 +5,7 @@ from random import random
 from django.test import TestCase
 
 from hyprfire.settings import BASE_DIR
-from hyprfire_app.new_scripts.kalon.file import get_filename_list
+from hyprfire_app.utils.file import get_filename_list
 
 
 class FileTest(TestCase):

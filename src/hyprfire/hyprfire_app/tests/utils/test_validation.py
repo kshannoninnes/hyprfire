@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import TimestampException
-from hyprfire_app.new_scripts.kalon import validation, timestamp
+from hyprfire_app.utils import validation, timestamp
 
 
 class FileValidationTest(TestCase):
