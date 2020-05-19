@@ -1,9 +1,7 @@
 from pathlib import Path
-import random
 
 from django.test import TestCase
 from scapy.all import PcapReader
-from scapy.layers.inet import IP
 
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.new_scripts.kalon.packet_details_collector import PacketDetailsCollector
@@ -30,27 +28,14 @@ class TestPacketDetailsCollector(TestCase):
 
         cls.packet_details = PacketDetailsCollector(cls.packets).get_details()
 
-    def setUp(self):
+    def test_all_packets_match(self):
         """
-        setUp
+        test_all_packets_match
 
-        Choose a random packet to test before each test case
+        The filtered list should contain all packets in the original list
         """
-        packet_num = random.choice(range(0, len(self.packets) - 1))
-        self.expected_packet = self.packets[packet_num]
-        self.actual_packet = self.packet_details[packet_num]
-
-    def test_random_packets_match(self):
-        """
-        test_random_packets_match
-
-        Any given packet in the original list should match the same packet in the output list
-
-        Note: we compare several packet attributes together as a package to ensure uniqueness
-        """
-        self.assertEqual(str(self.expected_packet.time), self.actual_packet['timestamp'])
-        self.assertEqual(str(self.expected_packet[IP].src), self.actual_packet['ip_data']['src'])
-        self.assertEqual(str(self.expected_packet[IP].dst), self.actual_packet['ip_data']['dst'])
+        [self.assertEqual(str(x.time), str(self.packet_details[index]['timestamp']))
+         for index, x in enumerate(self.packets)]
 
     def test_output_list_length_matches_original(self):
         """
