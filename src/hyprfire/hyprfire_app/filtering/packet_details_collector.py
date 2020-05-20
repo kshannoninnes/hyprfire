@@ -3,8 +3,7 @@ from socket import getservbyport
 from scapy.layers.inet import IP, TCP, UDP
 
 
-# TODO Write tests
-class PacketDataCollector:
+class PacketDetailsCollector:
     """
     PacketDataCollector
 

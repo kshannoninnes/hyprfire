@@ -11,6 +11,19 @@ from hyprfire_app.models import Data
 
 filename = os.path.abspath('hyprfire_app/tests/test_files/testdump')
 
+data_test = """{"55052488396,0.004661384833837787,1588259849.1664534,1588259855.8103387
+","55057187633,0.023503316140268248,1588259855.811056,1588259858.5642111
+","55060852110,0.0032588726539729217,1588259858.5642543,1588259863.1399665
+","55064699729,0.0030673818762256807,1588259863.1401627,1588259866.2592964
+","55067595847,0.027490799246764893,1588259866.2592983,1588259868.9323976
+","55069373524,0.04836370925433088,1588259868.9333422,1588259869.8137066
+","55070383419,0.1405247944123636,1588259869.8137193,1588259870.9531195
+","55073972209,0.009925430799835863,1588259870.9539232,1588259876.9904962
+","55079440019,0.0074067226874748515,1588259876.990511,1588259881.889528
+","55083863674,0.029198933222692017,1588259881.8895457,1588259885.8378038
+","55087089955,0.04194369570322365,1588259885.8389196,1588259888.3409922
+"}"""
+
 
 class CacheHandlerTestCase(TestCase):
 
@@ -40,7 +53,7 @@ class CacheHandlerTestCase(TestCase):
         :return: True if a string is returned.
         """
 
-        data = Data.objects.create(filename=filename, algorithm='Zipf', window_size=1000, analysis='Time', data="{}")
+        data = Data.objects.create(filename=filename, algorithm='Zipf', window_size=1000, analysis='Time', data=data_test)
         data.save()
 
         valid1 = ch.CacheHandler(filename, 'Zipf', '1000', 'Time')
@@ -61,7 +74,7 @@ class CacheHandlerTestCase(TestCase):
         """
         fake_filename = os.path.abspath('hyprfire_app/tests/test_files/fake_testdump')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(FileNotFoundError):
             ch.CacheHandler(fake_filename, 'Benford', '1000', 'Time')
 
     def test_invalid_windowsize(self):

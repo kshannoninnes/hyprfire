@@ -1,3 +1,8 @@
+"""
+File: zipf_analysis.py
+Author: Quang Le
+Purpose: contains functions for zipf analysis, based on Stefan's zipfAnalysis.py
+"""
 import math
 
 
