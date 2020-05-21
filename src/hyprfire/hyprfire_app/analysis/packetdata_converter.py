@@ -61,7 +61,7 @@ def analyse_packets_window(window, is_benfords, is_time):
                 u_value = za.get_zipf_u_value(zipf_bucks)
 
         csv = str(time_value) + ',' + str(u_value) + ',' + str(start_epoch) + ',' + str(end_epoch) + '\n'
-    except IndexError:
+    except LookupError:
         raise IndexError("Index is out of range")
     return csv
 
@@ -146,7 +146,8 @@ def convert_to_csv(packet_data, ana_type='b', winsize=1000, timelen='t'):
     """
 
     # Checks the arguments passed are valid
-    logger.info('Starting packetdata_converter..')
+    logger.info('Starting packetdata_converter with ana_type=' + ana_type + ',' + 'winsize=' + str(winsize) + ',' +
+                'timelen=' + timelen)
     check_arguments(packet_data, ana_type, winsize, timelen)
 
     if ana_type == 'b':
@@ -170,6 +171,6 @@ def convert_to_csv(packet_data, ana_type='b', winsize=1000, timelen='t'):
         csv = analyse_packets_window(window_values, is_benfords, is_time)
         csv_list.append(csv)
 
-    logger.info("Finished calculation of csv values and returning list of csv strings")
+    logger.info("Finished calculation of csv values and returning list of csv strings, list length=" + str(len(csv_list)))
 
     return csv_list
