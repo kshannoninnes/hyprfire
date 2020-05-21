@@ -127,7 +127,7 @@ STATIC_URL = '/static/'
 # Logging Information
 LOGGING = {
     'version': 1,
-    # disable logging; tell Django to do not disable loggers. By default, Django uses some of its own loggers.
+    # disable logging; tell Django to not disable loggers. By default, Django uses some of its own loggers.
     'disable_existing_loggers': False,
 
     # Loggers
