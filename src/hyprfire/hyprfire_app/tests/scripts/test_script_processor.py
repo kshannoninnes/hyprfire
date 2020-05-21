@@ -48,7 +48,7 @@ class CacheHandlerTestCase(TestCase):
         This test function will run and test cached data. It will not go through Script Processor but instead
         go through the cached data.
 
-        It will create a model, thats going to duplicate the inside of the data
+        It will create a model, that is going to duplicate the inside of the data
 
         :return: True if a string is returned.
         """
@@ -77,9 +77,9 @@ class CacheHandlerTestCase(TestCase):
         with self.assertRaises(FileNotFoundError):
             ch.CacheHandler(fake_filename, 'Benford', '1000', 'Time')
 
-    def test_invalid_windowsize(self):
+    def test_invalid_window_size(self):
         """
-        This test function will test how the Script Processor will handle invalid windowsize input
+        This test function will test how the Script Processor will handle invalid window_size input
         Currently the Script Processor will check if its valid or not and return a ValueError if its invalid
 
         The test file will be: testdump
@@ -91,7 +91,7 @@ class CacheHandlerTestCase(TestCase):
         with self.assertRaises(ValueError):
             ch.CacheHandler(filename, 'Zipf', '-1', 'Length')
 
-    def test_invalid_algortihm(self):
+    def test_invalid_algorithm(self):
         """
         This test function will test how the Script Processor will handle invalid algorithm input
         Currently the Script Processor will check for Benford and Zipf and return a ValueError if it is none of those

@@ -5,10 +5,10 @@ from django.contrib.postgres.fields import ArrayField
 class Data(models.Model):
     """
     This is a class model for the Django ORM.
-    The class Data will store the filename, alogirthm, window_size, analysis and csv_data into the database
+    The class Data will store the filename, alogrithm, window_size, analysis and csv_data into the database
     using Django's inbuilt ORM libraries.
 
-    Primary Key: is "id" set Django's default primary key if not listed. Auto increment.
+    Primary Key: is "id" - Django's default primary key if not listed. Auto increment.
     filename: the filepath/name
     algorithm: Either Zipf or Benford
     window_size = the size of window (an integer)

@@ -32,12 +32,12 @@ def index(request):
         try:
             form = AnalyseForm(request.POST)
             if form.is_valid():
-                filename = form.cleaned_data['filenames']
+                file_name = form.cleaned_data['filenames']
                 window = form.cleaned_data['window']
                 algorithm = form.cleaned_data['algorithm']
                 analysis = form.cleaned_data['analysis']
 
-                response = CacheHandler(filename, algorithm, window, analysis)
+                response = CacheHandler(file_name, algorithm, window, analysis)
 
                 return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
         except ValueError as e:

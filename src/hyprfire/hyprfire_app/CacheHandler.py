@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def CacheHandler(file_name, algorith_type, windowsize, analysis):
+def CacheHandler(file_name, algorith_type, window_size, analysis):
     """
     CacheHandler
     This function does the "caching" section of the application. It does a quick check in the database if there is an
@@ -21,27 +21,27 @@ def CacheHandler(file_name, algorith_type, windowsize, analysis):
 
     :param file_name: the filepath/name of the pcap file to search for/process
     :param algorith_type: either Benford or Zipf
-    :param windowsize: an integer on
+    :param window_size: an integer on
     :param analysis:
     :return:
     """
 
     # Gets a queryset from the database on how many Data of the same filename, algorithm, windowsize and analysis
-    result = Data.objects.filter(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
+    result = Data.objects.filter(filename=file_name, algorithm=algorith_type, window_size=window_size, analysis=analysis)
 
     if len(result) != 0:
         # If it is more than 0 then it exists in the database, and just pull the data from there.
         logger.info("Item already exists in the database.... pulling cached data")
-        csv_data = Data.objects.get(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
+        csv_data = Data.objects.get(filename=file_name, algorithm=algorith_type, window_size=window_size, analysis=analysis)
         csv_data = csv_data.data
 
     else:
 
 
-        csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
+        csv_data = ScriptProcessor(file_name, algorith_type, window_size, analysis)
 
         # Create a new Object (ORM)
-        database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
+        database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=window_size,
                                        analysis=analysis, data=csv_data)
         # Save it to the database
         database.save()
