@@ -151,7 +151,6 @@ def check_config(algorithm):
         results = True
     elif algorithm == 'Zipf':
         results = True
-    else:
 
     return results
 
