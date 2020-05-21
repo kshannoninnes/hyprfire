@@ -20,23 +20,27 @@ class MyTestCase(unittest.TestCase):
         self.csvdata = [row1, row2, row3, row4, row5]
         self.invalid_csv = [row1, row2, invalid, row3]
 
-    def test_plot_success(self):
+    #Test get_plot returns a string as expected
+    def test_get_plot_success(self):
         graph = plot_csvdata.get_plot(self.csvdata)
         self.assertIsInstance(graph, str)
 
-    def test_plot_invalid_csvdata(self):
+    #Test get_plot with invalid data raises errors as expected
+    def test_plot_invalid_csvdata_raise_errors(self):
         data = "Invalid"
         empty = []
         self.assertRaises(ValueError, plot_csvdata.get_plot, empty)
         self.assertRaises(TypeError, plot_csvdata.get_plot, data)
 
-    def test_customdata(self):
+    #Test customdata appears in the HTML string as expected
+    def test_customdata_in_html(self):
         graph = plot_csvdata.get_plot(self.csvdata)
         expected = '"customdata": [["1422423.4", "1565756.5"], ["1576457.6", "1664468.7"], ["1674534.6", "1735324.7"],' \
                    ' ["1783643.9", "1845545.6"], ["1845454.4", "1945454.8"]'
         self.assertIn(expected, graph)
 
-    def test_get_values_fail(self):
+    #Test get_csv_values raises error correctly when iterating an invalid csv
+    def test_get_csv_values_raise_error(self):
         self.assertRaises(IndexError, plot_csvdata.get_csv_values, self.invalid_csv)
 
 

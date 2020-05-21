@@ -62,6 +62,7 @@ def get_plot(csvdata_list):
         raise TypeError("Argument needs to be of a list type")
 
     csv_values = get_csv_values(csvdata_list)
+
     logger.info("Plotting csv values..")
     x_values = [row[0] for row in csv_values]
     y_values = [row[1] for row in csv_values]
@@ -79,6 +80,7 @@ def get_plot(csvdata_list):
                       yaxis_title="U Value")
     html_graph = plot(fig, output_type='div')
     logger.info("Returning html div string for graph")
+
     return html_graph
 
 
