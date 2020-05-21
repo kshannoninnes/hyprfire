@@ -127,13 +127,13 @@ STATIC_URL = '/static/'
 # Logging Information
 LOGGING = {
     'version': 1,
-    # disable logging; tell Django to do not disable loggers. By default, Django uses some of its own loggers.
+    # disable logging; tell Django to not disable loggers. By default, Django uses some of its own loggers.
     'disable_existing_loggers': False,
 
     # Loggers
     'loggers': {
         # one logger so all messages go through here
-        'django': {
+        '': {
             # attach django logger with 'file' and 'console' handler
             # if you wish to activate debug level logging
             # 1) add verboseFile to handlers
@@ -186,11 +186,11 @@ LOGGING = {
     # format of logs
     'formatters': {
         'basicFormat': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '[{levelname}] {asctime} | Module : {module} | "{message}"',
             'style': '{',
         },
         'verboseFormat': {
-            'format': '{levelname} {asctime} {module} {lineno} {processName} {threadName} {message}',
+            'format': '[{levelname}] {asctime} | Module: {module} | Line number: {lineno} | Thread name: {threadName} | "{message}"',
             'style': '{',
         }
     }
