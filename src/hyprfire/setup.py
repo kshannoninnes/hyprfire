@@ -6,7 +6,7 @@ setup(
     name='hyprfire',
     version='1.0',
     packages=find_packages(),
-    scripts=['manage.py'],
+    scripts=['manage.py', 'run.py'],
     author='Curtin Capstone 2020 - Group 23 (Stefan Cyber)',
     description='A web app tool hosted on localhost server to help analyse pcap data for anomalous events.',
     install_requires=[],

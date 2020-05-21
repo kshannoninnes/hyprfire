@@ -133,7 +133,7 @@ LOGGING = {
     # Loggers
     'loggers': {
         # one logger so all messages go through here
-        'django': {
+        '': {
             # attach django logger with 'file' and 'console' handler
             # if you wish to activate debug level logging
             # 1) add verboseFile to handlers
