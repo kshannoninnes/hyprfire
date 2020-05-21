@@ -186,11 +186,11 @@ LOGGING = {
     # format of logs
     'formatters': {
         'basicFormat': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '[{levelname}] {asctime} | Module : {module} | "{message}"',
             'style': '{',
         },
         'verboseFormat': {
-            'format': '{levelname} {asctime} {module} {lineno} {processName} {threadName} {message}',
+            'format': '[{levelname}] {asctime} | Module: {module} | Line number: {lineno} | Thread name: {threadName} | "{message}"',
             'style': '{',
         }
     }
