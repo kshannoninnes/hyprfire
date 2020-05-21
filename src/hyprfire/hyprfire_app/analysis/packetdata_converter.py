@@ -5,8 +5,8 @@ Purpose: Convert list of PacketData objects from pcapconverter.py into csv value
 to produce an anomaly graph. Based on Stefan's original NewBasics3.py script
 """
 
-import hyprfire_app.new_scripts.benfords_analysis as ba
-import hyprfire_app.new_scripts.zipf_analysis as za
+import hyprfire_app.analysis.benfords_analysis as ba
+import hyprfire_app.analysis.zipf_analysis as za
 import logging
 
 logger = logging.getLogger(__name__)
@@ -146,9 +146,8 @@ def convert_to_csv(packet_data, ana_type='b', winsize=1000, timelen='t'):
     """
 
     # Checks the arguments passed are valid
-    logger.info('Starting packetdata_converter')
+    logger.info('Starting packetdata_converter..')
     check_arguments(packet_data, ana_type, winsize, timelen)
-    logger.info('Arguments passed into packetdata_converter are valid')
 
     if ana_type == 'b':
         is_benfords = True
@@ -159,8 +158,6 @@ def convert_to_csv(packet_data, ana_type='b', winsize=1000, timelen='t'):
         is_time = True
     else:
         is_time = False
-
-    logger.info("Starting calculation of csv values")
 
     # Pass windowsize of packet data into analyse_packets_window to get csv values
     csv_list = []

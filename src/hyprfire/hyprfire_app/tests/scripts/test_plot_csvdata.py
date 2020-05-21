@@ -5,10 +5,10 @@ Purpose: unit tests for plot_csvdata.py
 """
 
 import unittest
-from hyprfire_app.new_scripts import plot_csvdata
+from hyprfire_app.analysis import plot_csvdata
 
 
-class MyTestCase(unittest.TestCase):
+class PlotCSVDataTestUnit(unittest.TestCase):
 
     def setUp(self):
         row1 = "4056700,0.00401,1422423.4,1565756.5"

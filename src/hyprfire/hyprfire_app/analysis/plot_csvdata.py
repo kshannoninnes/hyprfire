@@ -63,7 +63,6 @@ def get_plot(csvdata_list):
 
     csv_values = get_csv_values(csvdata_list)
 
-    logger.info("Plotting csv values..")
     x_values = [row[0] for row in csv_values]
     y_values = [row[1] for row in csv_values]
     epoch_values = [(row[2], row[3]) for row in csv_values]
