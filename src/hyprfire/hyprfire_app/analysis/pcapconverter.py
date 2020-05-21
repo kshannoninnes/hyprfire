@@ -8,18 +8,20 @@ extractData calls the Scapy library method PcapReader to obtain information abou
 convert it into a list of PacketData objects to be provided to packetdataConverter. The data from
 each smaller file is compiled together and sorted, then returned.
 Author: Dean Quaife
-Last edited: 2020/05/19
+Last edited: 2020/05/21
 """
 
 from scapy.all import PcapReader
-from hyprfire_app.new_scripts.packetdata import PacketData
-from hyprfire_app.exceptions import ConverterException
+from hyprfire_app.analysis.packetdata import PacketData
+from hyprfire_app.exceptions import ConverterException, EditcapException
 import datetime, subprocess, multiprocessing
 from pathlib import Path
 from decimal import Decimal
 
-""" retrieves data from a pcap file. Returns a PacketData list
-will raise a ConverterException if filename doesn't exist or isn't a pcap file """
+""" Retrieves data from a pcap file
+Will raise a ConverterException if filename doesn't exist or isn't a pcap file
+Input parameters: filename: a string representing the path to a pcap file
+Output: data_list: a List of PacketData objects representing that pcap file """
 def pcapConverter(filename):
     cores = multiprocessing.cpu_count()
     temp_paths = []
@@ -29,8 +31,8 @@ def pcapConverter(filename):
         raise ConverterException("Filename does not exist")
     try:
         editcapSplit(filename)
-    except subprocess.CalledProcessError:
-        raise ConverterException(f"Editcap failure: is this file a capture file?")
+    except EditcapException:
+        raise ConverterException("Editcap failure: is this file a capture file?")
 
     for x in Path('.').glob('temp*.pcap'):
         temp_paths.append(str(x))
@@ -44,13 +46,18 @@ def pcapConverter(filename):
     return data_list
 
 """ uses the editcap command provided by Wireshark to split filename into 10000 packet pcap files
-subprocess.run() will raise an exception if filename is not a pcap file """
+Will raise an EditcapException if filename is not a pcap file
+Input parameters: filename: a string representing a pcap filename """
 def editcapSplit(filename):
     temp = "temp.pcap"
     command = f'editcap -c 10000 {filename} {temp}'
-    subprocess.run(command, check=True, shell=True)  # split filename with editcap
+    res = subprocess.run(command)  # split filename with editcap
+    if res.returncode != 0:
+        raise EditcapException()
 
-# converts important data from each editcap file into a list of PacketData objects
+""" converts important data from each editcap file into a list of PacketData objects
+Input parameters: file: a string representing a pcap filename
+Output: packets: a PacketData List representing file """
 def extractData(file):
     packets = []
     with PcapReader(file) as reader:
@@ -62,7 +69,10 @@ def extractData(file):
     return packets
 
 """ returns number of microseconds since midnight on the day the packet arrived
-used to calculate graph values later """
+used to calculate graph values later
+Input parameters: epochTimestamp: a Decimal value retrieved from a packet timestamp
+Output: microseconds: an int representing the number of seconds since midnight on the date of
+epochTimestamp """
 def sinceMidnight(epochTimestamp):
     date = datetime.datetime.fromtimestamp(epochTimestamp) #only returns time up to seconds
     seconds_midnight = datetime.datetime(date.year, date.month, date.day).timestamp()
