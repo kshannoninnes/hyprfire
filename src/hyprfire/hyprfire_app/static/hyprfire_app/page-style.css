@@ -100,7 +100,7 @@ tr:nth-child(even) {
     padding: .1em 1.2em .2em .5em;
     margin: 0;
 	border: 1px solid #aaa;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,.2);
     box-sizing: border-box;
     border-radius: .5em;
 	-moz-appearance: none;
@@ -113,6 +113,7 @@ tr:nth-child(even) {
 	background-size: .65em auto, 100%;
     float: right;
 }
+
 #id_filenames::-ms-expand {
 	display: none;
 }
@@ -123,11 +124,12 @@ tr:nth-child(even) {
 
 #id_filenames:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
 }
+
 #id_filenames option {
 	font-weight:normal;
 }
@@ -142,7 +144,7 @@ tr:nth-child(even) {
 
 #id_window:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
@@ -158,14 +160,16 @@ tr:nth-child(even) {
 
 #id_algorithm:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
 }
+
 #id_algorithm option {
 	font-weight:normal;
 }
+
 #id_algorithm option {
 	font-weight:normal;
 }
@@ -180,14 +184,16 @@ tr:nth-child(even) {
 
 #id_analysis:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
 }
+
 #id_analysis option {
 	font-weight:normal;
 }
+
 #id_analysis option {
 	font-weight:normal;
 }
