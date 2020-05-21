@@ -28,16 +28,22 @@ blacklist = [
 def index(request):
     filenames = get_filename_list(f'{BASE_DIR}/pcaps/')
     if request.method == "POST":
-        form = AnalyseForm(request.POST)
-        if form.is_valid():
-            filename = form.cleaned_data['filenames']
-            window = form.cleaned_data['window']
-            algorithm = form.cleaned_data['algorithm']
-            analysis = form.cleaned_data['analysis']
 
-            response = CacheHandler(filename, algorithm, window, analysis)
+        try:
+            form = AnalyseForm(request.POST)
+            if form.is_valid():
+                filename = form.cleaned_data['filenames']
+                window = form.cleaned_data['window']
+                algorithm = form.cleaned_data['algorithm']
+                analysis = form.cleaned_data['analysis']
 
-            return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
+                response = CacheHandler(filename, algorithm, window, analysis)
+
+                return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
+        except ValueError as e:
+            return HttpResponse(status=422, reason=str(e))
+        except FileNotFoundError as e:
+            return HttpResponse(status=404, reason=str(e))
 
     else:
         form = AnalyseForm()

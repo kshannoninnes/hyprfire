@@ -4,7 +4,10 @@
 import os
 from .new_scripts import pcapconverter, packetdata_converter, plot_csvdata
 from .models import Data
-from django.http import HttpResponse
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def CacheHandler(file_name, algorith_type, windowsize, analysis):
@@ -28,22 +31,21 @@ def CacheHandler(file_name, algorith_type, windowsize, analysis):
 
     if len(result) != 0:
         # If it is more than 0 then it exists in the database, and just pull the data from there.
-        print("Item already exists in the database.... pulling cached data")
+        logger.info("Item already exists in the database.... pulling cached data")
         csv_data = Data.objects.get(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
         csv_data = csv_data.data
 
     else:
 
-        try:
-            csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
 
-            # Create a new Object (ORM)
-            database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
-                                           analysis=analysis, data=csv_data)
-            # Save it to the database
-            database.save()
-        except FileNotFoundError:
-            return HttpResponse(status=404)
+        csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
+
+        # Create a new Object (ORM)
+        database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
+                                       analysis=analysis, data=csv_data)
+        # Save it to the database
+        database.save()
+
 
     response = plot_csvdata.get_plot(csv_data)
 
@@ -68,7 +70,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
     # Checks if arguments being passed through is valid
     if arguments_valid(file_name, algorithm_type, windowsize, analysis):
 
-        print("Starting Sprint Processor")
+        logger.info("Starting Script Processor")
 
         dumpfile = pcapconverter.pcapConverter(file_name)
 
@@ -80,9 +82,6 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
 
             algorithm = 'z'
 
-        else:
-            raise ValueError("Incorrect Algorithm Type")
-
         if analysis == 'Length':
 
             analysis_type = 'l'
@@ -91,12 +90,9 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
 
             analysis_type = 't'
 
-        else:
-            raise ValueError("Incorrect Analysis type")
-
         csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
 
-        print("SCRIPT PROCESSOR is DONE!")
+        logger.info("Script Processor is Done!")
 
         return csv_data
 
@@ -136,7 +132,7 @@ def check_filename(name):
 
     if results == False:
 
-        raise ValueError("Incorrect File name!")
+        raise FileNotFoundError("Cannot Find the file!")
 
     return results
 
