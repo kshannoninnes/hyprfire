@@ -1,6 +1,11 @@
 from socket import getservbyport
 
+from scapy.data import TCP_SERVICES, UDP_SERVICES
 from scapy.layers.inet import IP, TCP, UDP
+
+
+TCP_PORTS = dict((TCP_SERVICES[x], x) for x in TCP_SERVICES.keys())
+UDP_PORTS = dict((UDP_SERVICES[y], y) for y in UDP_SERVICES.keys())
 
 
 class PacketDetailsCollector:
@@ -122,12 +127,15 @@ class PacketDetailsCollector:
             }
 
             if TCP in self.packet or UDP in self.packet:
-                transport_data['src_port'] = self._resolve_port(self.packet.sport)
-                transport_data['dst_port'] = self._resolve_port(self.packet.dport)
+                transport_data['src_port'] = self._resolve_port(self.packet.sport, is_tcp=True) if TCP in self.packet \
+                    else self._resolve_port(self.packet.sport, is_tcp=False)
+
+                transport_data['dst_port'] = self._resolve_port(self.packet.dport, is_tcp=True) if TCP in self.packet \
+                    else self._resolve_port(self.packet.dport, is_tcp=False)
 
             return transport_data
 
-        def _resolve_port(self, port_num):
+        def _resolve_port(self, port_num, is_tcp=True):
             """
             _resolve_port
 
@@ -135,6 +143,7 @@ class PacketDetailsCollector:
 
             Parameters
             port_num: an integer representing a port number
+            protocol: a boolean representing whether the port is tcp or udp
 
             Return
             A string representation of the port number with the associated port name.
@@ -145,9 +154,7 @@ class PacketDetailsCollector:
             really messy, but there's not much I can do to fix this as long as I use
             this function.
             """
-            try:
-                port_name = f'{port_num} ({getservbyport(port_num)})'
-            except OSError:
-                port_name = f'{port_num} ({self.UNKNOWN})'
+            port_dict = TCP_PORTS if is_tcp else UDP_PORTS
+            port_name = port_dict[port_num] if port_num in port_dict else self.UNKNOWN
 
-            return port_name
+            return f'{port_num} ({port_name})'
