@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'hyprfire_app.apps.AppConfig'
+    'hyprfire_app',
 ]
 
 MIDDLEWARE = [
@@ -77,11 +77,14 @@ WSGI_APPLICATION = 'hyprfire.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'hyprfiredb',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+        'USER': 'postgres',
+        'PASSWORD': 'adminPostgres',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -107,7 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Modify TIME_ZONE to you particular timezone. https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+TIME_ZONE = 'Australia/Perth'
 
 USE_I18N = True
 
@@ -121,60 +125,74 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# DataFlair #Logging Information
+# Logging Information
 LOGGING = {
     'version': 1,
-    # disable logging; tell Django to do not disable loggers. By default, Django uses some of its own loggers.
+    # disable logging; tell Django to not disable loggers. By default, Django uses some of its own loggers.
     'disable_existing_loggers': False,
 
-    # Loggers ####################################################################
+    # Loggers
     'loggers': {
-        #one logger so all messages go through here
-        'django': {
+        # one logger so all messages go through here
+        '': {
             # attach django logger with 'file' and 'console' handler
-            'handlers': ['file', 'console', 'verboseFile'],
+            # if you wish to activate debug level logging
+            # 1) add verboseFile to handlers
+            # 2) uncomment out verboseFile under handlers.
+            'handlers': ['warningFile', 'console', 'infoFile'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
             'propagate': True,
         },
-        # possible django.request, django.server, django.template, django.db.backends
     },
 
     # Handlers
-    # MailHandlers and AdminEmailHandlers are possible options but over-kill for our application.
     'handlers': {
         # 'file' handler - logs to  "warning.log" file with basic detail, only writing warning, error, critical messages
-        'file': {
+        'warningFile': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
             'filename': './logs/warning.log',
             'formatter': 'basicFormat',
         },
-        # 'console' handler - logs to the console with basic information, only about errors and critical messages
+        # 'console' handler - show warning, error, critical messages to console as well.
         'console': {
             'class': 'logging.StreamHandler',
-            'level': 'ERROR',
+            'level': 'WARNING',
             'formatter': 'basicFormat',
         },
-        # 'verboseFile' handler - logs to "verboseDebug.log" file with most details
-        'verboseFile': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': './logs/verboseDebug.log',
+
+        # 'verboseFile' handler - logs to "verboseDebug.log" about EVERYTHING to do with debug, info, warning, error, critical messages
+        # rotating log files meaning it will save up to 5 copies of itself, of size 5MB
+
+        # 'verboseFile': {
+        #     'level': 'DEBUG',
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'filename': './logs/verboseDebug.log',
+        #     'formatter': 'verboseFormat',
+        #     'backupCount': 5,
+        #     'maxBytes': 5*1024*1024,
+        # },
+
+        # 'infoFile' handler - logs to "info.log" about messages at info, warning, error, critical level
+        # rotating log files meaning it will save up to 5 copies of itself, of size 5MB
+        'infoFile': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': './logs/info.log',
             'formatter': 'verboseFormat',
-        }
+            'backupCount': 5,
+            'maxBytes': 5*1024*1024,
+        },
     },
+    # format of logs
     'formatters': {
         'basicFormat': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '[{levelname}] {asctime} | Module : {module} | "{message}"',
             'style': '{',
         },
         'verboseFormat': {
-            'format': '{levelname} {asctime} {module} {lineno} {process} {processName} {thread} {threadName} {message}',
+            'format': '[{levelname}] {asctime} | Module: {module} | Line number: {lineno} | Thread name: {threadName} | "{message}"',
             'style': '{',
         }
     }
-    # after modules are finalised, add the following to start of all modules
-    # import logging
-    #
-    # log = logging.getLogger(__name__)
 }

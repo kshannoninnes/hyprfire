@@ -1,26 +1,18 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages, os
 
+# setup.py can be used for source distribution. It will also run as a part of the install.py script.
 setup(
     name='hyprfire',
     version='1.0',
-    packages=['.','hyprfire', 'hyprfire_app', 'hyprfire_app/new_scripts', 'hyprfire_app/old_scripts',
-              'hyprfire_app/scripts', 'hyprfire_app/migrations' , 'logs', 'pcaps'],
-    url='',
-    license='no license as of now',
-    author='yo',
-    author_email='no email',
-    description='This is hyprfire.',
-    install_requires=[
-        "hyprfire",
-        "asgiref>=3.2.7",
-        "Django==3.0.5",
-        "plotly>=4.6.0",
-        "pytz>=2019.3",
-        "retrying>=1.3.3",
-        "six>=1.14.0",
-        "sqlparse>=0.3.1",
-        "wireshark>=2.6.10",
-    ],
+    packages=find_packages(),
+    scripts=['manage.py', 'run.py'],
+    author='Curtin Capstone 2020 - Group 23 (Stefan Cyber)',
+    description='A web app tool hosted on localhost server to help analyse pcap data for anomalous events.',
+    install_requires=[],
     include_package_data=True,
 )
+
+# create directories called logs and pcaps.
+os.makedirs('logs', exist_ok=True)
+os.makedirs('pcaps', exist_ok=True)

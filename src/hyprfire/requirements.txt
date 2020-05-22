@@ -1,9 +1,11 @@
-scapy
 asgiref==3.2.7
+coverage==5.1
 Django==3.0.5
+pathvalidate==2.3.0
 plotly==4.6.0
+psycopg2==2.8.5
 pytz==2020.1
 retrying==1.3.3
-scapy==2.4.3
+git+https://github.com/secdev/scapy@93c15a8aac25e632cbdfdf727b6550767f722def
 six==1.14.0
 sqlparse==0.3.1

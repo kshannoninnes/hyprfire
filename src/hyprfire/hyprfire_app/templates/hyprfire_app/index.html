@@ -7,16 +7,15 @@
     <meta charset="UTF-8">
     <title>Hyprfire</title>
 
-    <link rel="stylesheet" href="{% static 'hyprfire_app/page-style.css' %}">
-    <link rel="stylesheet" href="{% static 'hyprfire_app/card-style.css' %}">
+    <link rel="stylesheet" href="{% static 'hyprfire_app/style.css' %}">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 </head>
 
 <body>
     <!-- This div will take up 12% of the left side of the screen. -->
     <!-- It is used to display a list of clickable filenames sent by the server -->
-    <div class="split left" id="left_container">
-        <h3 class="underlinexyz">Analysis</h3>
+    <div class="split left" id="split left">
+        <h3 class="underlinexyz">Configuration</h3>
         <div class="form_thing">
             <form method="POST">
                 {% csrf_token %}
@@ -24,28 +23,74 @@
                 <div class="config_opt"> {{ form.window.label }}:{{ form.window }}</div>
                 <div class="config_opt"> {{ form.algorithm.label }}:{{ form.algorithm }}</div>
                 <div class="config_opt">{{ form.analysis.label }}: {{ form.analysis }}</div>
-                <input type="submit" class="w3-btn w3-block hf_btn w3-blue" value="Analyse">
+                <input type="submit" class="w3-btn w3-block hf_btn w3-blue" style="width: 48%; margin-left: 1%" value="Analyse">
             </form>
+            <input type="submit" id="exportButton" class="w3-btn w3-block hf_btn w3-green" style="width: 48%; margin-left: 51%; position: absolute; display: inline-block" value="Export">
         </div>
-
-       <h3 class="underlinexyz">Pre-Analysed Files</h3>
-       <div class="list_analysed">
-           <ul class="w3-ul" id="file_list">
-               {% for file in filenames %}
-                   <li> {{ file }} </li>
-               {% endfor %}
-           </ul>
-       </div>
     </div>
 
-    <!-- This div takes up the remaining 88% of the right side of the screen. -->
-    <!-- It will be used to show a graph and the raw data under the graph -->
-    <div class="split right" id="right_container">
-        {{ graph|safe }}
+    <div class="split right">
+        <div class="graph">
+          {{ graph|safe }}
+        </div>
+        <div class="packet_data">
+            <div class="split_left">
+                <table id="packet_data_table" class="table">
+                    <tr>
+                      <th class="table_header">Timestamp</th>
+                      <th class="table_header">Category</th>
+                      <th class="table_header">Source</th>
+                      <th class="table_header">Destination</th>
+                    </tr>
+                    <tbody id="table-body">
+                      
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+      var e = document.getElementById("id_filenames");
+      var fileName = e.options[e.selectedIndex].text;
+      var myDiv = document.getElementsByClassName('plotly-graph-div')[0];
+      var start = 0;
+      var end = 0;
+      myDiv.on('plotly_selected',
+      function(data){ 
+        $("#table-body").empty();
+        //getting the start and end times of the points user selects
+        start = String(data.points[0].customdata[0]);
+        end = String(data.points[data.points.length-1].customdata[1]);
+        console.log(data.points[0].customdata[0]);
+        console.log(data.points[data.points.length-1].customdata[1]);
+        //go through the output from /collect/ end point and put into a table form for readability
+        $.getJSON(`/collect/${fileName}/${start}/${end}/`, function(data) {
+          let packet_list = data["packet_data_list"];
+          $.each(packet_list, function(index, element) {
+            //for each packet grab timestam, category, source and dest
+            let timestamp = `<td class="table_data">${element.timestamp}</td>`;
+            let category = `<td class="table_data">${element.category}</td>`;
+            //add hyperlinks for source and destination to do a whois, very handy!
+            let source_link = `<a href="https://ipinfo.io/${element.ip_data.src}" target="_blank">${element.ip_data.src}:${element.transport_data.src_port}</a>`;
+            let dest_link = `<a href="https://ipinfo.io/${element.ip_data.dst}" target="_blank">${element.ip_data.dst}:${element.transport_data.dst_port}</a>`;
+            let source = `<td class="table_data">${source_link}</td>`;
+            let dest = `<td class="table_data">${dest_link}</td>`;
+            //add all this to the table body
+            $("#table-body").append(`<tr>${timestamp} ${category} ${source} ${dest}</tr>`);
+
+          })
+        });
+      });
+
+      //upon clicking the export button, download the resulting pcap from download endpoint with specified time stamp values
+      $('#exportButton').click(function(event) {
+        event.preventDefault();
+        curUrl = window.location;
+        window.location = curUrl.protocol + '//' + curUrl.host + '/' + `download/${fileName}/${start}/${end}/`
+      });
+    </script>
     <script src="{% static 'hyprfire_app/main.js' %}"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
