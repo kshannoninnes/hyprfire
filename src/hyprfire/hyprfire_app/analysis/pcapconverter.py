@@ -14,7 +14,7 @@ Last edited: 2020/05/21
 from scapy.all import PcapReader
 from hyprfire_app.analysis.packetdata import PacketData
 from hyprfire_app.exceptions import ConverterException, EditcapException
-import datetime, subprocess, multiprocessing, logging
+import datetime, subprocess, multiprocessing, logging, pathvalidate
 from pathlib import Path
 from decimal import Decimal
 
@@ -29,6 +29,7 @@ def pcapConverter(filename):
     logger = logging.getLogger(__name__)
     fileCount = 0
 
+    pathvalidate.sanitize_filename(Path(filename).stem)
     logger.info(f"PcapConverter start: filename is {filename}")
     if not Path(filename).is_file():
         raise ConverterException("Filename does not exist")
@@ -59,7 +60,7 @@ Will raise an EditcapException if filename is not a pcap file
 Input parameters: filename: a string representing a pcap filename """
 def editcapSplit(filename):
     temp = "temp.pcap"
-    command = f'editcap -c 10000 {filename} {temp}'
+    command = ['editcap', '-c', '10000', filename, temp]
     res = subprocess.run(command)  # split filename with editcap
     if res.returncode != 0:
         raise EditcapException()
