@@ -1,11 +1,12 @@
-from socket import getservbyport
-
+import logging
 from scapy.data import TCP_SERVICES, UDP_SERVICES
 from scapy.layers.inet import IP, TCP, UDP
 
 
 TCP_PORTS = dict((TCP_SERVICES[x], x) for x in TCP_SERVICES.keys())
 UDP_PORTS = dict((UDP_SERVICES[y], y) for y in UDP_SERVICES.keys())
+
+logger = logging.getLogger(__name__)
 
 
 class PacketDetailsCollector:
@@ -48,8 +49,10 @@ class PacketDetailsCollector:
         """
         details_list = []
 
+        logger.debug('Beginning packet details collection')
         for item in self.packet_list:
             packet = self._Packet(item)
+            logger.debug(f'Collecting details for packet with timestamp "{packet.get_timestamp()}"')
             packet_data = {
                 'timestamp': packet.get_timestamp(),
                 'category': packet.get_category(),
@@ -59,6 +62,7 @@ class PacketDetailsCollector:
 
             details_list.append(packet_data)
 
+        logger.debug('Packet details collection complete')
         return details_list
 
     class _Packet:
