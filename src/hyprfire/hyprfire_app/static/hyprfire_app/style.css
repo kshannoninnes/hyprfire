@@ -89,19 +89,18 @@ tr:nth-child(even) {
 /* put an underline under configuration header for consistency with above */
 .underlinexyz {
   border-bottom: 1px solid #d3d3d3;
-  padding-bottom: 5px;
-  padding-left: 5px;
+  padding-bottom: 20px;
 }
 
 #id_filenames,#id_window,#id_algorithm,#id_analysis{
-    width: 50%;
     display: block;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 750;
     line-height: 1.2;
     padding: .1em 1.2em .2em .5em;
-    border: 1px solid #aaa;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    margin: 0;
+	border: 1px solid #aaa;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,.2);
     box-sizing: border-box;
     border-radius: .5em;
 	-moz-appearance: none;
@@ -113,8 +112,8 @@ tr:nth-child(even) {
 	background-position: right .7em top 50%, 0 0;
 	background-size: .65em auto, 100%;
     float: right;
-    margin-right: 10px;
 }
+
 #id_filenames::-ms-expand {
 	display: none;
 }
@@ -125,11 +124,12 @@ tr:nth-child(even) {
 
 #id_filenames:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
 }
+
 #id_filenames option {
 	font-weight:normal;
 }
@@ -144,7 +144,7 @@ tr:nth-child(even) {
 
 #id_window:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
@@ -160,14 +160,16 @@ tr:nth-child(even) {
 
 #id_algorithm:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
 }
+
 #id_algorithm option {
 	font-weight:normal;
 }
+
 #id_algorithm option {
 	font-weight:normal;
 }
@@ -182,14 +184,16 @@ tr:nth-child(even) {
 
 #id_analysis:focus {
 	border-color: #fd0303;
-	box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+	box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
 	box-shadow: 0 0 0 3px -moz-mac-focusring;
 	color: #222;
 	outline: none;
 }
+
 #id_analysis option {
 	font-weight:normal;
 }
+
 #id_analysis option {
 	font-weight:normal;
 }
@@ -197,7 +201,7 @@ tr:nth-child(even) {
 .config_opt {
     font-size: 16px;
     margin-bottom: 5px;
-    padding-left: 5px;
+
 }
 
 .list_analysed {
@@ -208,4 +212,3 @@ tr:nth-child(even) {
 .form_thing {
   margin-bottom: 50px;
 }
-

@@ -1,6 +1,7 @@
 from django import forms
 import os
 from pathlib import Path
+from hyprfire.settings import BASE_DIR
 
 WINDOW_SIZES = [
     (1000, '1000'),
@@ -19,11 +20,8 @@ ANALYSIS = [
 
 
 class AnalyseForm(forms.Form):
-    project_root = os.path.dirname(os.path.abspath(__file__))
-    pcaps_path = os.path.join(project_root, '../pcaps')
 
-    path = Path(pcaps_path)
-
+    path = str(Path(BASE_DIR) / 'pcaps') 
     filenames = forms.FilePathField(label='Files', path=path, recursive=False, allow_files=True)
     window = forms.CharField(label="Window Size ", widget=forms.Select(choices=WINDOW_SIZES))
     algorithm = forms.CharField(label="Algorithm ", widget=forms.Select(choices=ALGORITHMS))

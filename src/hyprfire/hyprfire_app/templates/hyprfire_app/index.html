@@ -16,7 +16,7 @@
     <!-- This div will take up 12% of the left side of the screen. -->
     <!-- It is used to display a list of clickable filenames sent by the server -->
     <div class="split left" id="split left">
-        <h3 class="underlinexyz">Analysis</h3>
+        <h3 class="underlinexyz">Configuration</h3>
         <div class="form_thing">
             <form method="POST">
                 {% csrf_token %}
@@ -43,13 +43,16 @@
                       <th class="table_header">Source</th>
                       <th class="table_header">Destination</th>
                     </tr>
+                    <tbody id="table-body">
+                      
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script type="text/javascript">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
       var e = document.getElementById("id_filenames");
       var fileName = e.options[e.selectedIndex].text;
       var myDiv = document.getElementsByClassName('plotly-graph-div')[0];
@@ -57,24 +60,32 @@
       var end = 0;
       myDiv.on('plotly_selected',
       function(data){ 
+        $("#table-body").empty();
         //getting the start and end times of the points user selects
         start = String(data.points[0].customdata[0]);
         end = String(data.points[data.points.length-1].customdata[1]);
         console.log(data.points[0].customdata[0]);
         console.log(data.points[data.points.length-1].customdata[1]);
+        //go through the output from /collect/ end point and put into a table form for readability
         $.getJSON(`/collect/${fileName}/${start}/${end}/`, function(data) {
           let packet_list = data["packet_data_list"];
           $.each(packet_list, function(index, element) {
+            //for each packet grab timestam, category, source and dest
             let timestamp = `<td class="table_data">${element.timestamp}</td>`;
             let category = `<td class="table_data">${element.category}</td>`;
-            let source = `<td class="table_data">${element.ip_data.src}:${element.transport_data.src_port}</td>`;
-            let dest = `<td class="table_data">${element.ip_data.dst}:${element.transport_data.dst_port}</td>`;
-            $("#packet_data_table").append(`<tr>${timestamp} ${category} ${source} ${dest}</tr>`);
+            //add hyperlinks for source and destination to do a whois, very handy!
+            let source_link = `<a href="https://ipinfo.io/${element.ip_data.src}" target="_blank">${element.ip_data.src}:${element.transport_data.src_port}</a>`;
+            let dest_link = `<a href="https://ipinfo.io/${element.ip_data.dst}" target="_blank">${element.ip_data.dst}:${element.transport_data.dst_port}</a>`;
+            let source = `<td class="table_data">${source_link}</td>`;
+            let dest = `<td class="table_data">${dest_link}</td>`;
+            //add all this to the table body
+            $("#table-body").append(`<tr>${timestamp} ${category} ${source} ${dest}</tr>`);
 
           })
         });
       });
 
+      //upon clicking the export button, download the resulting pcap from download endpoint with specified time stamp values
       $('#exportButton').click(function(event) {
         event.preventDefault();
         curUrl = window.location;

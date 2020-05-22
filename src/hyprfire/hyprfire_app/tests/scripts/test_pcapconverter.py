@@ -1,9 +1,10 @@
 from unittest import TestCase
 from hyprfire_app.exceptions import ConverterException
-from hyprfire_app.new_scripts import pcapconverter
+from hyprfire_app.analysis import pcapconverter
 from hyprfire.settings import BASE_DIR
 from pathlib import Path
 from decimal import Decimal
+import random
 
 class TestPcapConverter(TestCase):
     """ test pcapConverter in normal conditions; checks timestamps of the first packet, the first packet
@@ -14,7 +15,8 @@ class TestPcapConverter(TestCase):
         testpath = str(Path(BASE_DIR)/'hyprfire_app'/'tests'/'test_files'/'testdump')
         result = pcapconverter.pcapConverter(testpath)
         exists = False
-        for x in Path(str(Path(BASE_DIR)/'hyprfire_app')).glob('temp*.pcap'):
+        check_deleted = Path(str(Path(BASE_DIR)/'hyprfire_app')).glob('temp*.pcap')
+        for x in check_deleted:
             if x.is_file():
                 exists = True
 
@@ -26,15 +28,17 @@ class TestPcapConverter(TestCase):
 
     #test pcapConverter using a non-existant filename; should throw an exception
     def test_pcapconverter_nofile(self):
+        rand = str(random.getrandbits(128)) + '.pcap'
+        testpath = str(Path(BASE_DIR) / 'hyprfire_app' / 'new_scripts' / rand)
         with self.assertRaises(ConverterException) as cm:
-            pcapconverter.pcapConverter("fake.pcap")
+            pcapconverter.pcapConverter(testpath)
         e = cm.exception
 
         self.assertEqual(e.message, "Filename does not exist")
 
     #test pcapConverter using a file that isn't a pcap file; should throw an exception
     def test_pcapconverter_wrongfile(self):
-        testpath = str(Path(BASE_DIR)/'hyprfire_app'/'new_scripts'/'pcapconverter.py')
+        testpath = str(Path(BASE_DIR)/'hyprfire_app'/'analysis'/'pcapconverter.py')
         with self.assertRaises(ConverterException) as cm:
             pcapconverter.pcapConverter(testpath)
         e = cm.exception
