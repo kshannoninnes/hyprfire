@@ -29,7 +29,6 @@ def pcapConverter(filename):
     logger = logging.getLogger(__name__)
     fileCount = 0
 
-    pathvalidate.sanitize_filename(Path(filename).stem)
     logger.info(f"PcapConverter start: filename is {filename}")
     if not Path(filename).is_file():
         raise ConverterException("Filename does not exist")
