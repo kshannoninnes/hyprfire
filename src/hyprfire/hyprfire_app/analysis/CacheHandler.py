@@ -5,6 +5,10 @@ import os
 from hyprfire_app.analysis import pcapconverter, packetdata_converter, plot_csvdata
 from hyprfire_app.models import Data
 import logging
+from pathlib import Path
+from pathvalidate import sanitize_filename
+from hyprfire.settings import BASE_DIR
+
 
 
 logger = logging.getLogger(__name__)
@@ -71,8 +75,8 @@ def ScriptProcessor(file_name, algorithm_type, window_size, analysis):
     if arguments_valid(file_name, algorithm_type, window_size, analysis):
 
         logger.info("Starting Script Processor")
-
-        dumpfile = pcapconverter.pcapConverter(file_name)
+        valid_file_name = filename_sanitizer(file_name)
+        dumpfile = pcapconverter.pcapConverter(valid_file_name)
 
         if algorithm_type == 'Benford':
 
@@ -190,3 +194,15 @@ def check_analysis(analysis):
 
     return response
 
+def filename_sanitizer(filename):
+    """
+    Function Name: filename_sanitizer
+    This will function will sanitize the name of the of the file, checks that it will always check the hyprfire/pcaps
+    directory.
+
+    :param filename: the filepath (unsanitized) of the pcap file to be scanned
+    :return: string, of the sanitized filepath
+    """
+    sanitized_filename = sanitize_filename(Path(filename).stem)
+    file_path = str(Path(BASE_DIR) / 'pcaps' / sanitized_filename)
+    return file_path
