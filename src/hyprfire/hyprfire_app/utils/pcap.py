@@ -1,4 +1,7 @@
 from scapy.all import PcapWriter, PcapReader
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # TODO Write tests
@@ -33,4 +36,5 @@ def read_packets_from_file(file):
     with PcapReader(file) as reader:
         packet_list = reader.read_all()
 
+    logger.debug(f'{len(packet_list)} packets read from {file} into memory')
     return packet_list

@@ -1,4 +1,5 @@
 import math
+import logging
 import subprocess
 from pathlib import Path
 
@@ -6,6 +7,9 @@ from hyprfire_app.exceptions import EditcapException
 from hyprfire_app.utils.timestamp import convert_to_editcap_format, timestamps_equal
 from hyprfire_app.utils.validation import validate_file_path, validate_timestamp
 import hyprfire_app.utils.pcap as ph
+
+
+logger = logging.getLogger(__name__)
 
 
 class PacketFilter:
@@ -53,8 +57,11 @@ class PacketFilter:
         filtered_pcap_file = self._create_filtered_pcap()
         filtered_list = ph.read_packets_from_file(filtered_pcap_file)
         Path(filtered_pcap_file).unlink()
+        if not Path(filtered_pcap_file).exists():
+            logger.debug(f'{filtered_pcap_file} deleted')
         packet_list = self._filter_by_timestamp(filtered_list)
 
+        logger.debug('Filtered list created')
         return packet_list
 
     def _create_filtered_pcap(self):
@@ -73,12 +80,17 @@ class PacketFilter:
         if start_sec > end_sec:
             raise EditcapException('Start time must be before end time')
 
+        logger.debug(f'Creating pcap file with packets between "{start_sec}" and "{end_sec}"')
+
         temp_file = 'temp-editcapped-file.pcap'
         start = convert_to_editcap_format(start_sec)
         end = convert_to_editcap_format(end_sec)
 
         editcap_command = f'editcap -A "{start}" -B "{end}" "{self.file_path}" "{temp_file}"'
         subprocess.call(editcap_command, shell=True)
+
+        if Path(temp_file).exists():
+            logger.debug(f'Pcap file "{temp_file}" successfully created')
 
         return temp_file
 
@@ -97,12 +109,20 @@ class PacketFilter:
         filtered_list = []
         match_found = False
 
+        logger.debug('Beginning tight filtering of packets')
         for packet in packet_list:
             if timestamps_equal(self.start_timestamp, packet.time):
+                logger.debug('Initial packet found, beginning collection')
                 match_found = True
             if match_found:
                 filtered_list.append(packet)
             if timestamps_equal(self.end_timestamp, packet.time):
+                logger.debug('Final packet found, ending collection')
                 break
+
+        if not match_found:
+            logger.warning(f'No packet match found for starting timestamp "{self.start_timestamp}"')
+        if len(filtered_list) == 0:
+            logger.warning(f'No packets found between "{self.start_timestamp}" and "{self.end_timestamp}"')
 
         return filtered_list

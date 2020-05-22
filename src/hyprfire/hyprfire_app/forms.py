@@ -18,6 +18,7 @@ ANALYSIS = [
     ('Time', 'Time'),
 ]
 
+
 class AnalyseForm(forms.Form):
 
     path = str(Path(BASE_DIR) / 'pcaps') 
