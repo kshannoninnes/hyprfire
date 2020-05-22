@@ -86,8 +86,7 @@ class PacketFilter:
         start = convert_to_editcap_format(start_sec)
         end = convert_to_editcap_format(end_sec)
 
-        editcap_command = f'editcap -A "{start}" -B "{end}" "{self.file_path}" "{temp_file}"'
-        subprocess.call(editcap_command, shell=True)
+        subprocess.run(["editcap", "-A", str(start), "-B", str(end), self.file_path, temp_file])
 
         if Path(temp_file).exists():
             logger.debug(f'Pcap file "{temp_file}" successfully created')
