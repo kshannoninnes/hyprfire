@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'hyprfire_app.apps.AppConfig'
+    'hyprfire_app',
 ]
 
 MIDDLEWARE = [

@@ -2,15 +2,15 @@
 # The file must be able to handle the configuration items that have been sent from the analyze request.
 
 import os
-from .new_scripts import pcapconverter, packetdata_converter, plot_csvdata
-from .models import Data
+from hyprfire_app.analysis import pcapconverter, packetdata_converter, plot_csvdata
+from hyprfire_app.models import Data
 import logging
 
 
 logger = logging.getLogger(__name__)
 
 
-def CacheHandler(file_name, algorith_type, windowsize, analysis):
+def CacheHandler(file_name, algorithm_type, window_size, analysis):
     """
     CacheHandler
     This function does the "caching" section of the application. It does a quick check in the database if there is an
@@ -20,28 +20,28 @@ def CacheHandler(file_name, algorith_type, windowsize, analysis):
     Else it will run the ScriptProcessor, then save the data to the database at the end.
 
     :param file_name: the filepath/name of the pcap file to search for/process
-    :param algorith_type: either Benford or Zipf
-    :param windowsize: an integer on
+    :param algorithm_type: either Benford or Zipf
+    :param window_size: an integer on
     :param analysis:
     :return:
     """
 
     # Gets a queryset from the database on how many Data of the same filename, algorithm, windowsize and analysis
-    result = Data.objects.filter(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
+    result = Data.objects.filter(filename=file_name, algorithm=algorithm_type, window_size=window_size, analysis=analysis)
 
     if len(result) != 0:
         # If it is more than 0 then it exists in the database, and just pull the data from there.
         logger.info("Item already exists in the database.... pulling cached data")
-        csv_data = Data.objects.get(filename=file_name, algorithm=algorith_type, window_size=windowsize, analysis=analysis)
+        csv_data = Data.objects.get(filename=file_name, algorithm=algorithm_type, window_size=window_size, analysis=analysis)
         csv_data = csv_data.data
 
     else:
 
 
-        csv_data = ScriptProcessor(file_name, algorith_type, windowsize, analysis)
+        csv_data = ScriptProcessor(file_name, algorithm_type, window_size, analysis)
 
         # Create a new Object (ORM)
-        database = Data.objects.create(filename=file_name, algorithm=algorith_type, window_size=windowsize,
+        database = Data.objects.create(filename=file_name, algorithm=algorithm_type, window_size=window_size,
                                        analysis=analysis, data=csv_data)
         # Save it to the database
         database.save()
@@ -52,7 +52,7 @@ def CacheHandler(file_name, algorith_type, windowsize, analysis):
     return response
 
 
-def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
+def ScriptProcessor(file_name, algorithm_type, window_size, analysis):
     """
      ScriptProcessor
      Uses the new scripts that were derived from Stefan's old Script. Uses memory based handling instead of reading
@@ -68,7 +68,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
      """
 
     # Checks if arguments being passed through is valid
-    if arguments_valid(file_name, algorithm_type, windowsize, analysis):
+    if arguments_valid(file_name, algorithm_type, window_size, analysis):
 
         logger.info("Starting Script Processor")
 
@@ -90,7 +90,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
 
             analysis_type = 't'
 
-        csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(windowsize), analysis_type)
+        csv_data = packetdata_converter.convert_to_csv(dumpfile, algorithm, int(window_size), analysis_type)
 
         logger.info("Script Processor is Done!")
 
@@ -98,7 +98,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
 
     else:
         raise ValueError("Error in Processing Arguments: filenames, algorithm, windowsize or analysis type")
-
+        logging.error("Value Error was raised - Possible incorrect algorithm or analysis inputted")
 
 def arguments_valid(name, algorithm, size, analysis):
     """
@@ -133,7 +133,7 @@ def check_filename(name):
     if results == False:
 
         raise FileNotFoundError("Cannot Find the file!")
-
+        logging.error("File Not Found Error!")
     return results
 
 
@@ -169,7 +169,7 @@ def check_size(size):
         results = True
     else:
         raise ValueError("Cannot have a window size less than or equal to 0")
-
+        logging.error("Cannot have a window size less than or equal to 0")
     return results
 
 
