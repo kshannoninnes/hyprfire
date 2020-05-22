@@ -1,12 +1,13 @@
 # This File here will handle the "anaylze request" from the Django Framework
 # The file must be able to handle the configuration items that have been sent from the analyze request.
 
-import os, pathvalidate
+import os
 from hyprfire_app.analysis import pcapconverter, packetdata_converter, plot_csvdata
 from hyprfire_app.models import Data
 import logging
 from pathlib import Path
 from pathvalidate import sanitize_filename
+from hyprfire.settings import BASE_DIR
 
 
 
@@ -194,6 +195,6 @@ def check_analysis(analysis):
     return response
 
 def filename_sanitizer(filename):
-    sanitized_filename = pathvalidate.sanitize_filename(pathvalidate.Path(filename).stem)
-    file_path = str('hyprfire' / 'pcaps' / sanitized_filename)
+    sanitized_filename = sanitize_filename(Path(filename).stem)
+    file_path = str(Path(BASE_DIR) / 'pcaps' / sanitized_filename)
     return file_path
