@@ -14,7 +14,7 @@ Last edited: 2020/05/21
 from scapy.all import PcapReader
 from hyprfire_app.analysis.packetdata import PacketData
 from hyprfire_app.exceptions import ConverterException, EditcapException
-import datetime, subprocess, multiprocessing
+import datetime, subprocess, multiprocessing, logging
 from pathlib import Path
 from decimal import Decimal
 
@@ -26,9 +26,13 @@ def pcapConverter(filename):
     cores = multiprocessing.cpu_count()
     temp_paths = []
     data_list = []
+    logger = logging.getLogger(__name__)
+    fileCount = 0
 
+    logger.info(f"PcapConverter start: filename is {filename}")
     if not Path(filename).is_file():
         raise ConverterException("Filename does not exist")
+    logger.debug("Attempting to split file using editcap...")
     try:
         editcapSplit(filename)
     except EditcapException:
@@ -36,13 +40,18 @@ def pcapConverter(filename):
 
     for x in Path('.').glob('temp*.pcap'):
         temp_paths.append(str(x))
+        fileCount += 1
+    logger.debug(f"Success! Split pcap file into {fileCount} temp files. Extracting pcap data...")
+
     with multiprocessing.Pool(processes=cores)as pool:
         res = pool.map(extractData, temp_paths) #pass temp filenames to extractData with multiprocessing
-
     for segment in sorted(res, key= lambda temp_data: temp_data[0].epochTimestamp):
         data_list += segment #sort the segments to ensure they weren't received out of order
+    logger.debug(f"Obtained data for {len(data_list)} packets. Cleaning up temp files...")
     for x in Path('.').glob('temp*.pcap'):
         Path(x).unlink() #delete the temporary smaller files
+
+    logger.info("PcapConverter finished. Returning PacketData list.")
     return data_list
 
 """ uses the editcap command provided by Wireshark to split filename into 10000 packet pcap files
