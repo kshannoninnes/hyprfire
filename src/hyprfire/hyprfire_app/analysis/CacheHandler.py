@@ -1,10 +1,13 @@
 # This File here will handle the "anaylze request" from the Django Framework
 # The file must be able to handle the configuration items that have been sent from the analyze request.
 
-import os
+import os, pathvalidate
 from hyprfire_app.analysis import pcapconverter, packetdata_converter, plot_csvdata
 from hyprfire_app.models import Data
 import logging
+from pathlib import Path
+from pathvalidate import sanitize_filename
+
 
 
 logger = logging.getLogger(__name__)
@@ -71,8 +74,8 @@ def ScriptProcessor(file_name, algorithm_type, window_size, analysis):
     if arguments_valid(file_name, algorithm_type, window_size, analysis):
 
         logger.info("Starting Script Processor")
-
-        dumpfile = pcapconverter.pcapConverter(file_name)
+        valid_file_name = filename_sanitizer(file_name)
+        dumpfile = pcapconverter.pcapConverter(valid_file_name)
 
         if algorithm_type == 'Benford':
 
@@ -190,3 +193,7 @@ def check_analysis(analysis):
 
     return response
 
+def filename_sanitizer(filename):
+    sanitized_filename = pathvalidate.sanitize_filename(pathvalidate.Path(filename).stem)
+    file_path = str('hyprfire' / 'pcaps' / sanitized_filename)
+    return file_path
