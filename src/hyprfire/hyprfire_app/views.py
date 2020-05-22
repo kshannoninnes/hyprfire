@@ -16,7 +16,7 @@ from hyprfire_app.utils.validation import validate_file_path
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import JSONError, TimestampException
 from hyprfire_app.new_scripts.CacheHandler import CacheHandler
-
+import logging
 
 from tempfile import TemporaryFile
 
@@ -24,6 +24,7 @@ blacklist = [
     '.gitignore'
 ]
 
+logger = logging.getLogger(__name__)
 
 def index(request):
     filenames = get_filename_list(f'{BASE_DIR}/pcaps/')
@@ -41,9 +42,11 @@ def index(request):
 
                 return render(request, 'hyprfire_app/index.html', {'form': form, 'filenames': filenames, 'graph': response})
         except ValueError as e:
-            return HttpResponse(status=422, reason=str(e))
+            return HttpResponse(status=400, reason=str(e))
+            logging.exception("An Incorrect Value was passed through the CacheHandler - Cannot Process File")
         except FileNotFoundError as e:
             return HttpResponse(status=404, reason=str(e))
+            logging.exception("Filen name/path passed through CacheHandler cannot be found - Cannot Process File")
 
     else:
         form = AnalyseForm()

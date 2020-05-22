@@ -98,7 +98,7 @@ def ScriptProcessor(file_name, algorithm_type, windowsize, analysis):
 
     else:
         raise ValueError("Error in Processing Arguments: filenames, algorithm, windowsize or analysis type")
-        logging.warning("Value Error was raised - Possible incorrect algorithm or analysis inputted")
+        logging.error("Value Error was raised - Possible incorrect algorithm or analysis inputted")
 
 def arguments_valid(name, algorithm, size, analysis):
     """
@@ -133,7 +133,7 @@ def check_filename(name):
     if results == False:
 
         raise FileNotFoundError("Cannot Find the file!")
-        logging.warning("File Not Found Error!")
+        logging.error("File Not Found Error!")
     return results
 
 
@@ -169,7 +169,7 @@ def check_size(size):
         results = True
     else:
         raise ValueError("Cannot have a window size less than or equal to 0")
-        logging.warning("Cannot have a window size less than or equal to 0")
+        logging.error("Cannot have a window size less than or equal to 0")
     return results
 
 
