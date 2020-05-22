@@ -2,7 +2,7 @@
 # The file must be able to handle the configuration items that have been sent from the analyze request.
 
 import os
-from hyprfire_app.new_scripts import pcapconverter, packetdata_converter, plot_csvdata
+from hyprfire_app.analysis import pcapconverter, packetdata_converter, plot_csvdata
 from hyprfire_app.models import Data
 import logging
 
