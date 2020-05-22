@@ -5,7 +5,7 @@ Purpose: unit tests for packetdata_converter.py
 """
 from pathlib import Path
 from hyprfire.settings import BASE_DIR
-from hyprfire_app.new_scripts.pcapconverter import pcapConverter
+from hyprfire_app.analysis.pcapconverter import pcapConverter
 from hyprfire_app.analysis import packetdata_converter
 import unittest
 
