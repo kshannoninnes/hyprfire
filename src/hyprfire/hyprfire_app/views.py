@@ -1,4 +1,3 @@
-import logging
 from decimal import Decimal
 
 from django.http import HttpResponse, JsonResponse, FileResponse
@@ -16,7 +15,7 @@ from hyprfire_app.utils.validation import validate_file_path
 
 from hyprfire.settings import BASE_DIR
 from hyprfire_app.exceptions import JSONError, TimestampException
-from hyprfire_app.new_scripts.CacheHandler import CacheHandler
+from hyprfire_app.analysis.CacheHandler import CacheHandler
 import logging
 
 from tempfile import TemporaryFile

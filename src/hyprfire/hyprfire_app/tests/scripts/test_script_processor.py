@@ -5,7 +5,7 @@ Multiple functions will try different scenarios, causing the Script Processor to
 '''
 
 from django.test import TestCase
-from hyprfire_app.new_scripts import CacheHandler as ch
+from hyprfire_app.analysis import CacheHandler as ch
 import os
 from hyprfire_app.models import Data
 
