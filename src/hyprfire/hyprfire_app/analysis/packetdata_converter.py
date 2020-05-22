@@ -145,9 +145,9 @@ def convert_to_csv(packet_data, ana_type='b', winsize=1000, timelen='t'):
 
     """
 
-    # Checks the arguments passed are valid
     logger.info('Starting packetdata_converter with ana_type=' + ana_type + ',' + 'winsize=' + str(winsize) + ',' +
                 'timelen=' + timelen)
+    # Checks the arguments passed are valid
     check_arguments(packet_data, ana_type, winsize, timelen)
 
     if ana_type == 'b':
