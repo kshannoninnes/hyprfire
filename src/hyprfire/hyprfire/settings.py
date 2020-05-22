@@ -110,7 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Modify TIME_ZONE to you particular timezone. https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+TIME_ZONE = 'Australia/Perth'
 
 USE_I18N = True
 

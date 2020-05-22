@@ -4,7 +4,7 @@ Author: Quang Le
 Purpose: unit test for benfords_analysis.py
 """
 
-from hyprfire_app.new_scripts import benfords_analysis
+from hyprfire_app.analysis import benfords_analysis
 import unittest
 
 

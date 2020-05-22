@@ -5,7 +5,7 @@ Purpose: unit test for zipf_analysis.py
 """
 
 import unittest
-from hyprfire_app.new_scripts import zipf_analysis
+from hyprfire_app.analysis import zipf_analysis
 
 
 class TestZipfUnit(unittest.TestCase):
